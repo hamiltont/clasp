@@ -1,4 +1,6 @@
-import scala.sys.process._
+package core
+
+import scala.sys.process.stringToProcess
 
 object Test {
 

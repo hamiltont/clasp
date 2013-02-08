@@ -1,10 +1,9 @@
 /**
- *
- */
-/**
  * @author hamiltont
  *
  */
+
+package core
 
 import java.io.File
 
@@ -18,7 +17,7 @@ class AbstractDevice(val SerialID:String) {
   }
 }
 
-class Emulator(SerialID:String) extends AbstractDevice(SerialID) {
+class Emulator(process: Process, SerialID:String) extends AbstractDevice(SerialID) {
 	override def toString = "Emulator " + SerialID
 }
 
@@ -28,6 +27,22 @@ class Device(SerialID:String) extends AbstractDevice(SerialID) {
   
   def setup {
     // Trigger the 4.2.1 verify apps dialog to allow choice to enable/disable
+  }
+}
+
+object EmulatorBuilder {
+  def build(avd_name: String, port: Int): AbstractDevice = {
+	val (process: Process, serial) = ToolFacade.start_emulator(avd_name, port);
+	new Emulator(process, serial)
+  }
+  
+  def build(port: Int): AbstractDevice = {
+	val avds = ToolFacade.get_avd_names
+	if (avds.length != 0)
+	  return build(avds.head, port)
+	  
+	ToolFacade.create_avd("initial","1")
+	build("initial", port)
   }
 }
 

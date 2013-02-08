@@ -1,0 +1,11 @@
+1 - Implement entire Android SDK command line API e.g. 
+    have AndroidProxy contain all android commands, 
+    EmulatorProxy contain all emulator commands, etc
+2 - Construct ToolsFacade so that all android commands
+    can be accessed from a common scala object
+3 - Setup code to build using BuildHive (may require 
+    Maven pom file)
+4 - Setup doxygen to build documentation for code. 
+    Potentially make this one of the BuildHive 
+    outputs
+5 - Write unit tests for various parts of the system
