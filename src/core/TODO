@@ -1,3 +1,9 @@
+0 - Setup Eclipse to run scala. I used Eclipse Juno 
+    and the integrated software installer (help->
+    install new software) to install 
+    the Scala IDE from "http://download.scala-ide.org/nightly-update-juno-master-2.10.x"
+    and the Scala read eval print loop (REPL) from
+    http://scala-ide.dreamhosters.com/nightly-update-worksheet-scalaide21-210/site/
 1 - Implement entire Android SDK command line API e.g. 
     have AndroidProxy contain all android commands, 
     EmulatorProxy contain all emulator commands, etc
@@ -11,4 +17,4 @@
 5 - Write unit tests for various parts of the system. 
     Lookup scala standard for this e.g. are tests 
     placed in one separate location or placed into 
-    their respective classes? 
+    their respective classes? g
