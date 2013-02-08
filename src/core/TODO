@@ -8,4 +8,7 @@
 4 - Setup doxygen to build documentation for code. 
     Potentially make this one of the BuildHive 
     outputs
-5 - Write unit tests for various parts of the system
+5 - Write unit tests for various parts of the system. 
+    Lookup scala standard for this e.g. are tests 
+    placed in one separate location or placed into 
+    their respective classes? 
