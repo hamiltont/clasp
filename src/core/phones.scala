@@ -6,6 +6,7 @@
 package core
 
 import java.io.File
+import scala.sys.process._
 
 class AbstractDevice(val SerialID:String) {
   def install_package(apk_path:String):Boolean = {
@@ -15,10 +16,17 @@ class AbstractDevice(val SerialID:String) {
 	else
 		false
   }
+  
+  /** Releases any resources associated with this device */ 
+  def cleanup {}
 }
 
 class Emulator(process: Process, SerialID:String) extends AbstractDevice(SerialID) {
 	override def toString = "Emulator " + SerialID
+	
+	override def cleanup {
+	  process.destroy
+	}
 }
 
 /* Physical hardware */
@@ -32,7 +40,7 @@ class Device(SerialID:String) extends AbstractDevice(SerialID) {
 
 object EmulatorBuilder {
   def build(avd_name: String, port: Int): AbstractDevice = {
-	val (process: Process, serial) = ToolFacade.start_emulator(avd_name, port);
+	val (process: Process, serial: String) = ToolFacade.start_emulator(avd_name, port);
 	new Emulator(process, serial)
   }
   
