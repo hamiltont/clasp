@@ -9,6 +9,9 @@
     EmulatorProxy contain all emulator commands, etc
 2 - Construct ToolsFacade so that all android commands
     can be accessed from a common scala object
+2.1 - Determine how to build entire framework as a single
+    jar file. Determine if jar file can be linked into 
+    an existing Java code base
 3 - Setup code to build using BuildHive (may require 
     Maven pom file)
 4 - Setup doxygen to build documentation for code. 
