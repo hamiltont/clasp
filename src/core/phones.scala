@@ -7,6 +7,8 @@ package core
 
 import java.io.File
 import scala.sys.process._
+import org.hyperic.sigar.Sigar
+import org.hyperic.sigar.ptql.ProcessFinder
 
 class AbstractDevice(val SerialID:String) {
   def install_package(apk_path:String):Boolean = {
@@ -22,6 +24,10 @@ class AbstractDevice(val SerialID:String) {
 }
 
 class Emulator(process: Process, SerialID:String) extends AbstractDevice(SerialID) {
+	val s: Sigar = new Sigar
+	val pf: ProcessFinder = new ProcessFinder(s)
+	val emulator_processid: Long = pf.findSingleProcess("Args.*.re=5555.5556")
+	var telnetPort: Int = 0
 	override def toString = "Emulator " + SerialID
 	
 	override def cleanup {

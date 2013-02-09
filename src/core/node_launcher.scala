@@ -6,6 +6,8 @@ import scala.annotation.elidable
 import scala.annotation.elidable.ASSERTION
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.MutableList
+import org.hyperic.sigar.Sigar
+import org.hyperic.sigar.ProcTime
 
 /*
  * Handles starting nodes, either to represent this 
@@ -23,12 +25,29 @@ object NodeLauncher {
   // the current computer
   def main(args: Array[String]): Unit = {
     
-	  var n:Node = new Node()
+      var s: Sigar = new Sigar
+      println(s getCpuPerc)
+      
+      
+	  var n:Node = new Node
+	  val emu: Emulator = n run_emulator
+      val pt: ProcTime = new ProcTime
+      pt.gather(s, emu.emulator_processid)
+      println(pt)
 	  
+      println(s getCpuPerc)
+      
 	  println("Created Node")
+	  
+	  pt.gather(s, emu.emulator_processid)
+	  println(pt)
 	  n.cleanup
 	  println("Cleaned Node")
+      
+      pt.gather(s, emu.emulator_processid)
+      println(pt)
 	  
+      println(s getCpuPerc)
   }
 
   def testADB() {
@@ -39,17 +58,17 @@ object NodeLauncher {
 
 class Node() {
   val devices: MutableList[AbstractDevice] = MutableList[AbstractDevice]()
-  
-  // TODO make this initialization not part of the constructor
   var current_emulator_port = 5555;
   println("A new Node is being constructed")
-  val foo: AbstractDevice = EmulatorBuilder.build(current_emulator_port)
-  devices += foo
+  
+  def run_emulator: Emulator = {
+    devices += EmulatorBuilder.build(current_emulator_port)
+    devices.last.asInstanceOf[Emulator]
+  }
   
   def cleanup {
     devices.foreach(phone => phone.cleanup)
-  }
-  
+  } 
 }
 
 
