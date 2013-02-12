@@ -22,33 +22,29 @@ import org.hyperic.sigar.Sigar
  * response
  * 
  */
-object NodeLauncher {
+object NodeLauncher extends App {
   val nodes = ListBuffer[Node]()
+  
+  var s: Sigar = new Sigar
+  println(s getCpuPerc)
 
-  // By default it launches a single Node for 
-  // the current computer
-  def main(args: Array[String]): Unit = {
+  var n: Node = new Node
+  val emu: Emulator = n run_emulator
+  //val pt: ProcTime = new ProcTime
+  //pt.gather(s, emu.emulator_processid)
+  //println(pt)
 
-    var s: Sigar = new Sigar
-    println(s getCpuPerc)
+  //println(s getCpuPerc)
 
-    var n: Node = new Node
-    val emu: Emulator = n run_emulator
-    val pt: ProcTime = new ProcTime
-    pt.gather(s, emu.emulator_processid)
-    println(pt)
+  println("Created Node")
 
-    println(s getCpuPerc)
+  //pt.gather(s, emu.emulator_processid)
+  //println(pt)
+  n.cleanup
+  println("Cleaned Node")
 
-    println("Created Node")
+  //println(s getCpuPerc)
 
-    pt.gather(s, emu.emulator_processid)
-    println(pt)
-    n.cleanup
-    println("Cleaned Node")
-
-    println(s getCpuPerc)
-  }
 
   def testADB() {
     assert(AdbProxy.is_adb_available)
@@ -59,7 +55,7 @@ class Node() {
   val devices: MutableList[Emulator] = MutableList[Emulator]()
   var current_emulator_port = 5555
   println("A new Node is being constructed")
-  val load_monitor: Actor = actor {
+  /*val load_monitor: Actor = actor {
     val s: Sigar = new Sigar 
     
     val steady_cpu: Double = (for (i <- 1 to 10) yield {Thread.sleep(10); s.getCpuPerc.getUser}).sum / 10.0 
@@ -82,6 +78,8 @@ class Node() {
   }
   // Allow sigar a second to build a model of system steady state
   Thread.sleep(10 * 10)
+  * */
+  
 
   def mean[T](item: Traversable[T])(implicit n: Numeric[T]) = {
     n.toDouble(item.sum) / item.size.toDouble
@@ -105,7 +103,6 @@ class Node() {
   }
 
   def cleanup {
-    load_monitor ! "EXIT"
     devices.foreach(phone => phone.cleanup)
   }
 }
