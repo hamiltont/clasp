@@ -4,5 +4,32 @@
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/hyperic-sigar-1.6.4/sigar-bin/lib/sigar.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/scala-library.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-actor_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-agent_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-camel_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-cluster-experimental_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-contrib_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-dataflow_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-durable-mailboxes-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-file-mailbox_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-kernel_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-mailboxes-common_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-remote_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-remote-tests-experimental_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-slf4j_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-testkit_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-transactor_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/akka-zeromq_2.10-2.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/camel-core-2.10.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/config-1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/jna-3.0.9.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/jnr-constants-0.8.2.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/netty-3.5.8.Final.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/protobuf-java-2.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/scala-stm_2.10-0.7.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/slf4j-api-1.7.2.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/uncommons-maths-1.2.2a.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/zeromq-scala-binding_2.10-0.0.7.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
