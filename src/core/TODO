@@ -1,3 +1,5 @@
+Brandon
+
 0 - Setup Eclipse to run scala. I used Eclipse Juno 
     and the integrated software installer (help->
     install new software) to install 
@@ -21,3 +23,19 @@
     Lookup scala standard for this e.g. are tests 
     placed in one separate location or placed into 
     their respective classes? g
+    
+    
+    
+Hamilton
+
+Implement logging system where nodes collect the logs of their running emulators and expose them for other services
+Implement telnet client to enable passing of telnet commands into a running emulator
+Locate cross-network client and implement cross-network node launching. Potentially use 
+       central hostfile to define nodes and their respective SDK locations. Nodes need to 
+       register their connected devices and emulators with a central registry
+Implement emulator hibernation
+Decide how workspace concept should be organized, where SDKs are located, etc
+
+
+ 
+ 
