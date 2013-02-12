@@ -2,14 +2,15 @@
 
 ## Install Eclipse (Juno) addons
 + Use the integrated software installer (help->install new software) to
-install the Scala IDE from
-"http://download.scala-ide.org/nightly-update-juno-master-2.10.x"
-+ Install Scala read eval print loop (REPL) from
-"http://scala-ide.dreamhosters.com/nightly-update-worksheet-scalaide21-210/site/"
+add the Scala 2.1-M2 update site from
+"http://download.scala-ide.org/sdk/e38/scala210/dev/site/"
++ Install Scala IDE, Scala Worksheet, and ScalaTest
 
 ## Create a new project and link the directories
-+ In an Eclipse workspace, create a new project `Clasp` and link the
-`src`, `test`, and `lib` directories.
++ In an Eclipse workspace, create a new project `Clasp` with a default `src`
+directory.
++ Delete the default `src` directory and link the `src` and `test` directories.
 + Right click on the `Clasp` directory and select
 `Build Path`->`Add External Archives`.
-+ Add `junit`, `sigar`, and other libraries.
++ Add `sigar`, `scalatest`, and other needed libraries.
++ Add the main JUnit library to the build path.
