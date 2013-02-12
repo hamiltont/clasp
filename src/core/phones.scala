@@ -10,33 +10,22 @@ import scala.sys.process._
 import org.hyperic.sigar.Sigar
 import org.hyperic.sigar.ptql.ProcessFinder
 
-class AbstractDevice(val SerialID:String) {
-  def install_package(apk_path:String):Boolean = {
-    val f: File  = new File(apk_path)
-    if (f.exists())
-    	AdbProxy.install_package(SerialID, apk_path)
-	else
-		false
-  }
-  
-  /** Releases any resources associated with this device */ 
-  def cleanup {}
-}
-
-class Emulator(process: Process, SerialID:String) extends AbstractDevice(SerialID) {
+class Emulator(process: Process, SerialID:String) {
 	val s: Sigar = new Sigar
 	val pf: ProcessFinder = new ProcessFinder(s)
 	val emulator_processid: Long = pf.findSingleProcess("Args.*.re=5555.5556")
 	var telnetPort: Int = 0
+	
+	
 	override def toString = "Emulator " + SerialID
 	
-	override def cleanup {
+	def cleanup {
 	  process.destroy
 	}
 }
 
 /* Physical hardware */
-class Device(SerialID:String) extends AbstractDevice(SerialID) {
+class Device(SerialID:String) {
   override def toString = "Device " + SerialID
   
   def setup {
@@ -45,12 +34,12 @@ class Device(SerialID:String) extends AbstractDevice(SerialID) {
 }
 
 object EmulatorBuilder {
-  def build(avd_name: String, port: Int): AbstractDevice = {
+  def build(avd_name: String, port: Int): Emulator = {
 	val (process: Process, serial: String) = ToolFacade.start_emulator(avd_name, port);
 	new Emulator(process, serial)
   }
   
-  def build(port: Int): AbstractDevice = {
+  def build(port: Int): Emulator = {
 	val avds = ToolFacade.get_avd_names
 	if (avds.length != 0)
 	  return build(avds.head, port)
