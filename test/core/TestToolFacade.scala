@@ -11,7 +11,13 @@ class ToolFacadeTest extends AssertionsForJUnit {
   @Before def initialize() {
   }
   
-  @Test def verifyTemplate() {
-    assertEquals("ScalaTest is easy!", "ScalaTest is easy!")
+  @Test def testAndroid() { 
+    assert(get_targets contains "android-17")
+    
+    assert(create_avd("clasp-test", "android-17", true))
+    assert(!create_avd("clasp-test", "android-17"))
+    val avds = get_avd_names
+    assert(avds contains "clasp-test")
+    assertFalse(avds contains "not-clasp-test")
   }
 }
