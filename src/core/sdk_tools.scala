@@ -27,9 +27,24 @@ object ToolFacade {
   
   def create_avd(name: String, target: String, force: Boolean = false): Boolean =
     AndroidProxy.create_avd(name, target, force)
-  def delete_avd(name: String): Boolean = AndroidProxy.delete_avd(name)
   def move_avd(name: String, path: String, newName: String = null): Boolean =
     AndroidProxy.move_avd(name, path, newName)
+  def delete_avd(name: String): Boolean = AndroidProxy.delete_avd(name)
+  def update_avd(name: String) = AndroidProxy.update_avd(name)
+  
+  def create_project(name: String,
+		  			 target: String,
+		  			 path: String,
+		  			 pkg: String,
+		  			 activity: String) =
+    AndroidProxy.create_project(name, target, path, pkg, activity)
+  
+  def update_project(path: String,
+		  			 library: String = null,
+		  			 name: String = null,
+		  			 target: String = null,
+		  			 subprojects: Boolean = false) =
+    AndroidProxy.update_project(library, path, name, target, subprojects)
   
   // emulator
   def start_emulator(avd_name: String, port: Int): (Process, String) =
@@ -90,7 +105,19 @@ object AndroidProxy {
     Log.log(output)
     true
   }
-  
+
+  def move_avd(name: String,
+               path: String,
+               newName: String = null): Boolean = {
+    var command = ListBuffer(android, "move avd", "-n", name, "-p ", path)
+    if (newName != null) {
+      command += ("-r", newName)
+    }
+    
+    val output: String = command.mkString(" ") !!;
+    true
+  }
+
   def delete_avd(name: String): Boolean = {
     if (!(get_avd_names contains name)) {
       System.err.println("Error: AVD '" + name + "'" + " does not exist.")
@@ -104,16 +131,43 @@ object AndroidProxy {
     true
   }
   
-  def move_avd(name: String,
-               path: String,
-               newName: String = null): Boolean = {
-    var command = ListBuffer(android, "move avd", "-n", name, "-p ", path)
-    if (newName != null) {
-      command += ("-r", newName)
-    }
+  def update_avd(name: String) {
+    val command = Seq(android, "update avd -n", name)
+    val output: String = command.mkString(" ") !!
     
-    //val output: String = query #| command !!
-    true
+    Log.log(output)
+  }
+  
+  def create_project(name: String,
+		  			 target: String,
+		  			 path: String,
+		  			 pkg: String,
+		  			 activity: String) {
+    var command = ListBuffer(android, "create project")
+    command += ("-n", name)
+    command += ("-t", target)
+    command += ("-p", path)
+    command += ("-k", pkg)
+    command += ("-a", activity)
+    val output: String = command.mkString(" ") !!
+    
+    Log.log(output)
+  }
+  
+  def update_project(path: String,
+		  			 library: String = null,
+		  			 name: String = null,
+		  			 target: String = null,
+		  			 subprojects: Boolean = false) {
+    var command = ListBuffer(android, "update project")
+    command += ("-p", path)
+    if (library != null) command += ("-l", library)
+    if (name != null) command += ("-n", name)
+    if (target != null) command += ("-t", target)
+    if (subprojects) command += ("-s")
+    val output: String = command.mkString(" ") !!
+    
+    Log.log(output)
   }
 }
 
