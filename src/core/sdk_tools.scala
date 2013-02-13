@@ -226,6 +226,25 @@ object AndroidProxy {
     
     Log.log(output)
   }
+  
+  def update_adb {
+    val command = s"$android update adb"
+    val output: String = command !!;
+    Log.log(output)
+  }
+  
+  def update_sdk(filter: String = null,
+		  		 noHttps: Boolean = false,
+                 all: Boolean = false,
+                 force: Boolean = false) {
+    var command = s"$android update sdk -u"
+    if (filter != null) command += s" -t $filter"
+    if (noHttps) command += " -s"
+    if (all) command += " -a"
+    if (force) command += " -f"
+    val output: String = command !!;
+    Log.log(output)
+  }
 }
 
 object EmulatorProxy {
