@@ -5,10 +5,13 @@ import org.junit.Assert._
 import org.junit.Test
 import org.junit.Before
 
+import java.io.File
+import org.apache.commons.io.FileUtils
+
 class ToolFacadeTest extends AssertionsForJUnit {
   import core.ToolFacade._
   
-  @Test def testAndroid() { 
+  @Test def testAndroidAVDCreation() { 
     assert(get_targets contains "android-17")
     assert(get_sdk contains
       "Intel x86 Atom System Image, Android API 17, revision 1")
@@ -26,5 +29,21 @@ class ToolFacadeTest extends AssertionsForJUnit {
     
     assert(delete_avd(avdNewName))
     assert(!delete_avd(avdNewName))
+  }
+  
+  @Test def testAndroidProjectCreation() { 
+    assert(get_targets contains "android-17")
+    
+    val projDirStr = sys.env("HOME") + "/clasp-temp"
+    create_project("testProject",
+    			   "android-17",
+    			   projDirStr,
+    			   "clasp.test",
+    			   "claspActivity")
+
+    update_project(projDirStr, null, "newname", null, true)
+    
+    val projDirFile: File = new File(projDirStr)
+    FileUtils.deleteDirectory(projDirFile)
   }
 }

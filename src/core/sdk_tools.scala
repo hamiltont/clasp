@@ -27,6 +27,21 @@ object ToolFacade {
   def move_avd(name: String, path: String, newName: String = null): Boolean =
     AndroidProxy.move_avd(name, path, newName)
   def delete_avd(name: String): Boolean = AndroidProxy.delete_avd(name)
+  def update_avd(name: String) = AndroidProxy.update_avd(name)
+  
+  def create_project(name: String,
+		  			 target: String,
+		  			 path: String,
+		  			 pkg: String,
+		  			 activity: String) =
+    AndroidProxy.create_project(name, target, path, pkg, activity)
+  
+  def update_project(path: String,
+		  			 library: String = null,
+		  			 name: String = null,
+		  			 target: String = null,
+		  			 subprojects: Boolean = false) =
+    AndroidProxy.update_project(library, path, name, target, subprojects)
   
   // emulator
   def start_emulator(avd_name: String, port: Int): (Process, String) =
@@ -111,6 +126,45 @@ object AndroidProxy {
     
     Log.log(output)
     true
+  }
+  
+  def update_avd(name: String) {
+    val command = Seq(android, "update avd -n", name)
+    val output: String = command.mkString(" ") !!
+    
+    Log.log(output)
+  }
+  
+  def create_project(name: String,
+		  			 target: String,
+		  			 path: String,
+		  			 pkg: String,
+		  			 activity: String) {
+    var command = ListBuffer(android, "create project")
+    command += ("-n", name)
+    command += ("-t", target)
+    command += ("-p", path)
+    command += ("-k", pkg)
+    command += ("-a", activity)
+    val output: String = command.mkString(" ") !!
+    
+    Log.log(output)
+  }
+  
+  def update_project(path: String,
+		  			 library: String = null,
+		  			 name: String = null,
+		  			 target: String = null,
+		  			 subprojects: Boolean = false) {
+    var command = ListBuffer(android, "update project")
+    command += ("-p", path)
+    if (library != null) command += ("-l", library)
+    if (name != null) command += ("-n", name)
+    if (target != null) command += ("-t", target)
+    if (subprojects) command += ("-s")
+    val output: String = command.mkString(" ") !!
+    
+    Log.log(output)
   }
 }
 
