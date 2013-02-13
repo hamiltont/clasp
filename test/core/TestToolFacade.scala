@@ -13,6 +13,8 @@ class ToolFacadeTest extends AssertionsForJUnit {
   
   @Test def testAndroid() { 
     assert(get_targets contains "android-17")
+    assert(get_sdk contains
+      "Intel x86 Atom System Image, Android API 17, revision 1")
     
     assert(create_avd("clasp-test", "android-17", true))
     assert(!create_avd("clasp-test", "android-17"))

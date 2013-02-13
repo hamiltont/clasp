@@ -20,6 +20,7 @@ object ToolFacade {
   // android
   def get_avd_names: Vector[String] = AndroidProxy.get_avd_names
   def get_targets : Vector[String] = AndroidProxy.get_targets
+  def get_sdk: Vector[String] = AndroidProxy.get_sdk
   
   def create_avd(name: String, target: String, force: Boolean = false): Boolean =
     AndroidProxy.create_avd(name, target, force)
@@ -51,10 +52,19 @@ object AndroidProxy {
     result.toVector
   }
   
-  def get_targets : Vector[String] = {
+  def get_targets: Vector[String] = {
     val command = android + "list targets";
     val output: String = command !!
     val regex = """id: [0-9]* or \"(.*)\"""".r
+    
+    val result = for (regex(target) <- regex findAllIn output) yield target
+    result.toVector
+  }
+  
+  def get_sdk: Vector[String] = {
+    val command = android + "list sdk";
+    val output: String = command !!
+    val regex = """[0-9]+- (.*)""".r
     
     val result = for (regex(target) <- regex findAllIn output) yield target
     result.toVector
