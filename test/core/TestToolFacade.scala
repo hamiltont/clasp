@@ -35,6 +35,7 @@ class ToolFacadeTest extends AssertionsForJUnit {
     assert(get_targets contains "android-17")
     
     val projDirStr = sys.env("HOME") + "/clasp-temp"
+    val testProjDirStr = sys.env("HOME") + "/clasp-temp-test"
     create_project("testProject",
     			   "android-17",
     			   projDirStr,
@@ -42,6 +43,8 @@ class ToolFacadeTest extends AssertionsForJUnit {
     			   "claspActivity")
 
     update_project(projDirStr, null, "newname", null, true)
+    create_test_project(testProjDirStr, "clasptest", projDirStr)
+    update_test_project(projDirStr, testProjDirStr)
     
     val projDirFile: File = new File(projDirStr)
     FileUtils.deleteDirectory(projDirFile)

@@ -43,6 +43,15 @@ object ToolFacade {
 		  			 subprojects: Boolean = false) =
     AndroidProxy.update_project(library, path, name, target, subprojects)
   
+  def create_test_project(path: String,
+		  				  name: String,
+		  			      main:String) =
+    AndroidProxy.create_test_project(path, name, main)
+  
+  def update_test_project(main: String,
+		  				  path: String) =
+    AndroidProxy.update_test_project(main, path)
+    
   // emulator
   def start_emulator(avd_name: String, port: Int): (Process, String) =
     EmulatorProxy.start_emulator(avd_name, port)
@@ -163,6 +172,24 @@ object AndroidProxy {
     if (target != null) command += ("-t", target)
     if (subprojects) command += ("-s")
     val output: String = command.mkString(" ") !!
+    
+    Log.log(output)
+  }
+  
+  def create_test_project(path: String,
+		  				  name: String,
+		  			      main:String) {
+    var command = s"$android create test-project -p $path -n $name -m $main"
+    println(command)
+    val output: String = command !!
+    
+    Log.log(output)
+  }
+  
+  def update_test_project(main: String,
+		  				  path: String) {
+    var command = s"$android update test-project -m $main -p $path"
+    val output: String = command.mkString !!
     
     Log.log(output)
   }
