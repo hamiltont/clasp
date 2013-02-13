@@ -36,6 +36,8 @@ class ToolFacadeTest extends AssertionsForJUnit {
     
     val projDirStr = sys.env("HOME") + "/clasp-temp"
     val testProjDirStr = sys.env("HOME") + "/clasp-temp-test"
+    val libProjDirStr = sys.env("HOME") + "/clasp-lib-test"
+    
     create_project("testProject",
     			   "android-17",
     			   projDirStr,
@@ -43,10 +45,17 @@ class ToolFacadeTest extends AssertionsForJUnit {
     			   "claspActivity")
 
     update_project(projDirStr, null, "newname", null, true)
-    create_test_project(testProjDirStr, "clasptest", projDirStr)
+    create_test_project(testProjDirStr, "claspTest", projDirStr)
     update_test_project(projDirStr, testProjDirStr)
     
-    val projDirFile: File = new File(projDirStr)
-    FileUtils.deleteDirectory(projDirFile)
+    create_lib_project("claspLib", "android-17", "clasp.test", libProjDirStr)
+    update_lib_project(libProjDirStr)
+    
+    update_project(projDirStr, libProjDirStr);
+    
+    for (fileStr <- List(projDirStr, testProjDirStr, libProjDirStr)) {
+      val file: File = new File(fileStr)
+      FileUtils.deleteDirectory(file)
+    }
   }
 }
