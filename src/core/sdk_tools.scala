@@ -71,7 +71,7 @@ object AndroidProxy {
   val android = sdk.android + " "
   
   def get_avd_names: Vector[String] = {
-    val command = android + "list avd";
+    val command = s"$android list avd";
     val output: String = command !!
     val regex = """Name: (.*)""".r
 
@@ -80,7 +80,7 @@ object AndroidProxy {
   }
   
   def get_targets: Vector[String] = {
-    val command = android + "list targets";
+    val command = s"$android list targets";
     val output: String = command !!
     val regex = """id: [0-9]* or \"(.*)\"""".r
     
@@ -89,7 +89,7 @@ object AndroidProxy {
   }
   
   def get_sdk: Vector[String] = {
-    val command = android + "list sdk";
+    val command = s"$android list sdk";
     val output: String = command !!
     val regex = """[0-9]+- (.*)""".r
     
@@ -105,12 +105,12 @@ object AndroidProxy {
       return false
     }
     
-    var command = ListBuffer(android, "create avd", "-n", name, "-t", target)
+    var command = s"$android create avd -n $name -t $target"
     if (force) {
-      command.append("--force")
+      command += " --force"
     }
     
-    val output: String = "echo no" #| command.mkString(" ") !!;
+    val output: String = "echo no" #| command !!;
     Log.log(output)
     true
   }
@@ -118,12 +118,12 @@ object AndroidProxy {
   def move_avd(name: String,
                path: String,
                newName: String = null): Boolean = {
-    var command = ListBuffer(android, "move avd", "-n", name, "-p ", path)
+    var command = s"$android move avd -n $name -p $path"
     if (newName != null) {
-      command += ("-r", newName)
+      command += s" -r $newName"
     }
     
-    val output: String = command.mkString(" ") !!;
+    val output: String = command !!;
     true
   }
 
@@ -133,16 +133,16 @@ object AndroidProxy {
       return false
     }
     
-    val command = Seq(android, "delete avd -n", name)
-    val output: String = command.mkString(" ") !!
+    val command = s"$android delete avd -n $name"
+    val output: String = command !!
     
     Log.log(output)
     true
   }
   
   def update_avd(name: String) {
-    val command = Seq(android, "update avd -n", name)
-    val output: String = command.mkString(" ") !!
+    val command = s"$android update avd -n $name"
+    val output: String = command !!
     
     Log.log(output)
   }
@@ -152,13 +152,13 @@ object AndroidProxy {
 		  			 path: String,
 		  			 pkg: String,
 		  			 activity: String) {
-    var command = ListBuffer(android, "create project")
-    command += ("-n", name)
-    command += ("-t", target)
-    command += ("-p", path)
-    command += ("-k", pkg)
-    command += ("-a", activity)
-    val output: String = command.mkString(" ") !!
+    var command = s"$android create project"
+    command += s" -n $name"
+    command += s" -t $target"
+    command += s" -p $path"
+    command += s" -k $pkg"
+    command += s" -a $activity"
+    val output: String = command !!
     
     Log.log(output)
   }
@@ -168,13 +168,12 @@ object AndroidProxy {
 		  			 name: String = null,
 		  			 target: String = null,
 		  			 subprojects: Boolean = false) {
-    var command = ListBuffer(android, "update project")
-    command += ("-p", path)
-    if (library != null) command += ("-l", library)
-    if (name != null) command += ("-n", name)
-    if (target != null) command += ("-t", target)
-    if (subprojects) command += ("-s")
-    val output: String = command.mkString(" ") !!
+    var command = s"$android update project -p $path"
+    if (library != null) command += s" -l $library"
+    if (name != null) command += s" -n $name"
+    if (target != null) command += s" -t $target"
+    if (subprojects) command += " -s"
+    val output: String = command !!
     
     Log.log(output)
   }
@@ -183,7 +182,6 @@ object AndroidProxy {
 		  				  name: String,
 		  			      main:String) {
     var command = s"$android create test-project -p $path -n $name -m $main"
-    println(command)
     val output: String = command !!
     
     Log.log(output)
@@ -220,25 +218,25 @@ object AdbProxy {
 
   def get_installed_packages(serial: String) {
 
-    val command = Seq(adb, "-s", serial, "shell pm list packages")
+    val command = s"$adb -s $serial shell pm list packages"
     println(command)
-    var output: String = command.mkString(" ") !!
+    var output: String = command !!
 
     println(output)
   }
 
   // In general needs a method to timeout
   def install_package(serial: String, apk_path: String): Boolean = {
-    val command = Seq(adb, "-s", serial, "install", apk_path)
+    val command = s"$adb -s $serial install $apk_path"
     println(command)
-    val output: String = command.mkString(" ") !!
+    val output: String = command !!
 
     println(output)
     return output.contains("Success")
   }
 
   def is_adb_available: Boolean = {
-    val output: String = adb + "version"!!
+    val output: String = s"$adb version" !!
 
     return output.contains("Android")
   }
