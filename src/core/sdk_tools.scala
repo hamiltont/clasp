@@ -74,7 +74,7 @@ object AndroidProxy {
                  target: String,
                  force: Boolean = false): Boolean = {
     if (!force && (get_avd_names contains name)) {
-      System.err.println("Error: AVD '" + name + "'" + " alread exists.")
+      System.err.println("Error: AVD '" + name + "'" + " already exists.")
       return false
     }
     
@@ -89,8 +89,13 @@ object AndroidProxy {
   }
   
   def delete_avd(name: String): Boolean = {
+    if (!(get_avd_names contains name)) {
+      System.err.println("Error: AVD '" + name + "'" + " does not exist.")
+      return false
+    }
+    
     val command = Seq(android, "delete avd -n", name)
-    val output: String = command !!
+    val output: String = command.mkString(" ") !!
     
     Log.log(output)
     true
