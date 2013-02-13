@@ -4,16 +4,19 @@
  */
 package core
 
-import scala.sys.process._
-import scala.util.matching.Regex
+import scala.sys.process.Process
+import scala.sys.process.stringSeqToProcess
+import scala.sys.process.stringToProcess
+import com.typesafe.config.ConfigFactory
 import scala.collection.mutable.ListBuffer
 
 object sdk {
-  val root = scala.util.Properties.envOrElse("ANDROID_HOME",
-      "/Development/adt-bundle-mac-x86_64")
-  val adb = root + "/platform-tools/adb"
-  val emulator = root + "/tools/emulator"
-  val android = root + "/tools/android"
+  val conf = ConfigFactory.load()
+  val adb = conf getString ("sdk.adb")
+  val emulator = conf getString ("sdk.emulator")
+  val android = conf getString ("sdk.android")
+  
+  // TODO run checks to ensure that all three of these can be accessed
 }
 
 object ToolFacade {
@@ -199,9 +202,8 @@ object EmulatorProxy {
   val emulator = sdk.emulator + " "
 
   def start_emulator(avd_name: String, port: Int): (Process, String) = {
-    var command = ListBuffer(emulator, "-ports", port.toString, ",")
-    command += ((port + 1).toString, " @", avd_name)
-    val builder = Process(command.mkString(" "))
+    var command = s"$emulator -ports $port,${port+1} @$avd_name"  
+    val builder = Process(command)
     
     return (builder.run, "emulator-" + port)
 

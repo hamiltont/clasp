@@ -37,5 +37,9 @@ Implement emulator hibernation
 Decide how workspace concept should be organized, where SDKs are located, etc
 
 
+Other
+
+Build setup script for application.conf that uses "which android", etc to locate binaries. Also look at "ANDROID_HOME"
+
  
  
