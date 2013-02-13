@@ -24,9 +24,9 @@ object ToolFacade {
   
   def create_avd(name: String, target: String, force: Boolean = false): Boolean =
     AndroidProxy.create_avd(name, target, force)
-  def delete_avd(name: String): Boolean = AndroidProxy.delete_avd(name)
   def move_avd(name: String, path: String, newName: String = null): Boolean =
     AndroidProxy.move_avd(name, path, newName)
+  def delete_avd(name: String): Boolean = AndroidProxy.delete_avd(name)
   
   // emulator
   def start_emulator(avd_name: String, port: Int): (Process, String) =
@@ -87,7 +87,19 @@ object AndroidProxy {
     Log.log(output)
     true
   }
-  
+
+  def move_avd(name: String,
+               path: String,
+               newName: String = null): Boolean = {
+    var command = ListBuffer(android, "move avd", "-n", name, "-p ", path)
+    if (newName != null) {
+      command += ("-r", newName)
+    }
+    
+    val output: String = command.mkString(" ") !!;
+    true
+  }
+
   def delete_avd(name: String): Boolean = {
     if (!(get_avd_names contains name)) {
       System.err.println("Error: AVD '" + name + "'" + " does not exist.")
@@ -98,18 +110,6 @@ object AndroidProxy {
     val output: String = command.mkString(" ") !!
     
     Log.log(output)
-    true
-  }
-  
-  def move_avd(name: String,
-               path: String,
-               newName: String = null): Boolean = {
-    var command = ListBuffer(android, "move avd", "-n", name, "-p ", path)
-    if (newName != null) {
-      command += ("-r", newName)
-    }
-    
-    val output: String = command.mkString(" ") !!;
     true
   }
 }
