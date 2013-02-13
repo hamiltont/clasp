@@ -7,15 +7,20 @@
  */
 package core
 
-import scala.sys.process._
-import scala.util.matching.Regex
-import scala.collection.mutable.ListBuffer
+import scala.sys.process.Process
+import scala.sys.process.stringSeqToProcess
+import scala.sys.process.stringToProcess
+
+import com.typesafe.config.ConfigFactory
 
 object sdk {
-  val root = "/Development/adt-bundle-mac-x86_64/";
-  val adb = root + "platform-tools/adb";
-  val emulator = root + "tools/emulator"
-  val android = root + "tools/android"
+  
+  val conf = ConfigFactory.load()
+  val adb = conf getString ("sdk.adb")
+  val emulator = conf getString ("sdk.emulator")
+  val android = conf getString ("sdk.android")
+  
+  // TODO run checks to ensure that all three of these can be accessed
 }
 
 object ToolFacade {
