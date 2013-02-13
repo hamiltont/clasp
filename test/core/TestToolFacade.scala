@@ -13,13 +13,18 @@ class ToolFacadeTest extends AssertionsForJUnit {
     assert(get_sdk contains
       "Intel x86 Atom System Image, Android API 17, revision 1")
     
-    assert(create_avd("clasp-test", "android-17", true))
-    assert(!create_avd("clasp-test", "android-17"))
+    val avdName = "clasp-test"
+    val avdNewName = avdName + "-new-name"
+    assert(create_avd(avdName, "android-17", true))
+    assert(!create_avd(avdName, "android-17"))
     val avds = get_avd_names
-    assert(avds contains "clasp-test")
+    assert(avds contains avdName)
     assertFalse(avds contains "not-clasp-test")
     
-    assert(delete_avd("clasp-test"))
-    assert(!delete_avd("clasp-test"))
+    val home = sys.env("HOME")
+    assert(move_avd(avdName, home + "/" + avdName, avdNewName))
+    
+    assert(delete_avd(avdNewName))
+    assert(!delete_avd(avdNewName))
   }
 }

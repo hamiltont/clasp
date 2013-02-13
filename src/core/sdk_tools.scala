@@ -109,7 +109,7 @@ object AndroidProxy {
       command += ("-r", newName)
     }
     
-    //val output: String = query #| command !!
+    val output: String = command.mkString(" ") !!;
     true
   }
 }
