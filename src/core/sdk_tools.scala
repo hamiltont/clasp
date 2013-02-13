@@ -59,6 +59,9 @@ object ToolFacade {
   
   def update_lib_project(path: String, target: String = null) =
     AndroidProxy.update_lib_project(path, target)
+  
+  def create_uitest_project(name: String, path: String, target: String) =
+    AndroidProxy.create_uitest_project(name, path, target)
     
   // emulator
   def start_emulator(avd_name: String, port: Int): (Process, String) =
@@ -211,6 +214,14 @@ object AndroidProxy {
   def update_lib_project(path: String, target: String = null) {
     var command = s"$android update lib-project -p $path"
     if (target != null) command += s" -t $target"
+    val output: String = command !!
+    
+    Log.log(output)
+  }
+  
+  def create_uitest_project(name: String, path: String, target: String) {
+    val command = s"$android create uitest-project -n $name " +
+      s" -p $path -t $target"
     val output: String = command !!
     
     Log.log(output)
