@@ -32,17 +32,17 @@ object ToolFacade {
   def update_avd(name: String) = AndroidProxy.update_avd(name)
   
   def create_project(name: String,
-		  			 target: String,
-		  			 path: String,
-		  			 pkg: String,
-		  			 activity: String) =
+                     target: String,
+                     path: String,
+                     pkg: String,
+                     activity: String) =
     AndroidProxy.create_project(name, target, path, pkg, activity)
   
   def update_project(path: String,
-		  			 library: String = null,
-		  			 name: String = null,
-		  			 target: String = null,
-		  			 subprojects: Boolean = false) =
+                     library: String = null,
+                     name: String = null,
+                     target: String = null,
+                     subprojects: Boolean = false) =
     AndroidProxy.update_project(library, path, name, target, subprojects)
   
   def create_test_project(path: String, name: String, main:String) =
@@ -52,9 +52,9 @@ object ToolFacade {
     AndroidProxy.update_test_project(main, path)
     
   def create_lib_project(name: String,
-		  				 target: String,
-		  				 pkg: String,
-		  				 path: String) =
+                         target: String,
+                         pkg: String,
+                         path: String) =
     AndroidProxy.create_lib_project(name, target, pkg, path)
   
   def update_lib_project(path: String, target: String = null) =
@@ -62,6 +62,14 @@ object ToolFacade {
   
   def create_uitest_project(name: String, path: String, target: String) =
     AndroidProxy.create_uitest_project(name, path, target)
+    
+  def update_adb = AndroidProxy.update_adb
+  
+  def update_sdk(filter: String = null,
+                 noHttps: Boolean = false,
+                 all: Boolean = false,
+                 force: Boolean = false) =
+    AndroidProxy.update_sdk(filter, noHttps, all, force)
     
   // emulator
   def start_emulator(avd_name: String, port: Int): (Process, String) =
@@ -156,10 +164,10 @@ object AndroidProxy {
   }
   
   def create_project(name: String,
-		  			 target: String,
-		  			 path: String,
-		  			 pkg: String,
-		  			 activity: String) {
+                     target: String,
+                     path: String,
+                     pkg: String,
+                     activity: String) {
     var command = s"$android create project"
     command += s" -n $name"
     command += s" -t $target"
@@ -172,10 +180,10 @@ object AndroidProxy {
   }
   
   def update_project(path: String,
-		  			 library: String = null,
-		  			 name: String = null,
-		  			 target: String = null,
-		  			 subprojects: Boolean = false) {
+                     library: String = null,
+                     name: String = null,
+                     target: String = null,
+                     subprojects: Boolean = false) {
     var command = s"$android update project -p $path"
     if (library != null) command += s" -l $library"
     if (name != null) command += s" -n $name"
@@ -201,9 +209,9 @@ object AndroidProxy {
   }
   
   def create_lib_project(name: String,
-		  				 target: String,
-		  				 pkg: String,
-		  				 path: String) {
+                         target: String,
+                         pkg: String,
+                         path: String) {
     val command = s"$android create lib-project -n $name " +
       s" -t $target -k $pkg -p $path"
     val output: String = command !!
@@ -234,7 +242,7 @@ object AndroidProxy {
   }
   
   def update_sdk(filter: String = null,
-		  		 noHttps: Boolean = false,
+                 noHttps: Boolean = false,
                  all: Boolean = false,
                  force: Boolean = false) {
     var command = s"$android update sdk -u"
