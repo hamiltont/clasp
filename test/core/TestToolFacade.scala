@@ -31,7 +31,7 @@ class ToolFacadeTest extends AssertionsForJUnit {
     assert(!delete_avd(avdNewName))
   }
   
-  @Test def testAndroidProjectCreation() { 
+  @Test def testAndroidProjectCreation() {
     assert(get_targets contains "android-17")
     
     val projDirStr = sys.env("HOME") + "/clasp-temp"
@@ -62,4 +62,22 @@ class ToolFacadeTest extends AssertionsForJUnit {
       FileUtils.deleteDirectory(file)
     }
   }
+  
+  @Test def testEmulator() {
+    assertEquals("21.0.1.0", get_emulator_version)
+    
+    val avdName = "clasp-test"
+    assert(create_avd(avdName, "android-17", true))
+    val camList = get_webcam_list(avdName)
+    assert(camList contains "webcam0")
+    var emuOpts = new EmulatorOptions
+    emuOpts.noBootAnim = true
+    val emulatorInfo = start_emulator(avdName, 5554, emuOpts)
+    val proc = emulatorInfo._1
+    val serial = emulatorInfo._2
+    Thread.sleep(2000);
+    kill_emulator(serial)
+    delete_avd(avdName)
+  }
+  
 }
