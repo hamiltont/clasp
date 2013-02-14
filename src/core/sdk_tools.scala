@@ -111,6 +111,21 @@ object ToolFacade {
     AdbProxy.backup_device(serial, file, apk, sharedStorage, all, system, packages)
   def restore_device(serial: String, file: String) =
     AdbProxy.restore_device(serial, file)
+    
+  def wait_for_device(serial: String) = AdbProxy.wait_for_device(serial)
+  def start_adb = AdbProxy.start_adb
+  def kill_adb = AdbProxy.kill_adb
+  def get_state(serial: String): String = AdbProxy.get_state(serial)  
+  def get_devpath(serial: String): String = AdbProxy.get_devpath(serial)
+  def remount_system(serial: String) = AdbProxy.remount_system(serial)
+  def reboot_normal(serial: String) = AdbProxy.reboot_normal(serial)
+  def reboot_bootloader(serial: String) = AdbProxy.reboot_bootloader(serial)
+  def reboot_recovery(serial: String) = AdbProxy.reboot_recovery(serial)
+  
+  def restart_adb_root = AdbProxy.restart_adb_root
+  def restart_adb_usb = AdbProxy.restart_adb_usb
+  def restart_adb_tcpip(port: String) = AdbProxy.restart_adb_tcpip(port)
+    
   def get_adb_version: String = AdbProxy.get_adb_version
   def get_installed_packages(serial: String) =
     AdbProxy.get_installed_packages(serial)
@@ -572,6 +587,71 @@ object AdbProxy {
     result.toVector.last
   }
   
+  def wait_for_device(serial: String) {
+    //TODO: Block until this returns.
+    val command = s"""$adb -s "$serial" wait-for-device"""
+    val output: String = command !!
+  }
+  
+  def start_adb {
+    val command = s"$adb start-server"
+    val output: String = command !!
+  }
+  
+  def kill_adb {
+    val command = s"$adb kill-server"
+    val output: String = command !!
+  }
+  
+  def get_state(serial: String): String = {
+    val command = s"""$adb "$serial" get-state"""
+    val output: String = command !!
+    
+    output
+  }
+  
+  def get_devpath(serial: String): String = {
+    val command = s"""$adb "$serial" get-devpath"""
+    val output: String = command !!
+    
+    output
+  }
+  
+  def remount_system(serial: String) = {
+    val command = s"""$adb "$serial" remount"""
+    val output: String = command !!
+  }
+  
+  def reboot_normal(serial: String) {
+    val command = s"""$adb "$serial" reboot"""
+    val output: String = command !!
+  }
+  
+  def reboot_bootloader(serial: String) {
+    val command = s"""$adb "$serial" reboot-bootloader"""
+    val output: String = command !!
+  }
+  
+  def reboot_recovery(serial: String) {
+    val command = s"""$adb "$serial" reboot recovery"""
+    val output: String = command !!
+  }
+  
+  def restart_adb_root {
+    val command = s"""$adb root"""
+    val output: String = command !!
+  }
+  
+  def restart_adb_usb {
+    val command = s"""$adb usb"""
+    val output: String = command !!
+  }
+  
+  def restart_adb_tcpip(port: String) {
+    val command = s"""$adb tcpip $port"""
+    val output: String = command !!
+  }
+  
   // TODO: Test
   def get_installed_packages(serial: String) {
     val command = s"$adb -s $serial shell pm list packages"
@@ -590,5 +670,4 @@ object AdbProxy {
   def kill_emulator(serial: String) {
     emulator_console(serial, "kill")
   }
-
 }
