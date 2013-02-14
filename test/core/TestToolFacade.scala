@@ -70,12 +70,19 @@ class ToolFacadeTest extends AssertionsForJUnit {
     assert(create_avd(avdName, "android-17", true))
     val camList = get_webcam_list(avdName)
     assert(camList contains "webcam0")
+    
     var emuOpts = new EmulatorOptions
     emuOpts.noBootAnim = true
     val emulatorInfo = start_emulator(avdName, 5554, emuOpts)
     val proc = emulatorInfo._1
     val serial = emulatorInfo._2
-    Thread.sleep(2000);
+    
+    Thread.sleep(5000);
+    
+    val devList = get_device_list
+    println(devList)
+    // assert(devList contains serial)
+    
     kill_emulator(serial)
     delete_avd(avdName)
   }
