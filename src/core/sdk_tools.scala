@@ -8,7 +8,6 @@ import scala.sys.process.Process
 import scala.sys.process.stringSeqToProcess
 import scala.sys.process.stringToProcess
 import com.typesafe.config.ConfigFactory
-import org.hamcrest.core.IsNull
 
 object sdk {
   val conf = ConfigFactory.load()
