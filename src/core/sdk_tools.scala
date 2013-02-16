@@ -7,6 +7,7 @@ package core
 import scala.sys.process.Process
 import scala.sys.process.stringSeqToProcess
 import scala.sys.process.stringToProcess
+import org.slf4j.LoggerFactory
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.Config
 
@@ -20,11 +21,13 @@ object sdk_config {
   val emulator_config = "sdk.emulator"
   val adb_config      = "sdk.adb"
   val config: Config  = ConfigFactory.load()
+  // TODO make this return the proper class at runtime. Currently only returns core.sdk_config
+  lazy val log = LoggerFactory.getLogger(getClass()) 
 }
 
 trait AndroidProxy {
   val android:String = sdk_config.config.getString(sdk_config.android_config)
-  
+  import sdk_config.log.{error, debug, info, trace}
   
   def get_avd_names: Vector[String] = {
     val command = s"$android list avd";
@@ -57,7 +60,7 @@ trait AndroidProxy {
                  target: String,
                  force: Boolean = false): Boolean = {
     if (!force && (get_avd_names contains name)) {
-      System.err.println("Error: AVD '" + name + "'" + " already exists.")
+      error(s"Error: AVD '$name' already exists.")
       return false
     }
     
@@ -67,7 +70,7 @@ trait AndroidProxy {
     }
     
     val output: String = "echo no" #| command !!;
-    Log.log(output)
+    info(output)
     true
   }
 
@@ -85,14 +88,14 @@ trait AndroidProxy {
 
   def delete_avd(name: String): Boolean = {
     if (!(get_avd_names contains name)) {
-      System.err.println("Error: AVD '" + name + "'" + " does not exist.")
+      error("Error: AVD '$name' does not exist.")
       return false
     }
     
     val command = s"$android delete avd -n $name"
     val output: String = command !!
     
-    Log.log(output)
+    info(output)
     true
   }
   
@@ -100,7 +103,7 @@ trait AndroidProxy {
     val command = s"$android update avd -n $name"
     val output: String = command !!
     
-    Log.log(output)
+    info(output)
   }
   
   def create_project(name: String,
@@ -115,8 +118,9 @@ trait AndroidProxy {
     command += s" -k $pkg"
     command += s" -a $activity"
     val output: String = command !!
+
     
-    Log.log(output)
+    info(output)
   }
   
   def update_project(path: String,
@@ -131,21 +135,21 @@ trait AndroidProxy {
     if (subprojects) command += " -s"
     val output: String = command !!
     
-    Log.log(output)
+    info(output)
   }
   
   def create_test_project(path: String, name: String, main:String) {
     val command = s"$android create test-project -p $path -n $name -m $main"
     val output: String = command !!
     
-    Log.log(output)
+    info(output)
   }
   
   def update_test_project(main: String, path: String) {
     val command = s"$android update test-project -m $main -p $path"
     val output: String = command !!
     
-    Log.log(output)
+    info(output)
   }
   
   def create_lib_project(name: String,
@@ -156,7 +160,7 @@ trait AndroidProxy {
       s" -t $target -k $pkg -p $path"
     val output: String = command !!
     
-    Log.log(output)
+    info(output)
   }
   
   def update_lib_project(path: String, target: String = null) {
@@ -164,7 +168,7 @@ trait AndroidProxy {
     if (target != null) command += s" -t $target"
     val output: String = command !!
     
-    Log.log(output)
+    info(output)
   }
   
   def create_uitest_project(name: String, path: String, target: String) {
@@ -172,13 +176,13 @@ trait AndroidProxy {
       s" -p $path -t $target"
     val output: String = command !!
     
-    Log.log(output)
+    info(output)
   }
   
   def update_adb {
     val command = s"$android update adb"
     val output: String = command !!;
-    Log.log(output)
+    info(output)
   }
   
   def update_sdk(filter: String = null,
@@ -191,12 +195,13 @@ trait AndroidProxy {
     if (all) command += " -a"
     if (force) command += " -f"
     val output: String = command !!;
-    Log.log(output)
+    info(output)
   }
 }
 
 trait EmulatorProxy {
   val emulator:String = sdk_config.config.getString(sdk_config.emulator_config)
+  import sdk_config.log.{error, debug, info, trace}
 
   def start_emulator(avd_name: String, port: Int, opts: EmulatorOptions = null): (Process, String) = {
     var command = s"$emulator -ports $port,${port+1} @$avd_name"
@@ -268,7 +273,7 @@ trait EmulatorProxy {
 		if(opts.force32Bit) command += s" -force-32bit"
     }
     
-    println(command)
+    info(command)
     val builder = Process(command)
     return (builder.run, "emulator-" + port)
 
@@ -328,6 +333,7 @@ class EmulatorOptions {
 
 trait AdbProxy {
   val adb:String = sdk_config.config.getString(sdk_config.adb_config)
+  import sdk_config.log.{error, debug, info, trace}
     
   // TODO: Improve and test
   def get_device_list: Vector[String] = {
@@ -345,7 +351,7 @@ trait AdbProxy {
     val command = s"$adb connect $host:$port"
     var output: String = command !!
     
-    Log.log(output);
+    info(output);
   }
   
   // TODO: Test
@@ -353,7 +359,7 @@ trait AdbProxy {
     val command = s"$adb disconnect $host:$port"
     var output: String = command !!
     
-    Log.log(output);
+    info(output);
   }
   
   // TODO: Test
@@ -361,7 +367,7 @@ trait AdbProxy {
     val command = s"$adb -s $serial adb push $localPath $remotePath"
     var output: String = command !!
     
-    Log.log(output);
+    info(output);
   }
   
   // TODO: Test
@@ -369,7 +375,7 @@ trait AdbProxy {
     val command = s"$adb -s $serial adb pull $remotePath $localPath"
     var output: String = command !!
     
-    Log.log(output);
+    info(output);
   }
   
   // TODO: Test
@@ -377,7 +383,7 @@ trait AdbProxy {
     val command = s"$adb -s $serial adb sync $directory"
     var output: String = command !!
     
-    Log.log(output);    
+    info(output);    
   }
   
   // TODO: Test
@@ -385,7 +391,7 @@ trait AdbProxy {
     val command = s"$adb -s $serial shell $shellCommand"
     var output: String = command !!
     
-    Log.log(output);  
+    info(output);  
   }
   
   // TODO: Test
@@ -393,7 +399,7 @@ trait AdbProxy {
     val command = s"$adb -s $serial emu $emuCommand"
     var output: String = command !!
     
-    Log.log(output);
+    info(output);
   }
   
   // TODO: Test
@@ -401,7 +407,7 @@ trait AdbProxy {
     val command = s"$adb -s $serial forward $local $remote"
     var output: String = command !!
     
-    Log.log(output);
+    info(output);
   }
   
   // TODO: Test
@@ -443,7 +449,7 @@ trait AdbProxy {
 	                system: Boolean = true,
 	                packages: String = null) {
     if ( !(all || sharedStorage) && packages == null) {
-      System.err.println("Error: Iff the -all or -shared flags are passed, "+
+      error("Error: Iff the -all or -shared flags are passed, "+
           "then the package list is optional.")
     }
     var command = s"""$adb -s "$serial" backup -f $file"""
@@ -457,7 +463,7 @@ trait AdbProxy {
     if (packages != null) command += s" $packages"
     val output: String = command !!
 
-    println(output)
+    debug(output)
   }
   
   // TODO: Test

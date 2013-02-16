@@ -1,0 +1,66 @@
+There are two types of logging used in the project: 
+Actor logging and non-Actor logging. 
+
+__Proper use__
+
+Although there are two independent logging systems, the codebase should use
+a uniform format. Log methods should be automatically imported into every
+class, and anywhere in the source code the following should be valid: 
+
+  // ... some source above
+  info("an info message")
+  debug("a debug message")
+  error("an error message")
+  
+  // ... some source below
+  
+Note that if you are in the non-actor logging system e.g. SLF4J, then `trace' is also
+available, but I would recommend avoiding this and sticking with the three levels
+that are always usable
+
+__Actor__ 
+Akka's ActorLogging (see 
+http://doc.akka.io/docs/akka/snapshot/scala/logging.html)
+is only used in the context of an Actor. 
+This would typically look something like this: 
+
+class Worker extends Actor with akka.actor.ActorLogging {
+
+	// Use the `log' variable anywhere in this class
+	log.info("Constructor called!")
+	
+	// Now you don't need to say log.info("msg"), just say info("msg") 
+	import log.{info, debug, error}
+}
+
+This is configured in the application.conf file. 
+There are many examples in that file. The default
+event handler is STDOUT and is automatically 
+registered to receive messages. All logging happens
+outside the main even loops, so IO does not 
+substantially impact performance. 
+
+Currently the log messages look like this: 
+23:28:18.996 [EmulatorSystem-akka.actor.default-dispatcher-3] INFO  akka.event.slf4j.Slf4jEventHandler - Slf4jEventHandler started
+Where the EmulatorSystem is the name of the Actor system
+
+__Non-Actor__
+
+Non-actors are logged using Akka's bindings into the SLF4J. SLF4J is simply a standardly
+defined API, so you need an actual implementation of that API. Our implementation of 
+choice is logback. To configure this you use logback.xml anywhere on the classpath.
+
+To implement this: 
+class MyClass {
+	// After this we can say log.info("hi there!")
+  lazy val log = LoggerFactory.getLogger(getClass())
+
+	// After this we can say info("hi there")
+  import log.{debug, info, trace, error}
+}
+
+Log messages look like this: 
+23:57:30.148 [main] ERROR core.sdk_config$ - test
+
+    
+ 

@@ -28,8 +28,11 @@
 	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/netty-3.5.8.Final.jar"/>
 	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/protobuf-java-2.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/scala-stm_2.10-0.7.jar"/>
-	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/slf4j-api-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/uncommons-maths-1.2.2a.jar"/>
 	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/zeromq-scala-binding_2.10-0.0.7.jar"/>
+	<classpathentry kind="lib" path="lib/logback-1.0.9/logback-access-1.0.9.jar"/>
+	<classpathentry kind="lib" path="lib/logback-1.0.9/logback-classic-1.0.9.jar"/>
+	<classpathentry kind="lib" path="lib/logback-1.0.9/logback-core-1.0.9.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/slf4j-api-1.7.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

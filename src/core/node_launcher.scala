@@ -9,9 +9,9 @@ import scala.annotation.elidable.ASSERTION
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.MutableList
 import scala.collection.mutable.Queue
-
 import org.hyperic.sigar.ProcTime
 import org.hyperic.sigar.Sigar
+import org.slf4j.LoggerFactory
 
 /*
  * Handles starting nodes, either to represent this 
@@ -23,27 +23,30 @@ import org.hyperic.sigar.Sigar
  * 
  */
 object NodeLauncher extends App {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
+
   val nodes = ListBuffer[Node]()
   
   var s: Sigar = new Sigar
-  println(s getCpuPerc)
+  info(s.getCpuPerc.toString)
 
   var n: Node = new Node
   val emu: Emulator = n run_emulator
   //val pt: ProcTime = new ProcTime
   //pt.gather(s, emu.emulator_processid)
-  //println(pt)
+  //info(pt)
 
-  //println(s getCpuPerc)
+  //info(s getCpuPerc)
 
-  println("Created Node")
+  info("Created Node")
 
   //pt.gather(s, emu.emulator_processid)
-  //println(pt)
+  //info(pt)
   n.cleanup
-  println("Cleaned Node")
+  info("Cleaned Node")
 
-  //println(s getCpuPerc)
+  //info(s getCpuPerc)
 
 
   def testADB() {
@@ -52,9 +55,12 @@ object NodeLauncher extends App {
 }
 
 class Node() {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
+  
   val devices: MutableList[Emulator] = MutableList[Emulator]()
   var current_emulator_port = 5555
-  println("A new Node is being constructed")
+  info("A new Node is being constructed")
   /*val load_monitor: Actor = actor {
     val s: Sigar = new Sigar 
     

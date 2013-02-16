@@ -18,6 +18,9 @@ import org.hyperic.sigar.ProcTime
 case class Load_Tick
 class EmulatorLoadMonitor(pid: Long) extends Actor {
   val log = Logging(context.system, this)
+  import log.{info, debug, error}
+  
+
   var s: Sigar = new Sigar
   val pt: ProcTime = new ProcTime
 
@@ -27,11 +30,11 @@ class EmulatorLoadMonitor(pid: Long) extends Actor {
   }
 
   def receive = {
-    case "test" => log.info("received test")
+    case "test" => info("received test")
     case Load_Tick => {
-      log.info("Load Tick")
+      info("Load Tick")
       pt.gather(s, pid)
-      log.info("Emulator: " + pt)
+      info("Emulator: " + pt)
     }
 
   }
