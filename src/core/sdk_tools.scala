@@ -11,9 +11,8 @@ import org.slf4j.LoggerFactory
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.Config
 
-object sdk extends AndroidProxy with EmulatorProxy with AdbProxy {
-  
-}
+/** This is the entire SDK tool facade! */
+object sdk extends AndroidProxy with EmulatorProxy with AdbProxy {}
 
 object sdk_config {
   // TODO run checks to ensure that all three of these can be accessed

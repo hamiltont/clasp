@@ -11,7 +11,6 @@ class, and anywhere in the source code the following should be valid:
   info("an info message")
   debug("a debug message")
   error("an error message")
-  
   // ... some source below
   
 Note that if you are in the non-actor logging system e.g. SLF4J, then `trace' is also
