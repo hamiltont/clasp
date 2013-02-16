@@ -12,12 +12,18 @@ import com.typesafe.config.Config
 
 object sdk extends AndroidProxy with EmulatorProxy with AdbProxy {
   
+}
+
+object sdk_config {
   // TODO run checks to ensure that all three of these can be accessed
+  val android_config  = "sdk.android"
+  val emulator_config = "sdk.emulator"
+  val adb_config      = "sdk.adb"
+  val config: Config  = ConfigFactory.load()
 }
 
 trait AndroidProxy {
-  val conf1: Config = ConfigFactory.load()
-  val android:String = conf1.getString("sdk.android")
+  val android:String = sdk_config.config.getString(sdk_config.android_config)
   
   
   def get_avd_names: Vector[String] = {
@@ -190,9 +196,7 @@ trait AndroidProxy {
 }
 
 trait EmulatorProxy {
-  
-  val conf2: Config = ConfigFactory.load()
-  val emulator:String = conf2.getString("sdk.emulator")
+  val emulator:String = sdk_config.config.getString(sdk_config.emulator_config)
 
   def start_emulator(avd_name: String, port: Int, opts: EmulatorOptions = null): (Process, String) = {
     var command = s"$emulator -ports $port,${port+1} @$avd_name"
@@ -323,9 +327,7 @@ class EmulatorOptions {
 }
 
 trait AdbProxy {
-  
-  val conf3: Config = ConfigFactory.load()
-  val adb:String = conf3.getString("sdk.adb")
+  val adb:String = sdk_config.config.getString(sdk_config.adb_config)
     
   // TODO: Improve and test
   def get_device_list: Vector[String] = {
