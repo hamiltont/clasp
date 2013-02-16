@@ -68,16 +68,16 @@ class Device(SerialID: String) {
 
 object EmulatorBuilder {
   def build(avd_name: String, port: Int): Emulator = {
-    val (process: Process, serial: String) = ToolFacade.start_emulator(avd_name, port);
+    val (process: Process, serial: String) = sdk.start_emulator(avd_name, port);
     new Emulator(process, serial)
   }
 
   def build(port: Int): Emulator = {
-    val avds = ToolFacade.get_avd_names
+    val avds = sdk.get_avd_names
     if (avds.length != 0)
       return build(avds.head, port)
 
-    ToolFacade.create_avd("initial", "1")
+    sdk.create_avd("initial", "1")
     build("initial", port)
   }
 }

@@ -47,7 +47,7 @@ object NodeLauncher extends App {
 
 
   def testADB() {
-    assert(AdbProxy.is_adb_available)
+    assert(sdk.is_adb_available)
   }
 }
 

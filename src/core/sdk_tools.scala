@@ -8,133 +8,17 @@ import scala.sys.process.Process
 import scala.sys.process.stringSeqToProcess
 import scala.sys.process.stringToProcess
 import com.typesafe.config.ConfigFactory
+import com.typesafe.config.Config
 
-object sdk {
-  val conf = ConfigFactory.load()
-  val adb = conf getString ("sdk.adb")
-  val emulator = conf getString ("sdk.emulator")
-  val android = conf getString ("sdk.android")
+object sdk extends AndroidProxy with EmulatorProxy with AdbProxy {
   
   // TODO run checks to ensure that all three of these can be accessed
 }
 
-object ToolFacade {
-  // android
-  def get_avd_names: Vector[String] = AndroidProxy.get_avd_names
-  def get_targets: Vector[String] = AndroidProxy.get_targets
-  def get_sdk: Vector[String] = AndroidProxy.get_sdk
+trait AndroidProxy {
+  val conf1: Config = ConfigFactory.load()
+  val android:String = conf1.getString("sdk.android")
   
-  def create_avd(name: String, target: String, force: Boolean = false): Boolean =
-    AndroidProxy.create_avd(name, target, force)
-  def move_avd(name: String, path: String, newName: String = null): Boolean =
-    AndroidProxy.move_avd(name, path, newName)
-  def delete_avd(name: String): Boolean = AndroidProxy.delete_avd(name)
-  def update_avd(name: String) = AndroidProxy.update_avd(name)
-  
-  def create_project(name: String,
-                     target: String,
-                     path: String,
-                     pkg: String,
-                     activity: String) =
-    AndroidProxy.create_project(name, target, path, pkg, activity)
-  
-  def update_project(path: String,
-                     library: String = null,
-                     name: String = null,
-                     target: String = null,
-                     subprojects: Boolean = false) =
-    AndroidProxy.update_project(library, path, name, target, subprojects)
-  
-  def create_test_project(path: String, name: String, main:String) =
-    AndroidProxy.create_test_project(path, name, main)
-  
-  def update_test_project(main: String, path: String) =
-    AndroidProxy.update_test_project(main, path)
-    
-  def create_lib_project(name: String,
-                         target: String,
-                         pkg: String,
-                         path: String) =
-    AndroidProxy.create_lib_project(name, target, pkg, path)
-  
-  def update_lib_project(path: String, target: String = null) =
-    AndroidProxy.update_lib_project(path, target)
-  
-  def create_uitest_project(name: String, path: String, target: String) =
-    AndroidProxy.create_uitest_project(name, path, target)
-    
-  def update_adb = AndroidProxy.update_adb
-  
-  def update_sdk(filter: String = null,
-                 noHttps: Boolean = false,
-                 all: Boolean = false,
-                 force: Boolean = false) =
-    AndroidProxy.update_sdk(filter, noHttps, all, force)
-    
-  // emulator
-  def start_emulator(avd_name: String, port: Int, opts: EmulatorOptions = null): (Process, String) =
-    EmulatorProxy.start_emulator(avd_name, port, opts)
-  def get_snapshot_list(avd_name: String): Vector[String] =
-    EmulatorProxy.get_snapshot_list(avd_name)
-  def get_webcam_list(avd_name: String): Vector[String] =
-    EmulatorProxy.get_webcam_list(avd_name)
-  def get_emulator_version(): String = EmulatorProxy.get_emulator_version
-
-  // adb
-  def get_device_list: Vector[String] = AdbProxy.get_device_list
-  def tcpip_connect(host: String, port: String) = AdbProxy.tcpip_connect(host, port)
-  def tcpip_disconnect(host: String, port: String) = AdbProxy.tcpip_disconnect(host, port)
-  def push_to_device(serial: String, localPath: String, remotePath: String) =
-    AdbProxy.push_to_device(serial, localPath, remotePath)
-  def pull_from_device(serial: String, remotePath: String, localPath: String) =
-    AdbProxy.pull_from_device(serial, remotePath, localPath)
-  def sync_to_device(serial: String, directory: String) =
-    AdbProxy.sync_to_device(serial, directory)
-  def remote_shell(serial: String, shellCommand: String) =
-    AdbProxy.remote_shell(serial, shellCommand)
-  def emulator_console(serial: String, emuCommand: String) =
-    AdbProxy.emulator_console(serial, emuCommand)
-  def forward_socket(serial: String, local: String, remote: String) =
-    AdbProxy.forward_socket(serial, local, remote)
-  def get_jdwp(serial:String): Vector[String] = AdbProxy.get_jdwp(serial)
-  def install_package(serial: String, apk_path: String): Boolean =
-    AdbProxy.install_package(serial, apk_path)
-  def uninstall_package(serial: String, pkg: String, keepData: Boolean = false): Boolean = 
-    AdbProxy.uninstall_package(serial, pkg, keepData)
-  def backup_device(serial: String,
-                    file: String,
-	                apk: Boolean = false,
-	                sharedStorage: Boolean = false,
-	                all: Boolean = false,
-	                system: Boolean = true,
-	                packages: String = null) =
-    AdbProxy.backup_device(serial, file, apk, sharedStorage, all, system, packages)
-  def restore_device(serial: String, file: String) =
-    AdbProxy.restore_device(serial, file)
-    
-  def wait_for_device(serial: String) = AdbProxy.wait_for_device(serial)
-  def start_adb = AdbProxy.start_adb
-  def kill_adb = AdbProxy.kill_adb
-  def get_state(serial: String): String = AdbProxy.get_state(serial)  
-  def get_devpath(serial: String): String = AdbProxy.get_devpath(serial)
-  def remount_system(serial: String) = AdbProxy.remount_system(serial)
-  def reboot_normal(serial: String) = AdbProxy.reboot_normal(serial)
-  def reboot_bootloader(serial: String) = AdbProxy.reboot_bootloader(serial)
-  def reboot_recovery(serial: String) = AdbProxy.reboot_recovery(serial)
-  
-  def restart_adb_root = AdbProxy.restart_adb_root
-  def restart_adb_usb = AdbProxy.restart_adb_usb
-  def restart_adb_tcpip(port: String) = AdbProxy.restart_adb_tcpip(port)
-    
-  def get_adb_version: String = AdbProxy.get_adb_version
-  def get_installed_packages(serial: String) =
-    AdbProxy.get_installed_packages(serial)
-  def is_adb_available: Boolean = AdbProxy.is_adb_available
-  def kill_emulator(serial: String) = AdbProxy.kill_emulator(serial)
-}
-
-object AndroidProxy {
-  val android = sdk.android + " "
   
   def get_avd_names: Vector[String] = {
     val command = s"$android list avd";
@@ -305,8 +189,10 @@ object AndroidProxy {
   }
 }
 
-object EmulatorProxy {
-  val emulator = sdk.emulator + " "
+trait EmulatorProxy {
+  
+  val conf2: Config = ConfigFactory.load()
+  val emulator:String = conf2.getString("sdk.emulator")
 
   def start_emulator(avd_name: String, port: Int, opts: EmulatorOptions = null): (Process, String) = {
     var command = s"$emulator -ports $port,${port+1} @$avd_name"
@@ -436,9 +322,11 @@ class EmulatorOptions {
       rawKeys, noBootAnim, noWindow, force32Bit = false
 }
 
-object AdbProxy {
-  val adb = sdk.adb + " "
+trait AdbProxy {
   
+  val conf3: Config = ConfigFactory.load()
+  val adb:String = conf3.getString("sdk.adb")
+    
   // TODO: Improve and test
   def get_device_list: Vector[String] = {
     val command = s"$adb devices"
@@ -671,3 +559,4 @@ object AdbProxy {
     emulator_console(serial, "kill")
   }
 }
+
