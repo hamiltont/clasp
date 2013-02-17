@@ -40,6 +40,11 @@ object NodeLauncher extends App {
   //info(s getCpuPerc)
 
   info("Created Node")
+  
+  
+  val out = sdk.send_telnet_command(emu.telnetPort, "avd snapshot list")
+  println(out)
+  
 
   //pt.gather(s, emu.emulator_processid)
   //info(pt)

@@ -40,11 +40,10 @@ class EmulatorLoadMonitor(pid: Long) extends Actor {
   }
 }
 
-class Emulator(process: Process, SerialID: String) {
+class Emulator(process: Process, val SerialID: String, val telnetPort: Int) {
   val s: Sigar = new Sigar
   val pf: ProcessFinder = new ProcessFinder(s)
   val emulator_pid: Long = pf.findSingleProcess("Args.*.re=5555.5556")
-  var telnetPort: Int = 0
   val system = ActorSystem("EmulatorSystem")
   val actor = system.actorOf(Props(new EmulatorLoadMonitor(emulator_pid)), name = "emulator-monitor")
 
@@ -72,7 +71,7 @@ class Device(SerialID: String) {
 object EmulatorBuilder {
   def build(avd_name: String, port: Int): Emulator = {
     val (process: Process, serial: String) = sdk.start_emulator(avd_name, port);
-    new Emulator(process, serial)
+    new Emulator(process, serial, port)
   }
 
   def build(port: Int): Emulator = {
