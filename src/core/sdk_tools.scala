@@ -338,7 +338,7 @@ trait AdbProxy {
   def get_device_list: Vector[String] = {
     val command = s"$adb devices"
     val output: String = command !!;
-    // TODO: There must be a better way to right this.
+    // TODO: There must be a better way to do this.
     val regex = """([^\n\t ]*)[\t ]*device[^s]""".r
     
     var result = for (regex(name) <- regex findAllIn output) yield name
