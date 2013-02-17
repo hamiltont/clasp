@@ -34,5 +34,7 @@
 	<classpathentry kind="lib" path="lib/logback-1.0.9/logback-classic-1.0.9.jar"/>
 	<classpathentry kind="lib" path="lib/logback-1.0.9/logback-core-1.0.9.jar"/>
 	<classpathentry kind="lib" path="lib/akka-2.1.0/akka/slf4j-api-1.7.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-net-3.2/commons-net-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.4/commons-io-2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

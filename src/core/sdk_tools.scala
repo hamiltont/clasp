@@ -10,9 +10,15 @@ import scala.sys.process.stringToProcess
 import org.slf4j.LoggerFactory
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.Config
+import org.apache.commons.net.telnet.TelnetClient
+import java.io.IOException
+import java.io.BufferedReader
+import java.io.InputStreamReader;
+import java.io.OutputStream
+
 
 /** This is the entire SDK tool facade! */
-object sdk extends AndroidProxy with EmulatorProxy with AdbProxy {}
+object sdk extends AndroidProxy with EmulatorProxy with AdbProxy with TelnetProxy {}
 
 object sdk_config {
   // TODO run checks to ensure that all three of these can be accessed
@@ -22,6 +28,46 @@ object sdk_config {
   val config: Config  = ConfigFactory.load()
   // TODO make this return the proper class at runtime. Currently only returns core.sdk_config
   lazy val log = LoggerFactory.getLogger(getClass()) 
+}
+
+trait TelnetProxy {
+  def send_telnet_command(port: Int, command: String): String = {
+    val telnet = new TelnetClient
+    var response: String = ""
+      
+    try {
+      telnet.connect("localhost", port)
+      
+      val reader = new BufferedReader(new InputStreamReader(telnet.getInputStream))
+      			
+      // Eat the Android header
+	  while (!reader.readLine.contains("OK")) {}
+	  
+      // Print the command
+      val command_bytes: Array[Byte] = command.getBytes
+	  val output: OutputStream = telnet.getOutputStream()
+	  output.write(command_bytes)
+	  
+	  // Hit the enter key e.g. ASCII 10
+	  output.write(10.toChar)
+      output.flush
+      
+      var line: String = ""
+      val response_buffer: StringBuffer = new StringBuffer 
+      while ( { line = reader.readLine; !(line.contains("OK") || line.contains("KO")) } )
+    	response_buffer.append(line).append('\n')  
+      response = response_buffer.toString
+	  
+    } catch {
+      case ioe: IOException => println("Error!")
+      case e: Exception => println("Error 2")
+    } finally {
+      telnet.disconnect
+    }
+    
+	response
+  }
+  
 }
 
 trait AndroidProxy {
