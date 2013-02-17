@@ -9,7 +9,7 @@ import java.io.File
 import org.apache.commons.io.FileUtils
 
 class ToolFacadeTest extends AssertionsForJUnit {
-  import core.ToolFacade._
+  import core.sdk._
   
   @Test def testAndroidAVDCreation() { 
     assert(get_targets contains "android-17")
@@ -64,7 +64,7 @@ class ToolFacadeTest extends AssertionsForJUnit {
   }
   
   @Test def testEmulator() {
-    assertEquals("21.0.1.0", get_emulator_version)
+    assertEquals("21.1.0", get_emulator_version)
     
     val avdName = "clasp-test"
     assert(create_avd(avdName, "android-17", true))
