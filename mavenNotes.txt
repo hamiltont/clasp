@@ -1,0 +1,16 @@
+If it's required to modify some of those parameter, please, add this chunk of code to your ~/.m2/settings.xml	
+	
+<settings>
+	<servers>
+		<server>
+			<id>ssh-repository</id>
+			<username>your username in the remote system if different from local</username>
+			<privateKey>/path/to/your/private/key</privateKey> <!-- not needed if using pageant -->
+			<configuration>
+				<sshExecutable>plink</sshExecutable>
+				<scpExecutable>pscp</scpExecutable>
+				<sshArgs>other arguments you may need</sshArgs>
+			</configuration>
+		</server>
+	</servers>
+</settings>
