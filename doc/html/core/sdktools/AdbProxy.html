@@ -2,22 +2,22 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>AdbProxy - core.AdbProxy</title>
-          <meta name="description" content="AdbProxy - core.AdbProxy" />
-          <meta name="keywords" content="AdbProxy core.AdbProxy" />
+          <title>AdbProxy - Clasp - core.sdktools.AdbProxy</title>
+          <meta name="description" content="AdbProxy - Clasp - core.sdktools.AdbProxy" />
+          <meta name="keywords" content="AdbProxy Clasp core.sdktools.AdbProxy" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
-      <link href="../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
-      <script type="text/javascript" src="../lib/jquery.js" id="jquery-js"></script>
-      <script type="text/javascript" src="../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../lib/template.js"></script>
-      <script type="text/javascript" src="../lib/tools.tooltip.js"></script>
-      
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      <script type="text/javascript" src="../../lib/modernizr.custom.js"></script><script type="text/javascript" src="../../lib/diagrams.js" id="diagrams-js"></script>
       <script type="text/javascript">
          if(top === self) {
-            var url = '../index.html';
-            var hash = 'core.AdbProxy';
+            var url = '../../index.html';
+            var hash = 'core.sdktools.AdbProxy';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -29,8 +29,8 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../lib/trait_big.png" />
-        <p id="owner"><a href="package.html" class="extype" name="core">core</a></p>
+        <img src="../../lib/trait_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="core">core</a>.<a href="package.html" class="extype" name="core.sdktools">sdktools</a></p>
         <h1>AdbProxy</h1>
       </div>
 
@@ -44,13 +44,21 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Provides an interface to the
+<a href="http://developer.android.com/tools/help/adb.html" target="_blank">Android Debug Bridge</a>
+command line tool.</p><p>This, along with other components of the Android SDK, is included in
+<a href="sdk$.html" class="extype" name="core.sdktools.sdk">core.sdktools.sdk</a>.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="sdk$.html" class="extype" name="core.sdk">sdk</a></div>
-        </div></div>
+          <div class="subClasses hiddenContent"><a href="sdk$.html" class="extype" name="core.sdktools.sdk">sdk</a></div>
+        </div><div class="toggleContainer block diagram-container" id="inheritance-diagram-container">
+                <span class="toggle diagram-link">Type Hierarchy</span>
+                <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#diagrams" target="_blank" class="diagram-help">Learn more about scaladoc diagrams</a>
+                <div class="diagram" id="inheritance-diagram"><svg class="class-diagram" id="graph4" viewBox="0.00 0.00 144.00 158.00" height="158pt" width="144pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1 1) rotate(0) translate(4 154)" class="graph" id="graph1"><polygon points="-4,5 -4,-154 141,-154 141,5 -4,5" stroke="white" fill="white"></polygon><g class="cluster" id="graph2"></g><g class="cluster" id="graph3"></g><!-- node0 --><g class="node this trait" id="graph4_0"><a xlink:title="core.sdktools.AdbProxy (this trait)" xlink:href="#inheritance-diagram"><polygon points="111.5,-88 24.5,-88 24.5,-62 111.5,-62 111.5,-88" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../../lib/trait_diagram.png" y="-83" x="34" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-73" x="56" text-anchor="start">AdbProxy</text></a></g><!-- node1 --><g class="node object" id="graph4_1"><a xlink:title="core.sdktools.sdk" xlink:href="sdk$.html#inheritance-diagram"><polygon points="98.25,-26 37.75,-26 37.75,-0 98.25,-0 98.25,-26" stroke="#102966" fill="#3556a7"></polygon><image xlink:href="../../lib/object_diagram.png" y="-21" x="48" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-11" x="70" text-anchor="start">sdk</text></a></g><!-- node0&#45;&gt;node1 --><g class="edge inheritance" id="graph4_0_1"><a xlink:title="sdk is a subtype of AdbProxy"><path d="M68,-56.6826C68,-46.8961 68,-34.9026 68,-26.1238" stroke="#d4d4d4" fill="none"></path><polygon points="66.2501,-56.8581 68,-61.8581 69.7501,-56.8581 66.2501,-56.8581" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node2 --><g class="node class" id="graph4_2"><a xlink:title="scala.AnyRef"><polygon points="107.25,-150 28.75,-150 28.75,-124 107.25,-124 107.25,-150" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../../lib/class_diagram.png" y="-145" x="39" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-135" x="61" text-anchor="start">AnyRef</text></a></g><!-- node2&#45;&gt;node0 --><g class="edge inheritance" id="graph4_2_0"><a xlink:title="AdbProxy is a subtype of AnyRef"><path d="M68,-118.683C68,-108.896 68,-96.9026 68,-88.1238" stroke="#d4d4d4" fill="none"></path><polygon points="66.2501,-118.858 68,-123.858 69.7501,-118.858 66.2501,-118.858" stroke="#d4d4d4" fill="none"></polygon></a></g></g></svg></div>
+              </div></div>
         
 
       <div id="mbrsel">
@@ -67,7 +75,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="core.AdbProxy"><span>AdbProxy</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="core.sdktools.AdbProxy"><span>AdbProxy</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -158,7 +166,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="core.AdbProxy#adb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#adb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="adb:String"></a>
       <a id="adb:String"></a>
       <h4 class="signature">
@@ -184,7 +192,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="core.AdbProxy#backup_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#backup_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="backup_device(serial:String,file:String,apk:Boolean,sharedStorage:Boolean,all:Boolean,system:Boolean,packages:String):Unit"></a>
       <a id="backup_device(String,String,Boolean,Boolean,Boolean,Boolean,String):Unit"></a>
       <h4 class="signature">
@@ -196,7 +204,7 @@
         <span class="name">backup_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="apk">apk: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="sharedStorage">sharedStorage: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="all">all: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="system">system: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="packages">packages: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Write an archive of the device's data to disk.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -213,7 +221,7 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="core.AdbProxy#emulator_console" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#emulator_console" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="emulator_console(serial:String,emuCommand:String):Unit"></a>
       <a id="emulator_console(String,String):Unit"></a>
       <h4 class="signature">
@@ -225,7 +233,7 @@
         <span class="name">emulator_console</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="emuCommand">emuCommand: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Run an emulator console command.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -268,7 +276,7 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="core.AdbProxy#forward_socket" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#forward_socket" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="forward_socket(serial:String,local:String,remote:String):Unit"></a>
       <a id="forward_socket(String,String,String):Unit"></a>
       <h4 class="signature">
@@ -280,7 +288,7 @@
         <span class="name">forward_socket</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="local">local: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="remote">remote: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Forward socket connections.</p>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -294,7 +302,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="core.AdbProxy#get_adb_version" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#get_adb_version" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="get_adb_version:String"></a>
       <a id="get_adb_version:String"></a>
       <h4 class="signature">
@@ -307,7 +315,7 @@
       </span>
       </h4>
       
-    </li><li name="core.AdbProxy#get_device_list" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#get_device_list" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="get_device_list:Vector[String]"></a>
       <a id="get_device_list:Vector[String]"></a>
       <h4 class="signature">
@@ -319,8 +327,8 @@
         <span class="name">get_device_list</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#get_devpath" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Return the current devices.</p>
+    </li><li name="core.sdktools.AdbProxy#get_devpath" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="get_devpath(serial:String):String"></a>
       <a id="get_devpath(String):String"></a>
       <h4 class="signature">
@@ -332,8 +340,8 @@
         <span class="name">get_devpath</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#get_installed_packages" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Return the device path of the device.</p>
+    </li><li name="core.sdktools.AdbProxy#get_installed_packages" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="get_installed_packages(serial:String):Unit"></a>
       <a id="get_installed_packages(String):Unit"></a>
       <h4 class="signature">
@@ -345,8 +353,8 @@
         <span class="name">get_installed_packages</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#get_jdwp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Return the installed packages.</p>
+    </li><li name="core.sdktools.AdbProxy#get_jdwp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="get_jdwp(serial:String):Vector[String]"></a>
       <a id="get_jdwp(String):Vector[String]"></a>
       <h4 class="signature">
@@ -358,8 +366,8 @@
         <span class="name">get_jdwp</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#get_state" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">List PIDs of processes hosting a JDWP transport.</p>
+    </li><li name="core.sdktools.AdbProxy#get_state" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="get_state(serial:String):String"></a>
       <a id="get_state(String):String"></a>
       <h4 class="signature">
@@ -371,7 +379,7 @@
         <span class="name">get_state</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Return the state of the device.</p>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -385,7 +393,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="core.AdbProxy#install_package" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#install_package" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="install_package(serial:String,apk_path:String):Boolean"></a>
       <a id="install_package(String,String):Boolean"></a>
       <h4 class="signature">
@@ -397,7 +405,7 @@
         <span class="name">install_package</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="apk_path">apk_path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Push a package file to the device and install it.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -411,7 +419,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="core.AdbProxy#is_adb_available" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#is_adb_available" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="is_adb_available:Boolean"></a>
       <a id="is_adb_available:Boolean"></a>
       <h4 class="signature">
@@ -424,7 +432,7 @@
       </span>
       </h4>
       
-    </li><li name="core.AdbProxy#kill_adb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#kill_adb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="kill_adb:Unit"></a>
       <a id="kill_adb:Unit"></a>
       <h4 class="signature">
@@ -436,8 +444,8 @@
         <span class="name">kill_adb</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#kill_emulator" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Kill the <code>adb</code> server if it is running.</p>
+    </li><li name="core.sdktools.AdbProxy#kill_emulator" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="kill_emulator(serial:String):Unit"></a>
       <a id="kill_emulator(String):Unit"></a>
       <h4 class="signature">
@@ -449,7 +457,7 @@
         <span class="name">kill_emulator</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Kill an emulator's process.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -489,7 +497,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="core.AdbProxy#pull_from_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#pull_from_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="pull_from_device(serial:String,remotePath:String,localPath:String):Unit"></a>
       <a id="pull_from_device(String,String,String):Unit"></a>
       <h4 class="signature">
@@ -501,8 +509,8 @@
         <span class="name">pull_from_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="remotePath">remotePath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="localPath">localPath: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#push_to_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Pull a file or directory from a device.</p>
+    </li><li name="core.sdktools.AdbProxy#push_to_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="push_to_device(serial:String,localPath:String,remotePath:String):Unit"></a>
       <a id="push_to_device(String,String,String):Unit"></a>
       <h4 class="signature">
@@ -514,8 +522,8 @@
         <span class="name">push_to_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="localPath">localPath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="remotePath">remotePath: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#reboot_bootloader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Push a file or directory to the device.</p>
+    </li><li name="core.sdktools.AdbProxy#reboot_bootloader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="reboot_bootloader(serial:String):Unit"></a>
       <a id="reboot_bootloader(String):Unit"></a>
       <h4 class="signature">
@@ -527,8 +535,8 @@
         <span class="name">reboot_bootloader</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#reboot_normal" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Reboots the device into the bootloader.</p>
+    </li><li name="core.sdktools.AdbProxy#reboot_normal" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="reboot_normal(serial:String):Unit"></a>
       <a id="reboot_normal(String):Unit"></a>
       <h4 class="signature">
@@ -540,8 +548,8 @@
         <span class="name">reboot_normal</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#reboot_recovery" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Reboots the device normally.</p>
+    </li><li name="core.sdktools.AdbProxy#reboot_recovery" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="reboot_recovery(serial:String):Unit"></a>
       <a id="reboot_recovery(String):Unit"></a>
       <h4 class="signature">
@@ -553,8 +561,8 @@
         <span class="name">reboot_recovery</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#remote_shell" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Reboots the device into recovery mode.</p>
+    </li><li name="core.sdktools.AdbProxy#remote_shell" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="remote_shell(serial:String,shellCommand:String):Unit"></a>
       <a id="remote_shell(String,String):Unit"></a>
       <h4 class="signature">
@@ -566,8 +574,8 @@
         <span class="name">remote_shell</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="shellCommand">shellCommand: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#remount_system" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Run a remote shell command.</p>
+    </li><li name="core.sdktools.AdbProxy#remount_system" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="remount_system(serial:String):Unit"></a>
       <a id="remount_system(String):Unit"></a>
       <h4 class="signature">
@@ -579,8 +587,8 @@
         <span class="name">remount_system</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#restart_adb_root" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Remounts the <code>/system</code> partition on the device read-write.</p>
+    </li><li name="core.sdktools.AdbProxy#restart_adb_root" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="restart_adb_root:Unit"></a>
       <a id="restart_adb_root:Unit"></a>
       <h4 class="signature">
@@ -592,8 +600,8 @@
         <span class="name">restart_adb_root</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#restart_adb_tcpip" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Restart the <code>adbd</code> daemon with root permissions.</p>
+    </li><li name="core.sdktools.AdbProxy#restart_adb_tcpip" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="restart_adb_tcpip(port:String):Unit"></a>
       <a id="restart_adb_tcpip(String):Unit"></a>
       <h4 class="signature">
@@ -605,8 +613,8 @@
         <span class="name">restart_adb_tcpip</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#restart_adb_usb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Restart the <code>adbd</code> daemon listening on TCP on the specified port.</p>
+    </li><li name="core.sdktools.AdbProxy#restart_adb_usb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="restart_adb_usb:Unit"></a>
       <a id="restart_adb_usb:Unit"></a>
       <h4 class="signature">
@@ -618,8 +626,8 @@
         <span class="name">restart_adb_usb</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#restore_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Restart the <code>adbd</code> daemon listening on USB.</p>
+    </li><li name="core.sdktools.AdbProxy#restore_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="restore_device(serial:String,file:String):Unit"></a>
       <a id="restore_device(String,String):Unit"></a>
       <h4 class="signature">
@@ -631,8 +639,8 @@
         <span class="name">restore_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#start_adb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Restore device contents from the backup archive.</p>
+    </li><li name="core.sdktools.AdbProxy#start_adb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="start_adb:Unit"></a>
       <a id="start_adb:Unit"></a>
       <h4 class="signature">
@@ -644,8 +652,8 @@
         <span class="name">start_adb</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#sync_to_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Ensure the <code>adb</code> server is running.</p>
+    </li><li name="core.sdktools.AdbProxy#sync_to_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="sync_to_device(serial:String,directory:String):Unit"></a>
       <a id="sync_to_device(String,String):Unit"></a>
       <h4 class="signature">
@@ -657,7 +665,7 @@
         <span class="name">sync_to_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="directory">directory: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Copy from host to device only if changed.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -671,7 +679,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="core.AdbProxy#tcpip_connect" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#tcpip_connect" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="tcpip_connect(host:String,port:String):Unit"></a>
       <a id="tcpip_connect(String,String):Unit"></a>
       <h4 class="signature">
@@ -683,8 +691,8 @@
         <span class="name">tcpip_connect</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AdbProxy#tcpip_disconnect" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Connect to the device via TCP/IP.</p>
+    </li><li name="core.sdktools.AdbProxy#tcpip_disconnect" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="tcpip_disconnect(host:String,port:String):Unit"></a>
       <a id="tcpip_disconnect(String,String):Unit"></a>
       <h4 class="signature">
@@ -696,7 +704,7 @@
         <span class="name">tcpip_disconnect</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Disconnect from the device via TCP/IP.</p>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>
@@ -710,7 +718,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="core.AdbProxy#uninstall_package" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#uninstall_package" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="uninstall_package(serial:String,pkg:String,keepData:Boolean):Boolean"></a>
       <a id="uninstall_package(String,String,Boolean):Boolean"></a>
       <h4 class="signature">
@@ -722,7 +730,7 @@
         <span class="name">uninstall_package</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pkg">pkg: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="keepData">keepData: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Remove a package from a device.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -771,7 +779,7 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="core.AdbProxy#wait_for_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AdbProxy#wait_for_device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="wait_for_device(serial:String):Unit"></a>
       <a id="wait_for_device(String):Unit"></a>
       <h4 class="signature">
@@ -783,7 +791,7 @@
         <span class="name">wait_for_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Block until device is online.</p>
     </li></ol>
             </div>
 

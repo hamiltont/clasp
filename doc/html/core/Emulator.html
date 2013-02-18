@@ -2,9 +2,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>Emulator - core.Emulator</title>
-          <meta name="description" content="Emulator - core.Emulator" />
-          <meta name="keywords" content="Emulator core.Emulator" />
+          <title>Emulator - Clasp - core.Emulator</title>
+          <meta name="description" content="Emulator - Clasp - core.Emulator" />
+          <meta name="keywords" content="Emulator Clasp core.Emulator" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
@@ -13,7 +13,7 @@
       <script type="text/javascript" src="../lib/jquery-ui.js"></script>
       <script type="text/javascript" src="../lib/template.js"></script>
       <script type="text/javascript" src="../lib/tools.tooltip.js"></script>
-      
+      <script type="text/javascript" src="../lib/modernizr.custom.js"></script><script type="text/javascript" src="../lib/diagrams.js" id="diagrams-js"></script>
       <script type="text/javascript">
          if(top === self) {
             var url = '../index.html';
@@ -47,7 +47,11 @@
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div></div>
+        </div><div class="toggleContainer block diagram-container" id="inheritance-diagram-container">
+                <span class="toggle diagram-link">Type Hierarchy</span>
+                <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#diagrams" target="_blank" class="diagram-help">Learn more about scaladoc diagrams</a>
+                <div class="diagram" id="inheritance-diagram"><svg class="class-diagram" id="graph8" viewBox="0.00 0.00 142.00 120.00" height="120pt" width="142pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1 1) rotate(0) translate(4 116)" class="graph" id="graph1"><polygon points="-4,5 -4,-116 139,-116 139,5 -4,5" stroke="white" fill="white"></polygon><g class="cluster" id="graph2"></g><g class="cluster" id="graph3"></g><!-- node0 --><g class="node this class" id="graph8_0"><a xlink:title="core.Emulator (this class)" xlink:href="#inheritance-diagram"><polygon points="109.25,-50 24.75,-50 24.75,-24 109.25,-24 109.25,-50" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../lib/class_diagram.png" y="-45" x="35" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-35" x="57" text-anchor="start">Emulator</text></a></g><!-- node1 --><g class="node class" id="graph8_1"><a xlink:title="scala.AnyRef"><polygon points="106.25,-112 27.75,-112 27.75,-86 106.25,-86 106.25,-112" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../lib/class_diagram.png" y="-107" x="38" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-97" x="60" text-anchor="start">AnyRef</text></a></g><!-- node1&#45;&gt;node0 --><g class="edge inheritance" id="graph8_1_0"><a xlink:title="Emulator is a subtype of AnyRef"><path d="M67,-80.6826C67,-70.8961 67,-58.9026 67,-50.1238" stroke="#d4d4d4" fill="none"></path><polygon points="65.2501,-80.8581 67,-85.8581 68.7501,-80.8581 65.2501,-80.8581" stroke="#d4d4d4" fill="none"></polygon></a></g></g></svg></div>
+              </div></div>
         
 
       <div id="mbrsel">
@@ -85,7 +89,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="core.Emulator#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(process:scala.sys.process.Process,SerialID:String):core.Emulator"></a>
+      <a id="&lt;init&gt;(process:scala.sys.process.Process,SerialID:String,telnetPort:Int):core.Emulator"></a>
       <a id="&lt;init&gt;:Emulator"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -93,7 +97,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Emulator</span><span class="params">(<span name="process">process: <span class="extype" name="scala.sys.process.Process">Process</span></span>, <span name="SerialID">SerialID: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
+        <span class="name">Emulator</span><span class="params">(<span name="process">process: <span class="extype" name="scala.sys.process.Process">Process</span></span>, <span name="SerialID">SerialID: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="telnetPort">telnetPort: <span class="extype" name="scala.Int">Int</span></span>)</span>
       </span>
       </h4>
       
@@ -171,16 +175,29 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="core.Emulator#actor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="actor:&lt;error&gt;"></a>
-      <a id="actor:&lt;error&gt;"></a>
+    </li><li name="core.Emulator#SerialID" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SerialID:String"></a>
+      <a id="SerialID:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">actor</span><span class="result">: &lt;error&gt;</span>
+        <span class="name">SerialID</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="core.Emulator#actor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="actor:akka.actor.ActorRef"></a>
+      <a id="actor:ActorRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">actor</span><span class="result">: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>
       </span>
       </h4>
       
@@ -321,15 +338,15 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="core.Emulator#load_tick_timer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="load_tick_timer:&lt;error&gt;"></a>
-      <a id="load_tick_timer:&lt;error&gt;"></a>
+      <a id="load_tick_timer:akka.actor.Cancellable"></a>
+      <a id="load_tick_timer:Cancellable"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">load_tick_timer</span><span class="result">: &lt;error&gt;</span>
+        <span class="name">load_tick_timer</span><span class="result">: <span class="extype" name="akka.actor.Cancellable">Cancellable</span></span>
       </span>
       </h4>
       
@@ -373,28 +390,28 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="core.Emulator#pf" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="pf:&lt;error&gt;"></a>
-      <a id="pf:&lt;error&gt;"></a>
+      <a id="pf:org.hyperic.sigar.ptql.ProcessFinder"></a>
+      <a id="pf:ProcessFinder"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">pf</span><span class="result">: &lt;error&gt;</span>
+        <span class="name">pf</span><span class="result">: <span class="extype" name="org.hyperic.sigar.ptql.ProcessFinder">ProcessFinder</span></span>
       </span>
       </h4>
       
     </li><li name="core.Emulator#s" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="s:&lt;error&gt;"></a>
-      <a id="s:&lt;error&gt;"></a>
+      <a id="s:org.hyperic.sigar.Sigar"></a>
+      <a id="s:Sigar"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">s</span><span class="result">: &lt;error&gt;</span>
+        <span class="name">s</span><span class="result">: <span class="extype" name="org.hyperic.sigar.Sigar">Sigar</span></span>
       </span>
       </h4>
       
@@ -412,15 +429,15 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="core.Emulator#system" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="system:&lt;error&gt;"></a>
-      <a id="system:&lt;error&gt;"></a>
+      <a id="system:akka.actor.ActorSystem"></a>
+      <a id="system:ActorSystem"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">system</span><span class="result">: &lt;error&gt;</span>
+        <span class="name">system</span><span class="result">: <span class="extype" name="akka.actor.ActorSystem">ActorSystem</span></span>
       </span>
       </h4>
       
@@ -430,7 +447,7 @@
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">var</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
         <span class="name">telnetPort</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>

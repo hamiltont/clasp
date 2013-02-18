@@ -1,0 +1,7 @@
+This is the content for the root page for the Clasp documentation.
+It uses Wiki-esque syntax, as the rest of the Scaladoc comments does.
+
+See [[https://wiki.scala-lang.org/display/SW/Scaladoc]], specifically
+[[https://wiki.scala-lang.org/display/SW/Syntax]]
+
+Code reference example: [[core.sdktools.sdk]]

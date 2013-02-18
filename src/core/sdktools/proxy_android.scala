@@ -5,11 +5,21 @@ import scala.sys.process.stringToProcess
 import sdk_config.log.error
 import sdk_config.log.info
 
-
+/**
+ * Provides an interface to the
+ * [[http://developer.android.com/tools/help/android.html `android`]]
+ * command line tool.
+ * 
+ * This, along with other components of the Android SDK, is included in
+ * [[core.sdktools.sdk]].
+ */
 trait AndroidProxy {
   val android:String = sdk_config.config.getString(sdk_config.android_config)
   import sdk_config.log.{error, debug, info, trace}
   
+  /**
+   * Return the available Android Virtual Devices.
+   */
   def get_avd_names: Vector[String] = {
     val command = s"$android list avd";
     val output: String = command !!
@@ -19,6 +29,9 @@ trait AndroidProxy {
     result.toVector
   }
   
+  /**
+   * Lists existing targets.
+   */
   def get_targets: Vector[String] = {
     val command = s"$android list targets";
     val output: String = command !!
@@ -28,6 +41,9 @@ trait AndroidProxy {
     result.toVector
   }
   
+  /**
+   * Lists remote SDK repository.
+   */
   def get_sdk: Vector[String] = {
     val command = s"$android list sdk";
     val output: String = command !!
@@ -36,7 +52,10 @@ trait AndroidProxy {
     val result = for (regex(target) <- regex findAllIn output) yield target
     result.toVector
   }
-
+  
+  /**
+   * Creates a new Android Virtual Device.
+   */
   def create_avd(name: String,
                  target: String,
                  force: Boolean = false): Boolean = {
@@ -55,6 +74,9 @@ trait AndroidProxy {
     true
   }
 
+  /**
+   * Moves or renames an Android Virtual Device.
+   */
   def move_avd(name: String,
                path: String,
                newName: String = null): Boolean = {
@@ -67,6 +89,9 @@ trait AndroidProxy {
     true
   }
 
+  /**
+   * Deletes an Android Virtual Device.
+   */
   def delete_avd(name: String): Boolean = {
     if (!(get_avd_names contains name)) {
       error("Error: AVD '$name' does not exist.")
@@ -80,6 +105,10 @@ trait AndroidProxy {
     true
   }
   
+  /**
+   * Updates an Android Virtual Device to match the folders
+   * of a new SDK.
+   */
   def update_avd(name: String) {
     val command = s"$android update avd -n $name"
     val output: String = command !!
@@ -87,6 +116,9 @@ trait AndroidProxy {
     info(output)
   }
   
+  /**
+   * Creates a new Android project.
+   */
   def create_project(name: String,
                      target: String,
                      path: String,
@@ -104,6 +136,10 @@ trait AndroidProxy {
     info(output)
   }
   
+  /**
+   * Updates an Android project. Must already have
+   * an `AndroidManifest.xml`.
+   */
   def update_project(path: String,
                      library: String = null,
                      name: String = null,
@@ -119,6 +155,9 @@ trait AndroidProxy {
     info(output)
   }
   
+  /**
+   * Creates a new Android project for a test package.
+   */
   def create_test_project(path: String, name: String, main:String) {
     val command = s"$android create test-project -p $path -n $name -m $main"
     val output: String = command !!
@@ -126,6 +165,10 @@ trait AndroidProxy {
     info(output)
   }
   
+  /**
+   * Updates the Android project for a test package. Must already
+   * have an `AndroidManifest.xml`.
+   */
   def update_test_project(main: String, path: String) {
     val command = s"$android update test-project -m $main -p $path"
     val output: String = command !!
@@ -133,6 +176,9 @@ trait AndroidProxy {
     info(output)
   }
   
+  /**
+   * Creates a new Android library project.
+   */
   def create_lib_project(name: String,
                          target: String,
                          pkg: String,
@@ -144,6 +190,10 @@ trait AndroidProxy {
     info(output)
   }
   
+  /**
+   * Updates an Android library project. Must already have an
+   * `AndroidManifest.xml`.
+   */
   def update_lib_project(path: String, target: String = null) {
     var command = s"$android update lib-project -p $path"
     if (target != null) command += s" -t $target"
@@ -152,6 +202,9 @@ trait AndroidProxy {
     info(output)
   }
   
+  /**
+   * Creates a new UI test project.
+   */
   def create_uitest_project(name: String, path: String, target: String) {
     val command = s"$android create uitest-project -n $name " +
       s" -p $path -t $target"
@@ -160,12 +213,18 @@ trait AndroidProxy {
     info(output)
   }
   
+  /**
+   * Updates `adb` to support the USB devices declared in the SDK add-ons.
+   */
   def update_adb {
     val command = s"$android update adb"
     val output: String = command !!;
     info(output)
   }
   
+  /**
+   * Updates the SDK by suggesting new platforms to install if available.
+   */
   def update_sdk(filter: String = null,
                  noHttps: Boolean = false,
                  all: Boolean = false,

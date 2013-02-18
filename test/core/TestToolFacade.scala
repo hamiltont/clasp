@@ -9,7 +9,7 @@ import java.io.File
 import org.apache.commons.io.FileUtils
 
 class ToolFacadeTest extends AssertionsForJUnit {
-  import core.sdk._
+  import core.sdktools.sdk._
   
   @Test def testAndroidAVDCreation() { 
     assert(get_targets contains "android-17")
@@ -71,7 +71,7 @@ class ToolFacadeTest extends AssertionsForJUnit {
     val camList = get_webcam_list(avdName)
     assert(camList contains "webcam0")
     
-    var emuOpts = new EmulatorOptions
+    var emuOpts = new core.sdktools.EmulatorOptions
     emuOpts.noBootAnim = true
     val emulatorInfo = start_emulator(avdName, 5554, emuOpts)
     val proc = emulatorInfo._1

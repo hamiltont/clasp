@@ -9,8 +9,9 @@ import org.slf4j.LoggerFactory
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 
-
-/** This is the entire SDK tool facade! */
+/**
+ * The entire SDK tool facade!
+ */
 object sdk extends AndroidProxy with EmulatorProxy with AdbProxy with TelnetProxy {}
 
 object sdk_config {

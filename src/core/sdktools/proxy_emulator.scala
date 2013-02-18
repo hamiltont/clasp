@@ -5,11 +5,21 @@ import scala.sys.process.stringToProcess
 
 import sdk_config.log.info
 
-
+/**
+ * Provides an interface to the
+ * [[http://developer.android.com/tools/help/emulator.html `emulator`]]
+ * command line tool.
+ * 
+ * This, along with other components of the Android SDK, is included in
+ * [[core.sdktools.sdk]].
+ */
 trait EmulatorProxy {
   val emulator:String = sdk_config.config.getString(sdk_config.emulator_config)
   import sdk_config.log.{error, debug, info, trace}
 
+  /**
+   * Start an emulator with the given options.
+   */
   def start_emulator(avd_name: String, port: Int, opts: EmulatorOptions = null): (Process, String) = {
     var command = s"$emulator -ports $port,${port+1} @$avd_name"
     if (opts != null) {
@@ -91,6 +101,9 @@ trait EmulatorProxy {
 
   }
 
+  /**
+   * Return a list of available snapshots.
+   */
   def get_snapshot_list(avd_name: String): Vector[String] = {
     val command = s"$emulator @$avd_name -snapshot-list"
     val output: String = command !!;
@@ -100,6 +113,9 @@ trait EmulatorProxy {
     result.toVector
   }
   
+  /**
+   * Return a list of web cameras available for emulation.
+   */
   def get_webcam_list(avd_name: String): Vector[String] = {
     val command = s"$emulator @$avd_name -webcam-list"
     val output: String = command !!;
@@ -119,6 +135,9 @@ trait EmulatorProxy {
   }
 }
 
+/**
+ * Contains various settings and flags for the emulator.
+ */
 class EmulatorOptions {
   var sysdir, system, datadir, kernel, ramdisk, image,
        data, partitionSize, cache, cacheSize, sdCard,

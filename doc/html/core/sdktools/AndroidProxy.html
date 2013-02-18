@@ -2,22 +2,22 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>AndroidProxy - core.AndroidProxy</title>
-          <meta name="description" content="AndroidProxy - core.AndroidProxy" />
-          <meta name="keywords" content="AndroidProxy core.AndroidProxy" />
+          <title>AndroidProxy - Clasp - core.sdktools.AndroidProxy</title>
+          <meta name="description" content="AndroidProxy - Clasp - core.sdktools.AndroidProxy" />
+          <meta name="keywords" content="AndroidProxy Clasp core.sdktools.AndroidProxy" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
-      <link href="../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
-      <script type="text/javascript" src="../lib/jquery.js" id="jquery-js"></script>
-      <script type="text/javascript" src="../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../lib/template.js"></script>
-      <script type="text/javascript" src="../lib/tools.tooltip.js"></script>
-      
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      <script type="text/javascript" src="../../lib/modernizr.custom.js"></script><script type="text/javascript" src="../../lib/diagrams.js" id="diagrams-js"></script>
       <script type="text/javascript">
          if(top === self) {
-            var url = '../index.html';
-            var hash = 'core.AndroidProxy';
+            var url = '../../index.html';
+            var hash = 'core.sdktools.AndroidProxy';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -29,8 +29,8 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../lib/trait_big.png" />
-        <p id="owner"><a href="package.html" class="extype" name="core">core</a></p>
+        <img src="../../lib/trait_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="core">core</a>.<a href="package.html" class="extype" name="core.sdktools">sdktools</a></p>
         <h1>AndroidProxy</h1>
       </div>
 
@@ -44,13 +44,21 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Provides an interface to the
+<a href="http://developer.android.com/tools/help/android.html" target="_blank"><code>android</code></a>
+command line tool.</p><p>This, along with other components of the Android SDK, is included in
+<a href="sdk$.html" class="extype" name="core.sdktools.sdk">core.sdktools.sdk</a>.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="sdk$.html" class="extype" name="core.sdk">sdk</a></div>
-        </div></div>
+          <div class="subClasses hiddenContent"><a href="sdk$.html" class="extype" name="core.sdktools.sdk">sdk</a></div>
+        </div><div class="toggleContainer block diagram-container" id="inheritance-diagram-container">
+                <span class="toggle diagram-link">Type Hierarchy</span>
+                <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#diagrams" target="_blank" class="diagram-help">Learn more about scaladoc diagrams</a>
+                <div class="diagram" id="inheritance-diagram"><svg class="class-diagram" id="graph3" viewBox="0.00 0.00 160.00 158.00" height="158pt" width="160pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1 1) rotate(0) translate(4 154)" class="graph" id="graph1"><polygon points="-4,5 -4,-154 157,-154 157,5 -4,5" stroke="white" fill="white"></polygon><g class="cluster" id="graph2"></g><g class="cluster" id="graph3"></g><!-- node0 --><g class="node this trait" id="graph3_0"><a xlink:title="core.sdktools.AndroidProxy (this trait)" xlink:href="#inheritance-diagram"><polygon points="128,-88 24,-88 24,-62 128,-62 128,-88" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../../lib/trait_diagram.png" y="-83" x="34" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-73" x="56" text-anchor="start">AndroidProxy</text></a></g><!-- node1 --><g class="node object" id="graph3_1"><a xlink:title="core.sdktools.sdk" xlink:href="sdk$.html#inheritance-diagram"><polygon points="106.25,-26 45.75,-26 45.75,-0 106.25,-0 106.25,-26" stroke="#102966" fill="#3556a7"></polygon><image xlink:href="../../lib/object_diagram.png" y="-21" x="56" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-11" x="78" text-anchor="start">sdk</text></a></g><!-- node0&#45;&gt;node1 --><g class="edge inheritance" id="graph3_0_1"><a xlink:title="sdk is a subtype of AndroidProxy"><path d="M76,-56.6826C76,-46.8961 76,-34.9026 76,-26.1238" stroke="#d4d4d4" fill="none"></path><polygon points="74.2501,-56.8581 76,-61.8581 77.7501,-56.8581 74.2501,-56.8581" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node2 --><g class="node class" id="graph3_2"><a xlink:title="scala.AnyRef"><polygon points="115.25,-150 36.75,-150 36.75,-124 115.25,-124 115.25,-150" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../../lib/class_diagram.png" y="-145" x="47" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-135" x="69" text-anchor="start">AnyRef</text></a></g><!-- node2&#45;&gt;node0 --><g class="edge inheritance" id="graph3_2_0"><a xlink:title="AndroidProxy is a subtype of AnyRef"><path d="M76,-118.683C76,-108.896 76,-96.9026 76,-88.1238" stroke="#d4d4d4" fill="none"></path><polygon points="74.2501,-118.858 76,-123.858 77.7501,-118.858 74.2501,-118.858" stroke="#d4d4d4" fill="none"></polygon></a></g></g></svg></div>
+              </div></div>
         
 
       <div id="mbrsel">
@@ -67,7 +75,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="core.AndroidProxy"><span>AndroidProxy</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="core.sdktools.AndroidProxy"><span>AndroidProxy</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -158,7 +166,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="core.AndroidProxy#android" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AndroidProxy#android" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="android:String"></a>
       <a id="android:String"></a>
       <h4 class="signature">
@@ -200,7 +208,7 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="core.AndroidProxy#create_avd" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AndroidProxy#create_avd" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="create_avd(name:String,target:String,force:Boolean):Boolean"></a>
       <a id="create_avd(String,String,Boolean):Boolean"></a>
       <h4 class="signature">
@@ -212,8 +220,8 @@
         <span class="name">create_avd</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="force">force: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#create_lib_project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Creates a new Android Virtual Device.</p>
+    </li><li name="core.sdktools.AndroidProxy#create_lib_project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="create_lib_project(name:String,target:String,pkg:String,path:String):Unit"></a>
       <a id="create_lib_project(String,String,String,String):Unit"></a>
       <h4 class="signature">
@@ -225,8 +233,8 @@
         <span class="name">create_lib_project</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pkg">pkg: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#create_project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Creates a new Android library project.</p>
+    </li><li name="core.sdktools.AndroidProxy#create_project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="create_project(name:String,target:String,path:String,pkg:String,activity:String):Unit"></a>
       <a id="create_project(String,String,String,String,String):Unit"></a>
       <h4 class="signature">
@@ -238,8 +246,8 @@
         <span class="name">create_project</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pkg">pkg: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="activity">activity: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#create_test_project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Creates a new Android project.</p>
+    </li><li name="core.sdktools.AndroidProxy#create_test_project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="create_test_project(path:String,name:String,main:String):Unit"></a>
       <a id="create_test_project(String,String,String):Unit"></a>
       <h4 class="signature">
@@ -251,8 +259,8 @@
         <span class="name">create_test_project</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="main">main: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#create_uitest_project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Creates a new Android project for a test package.</p>
+    </li><li name="core.sdktools.AndroidProxy#create_uitest_project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="create_uitest_project(name:String,path:String,target:String):Unit"></a>
       <a id="create_uitest_project(String,String,String):Unit"></a>
       <h4 class="signature">
@@ -264,8 +272,8 @@
         <span class="name">create_uitest_project</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#delete_avd" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Creates a new UI test project.</p>
+    </li><li name="core.sdktools.AndroidProxy#delete_avd" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="delete_avd(name:String):Boolean"></a>
       <a id="delete_avd(String):Boolean"></a>
       <h4 class="signature">
@@ -277,7 +285,7 @@
         <span class="name">delete_avd</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Deletes an Android Virtual Device.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -333,7 +341,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="core.AndroidProxy#get_avd_names" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AndroidProxy#get_avd_names" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="get_avd_names:Vector[String]"></a>
       <a id="get_avd_names:Vector[String]"></a>
       <h4 class="signature">
@@ -345,8 +353,8 @@
         <span class="name">get_avd_names</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#get_sdk" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Return the available Android Virtual Devices.</p>
+    </li><li name="core.sdktools.AndroidProxy#get_sdk" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="get_sdk:Vector[String]"></a>
       <a id="get_sdk:Vector[String]"></a>
       <h4 class="signature">
@@ -358,8 +366,8 @@
         <span class="name">get_sdk</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#get_targets" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Lists remote SDK repository.</p>
+    </li><li name="core.sdktools.AndroidProxy#get_targets" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="get_targets:Vector[String]"></a>
       <a id="get_targets:Vector[String]"></a>
       <h4 class="signature">
@@ -371,7 +379,7 @@
         <span class="name">get_targets</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Lists existing targets.</p>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -398,7 +406,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="core.AndroidProxy#move_avd" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AndroidProxy#move_avd" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="move_avd(name:String,path:String,newName:String):Boolean"></a>
       <a id="move_avd(String,String,String):Boolean"></a>
       <h4 class="signature">
@@ -410,7 +418,7 @@
         <span class="name">move_avd</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="newName">newName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Moves or renames an Android Virtual Device.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -476,7 +484,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="core.AndroidProxy#update_adb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="core.sdktools.AndroidProxy#update_adb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="update_adb:Unit"></a>
       <a id="update_adb:Unit"></a>
       <h4 class="signature">
@@ -488,8 +496,8 @@
         <span class="name">update_adb</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#update_avd" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Updates <code>adb</code> to support the USB devices declared in the SDK add-ons.</p>
+    </li><li name="core.sdktools.AndroidProxy#update_avd" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="update_avd(name:String):Unit"></a>
       <a id="update_avd(String):Unit"></a>
       <h4 class="signature">
@@ -501,8 +509,9 @@
         <span class="name">update_avd</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#update_lib_project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Updates an Android Virtual Device to match the folders
+of a new SDK.</p>
+    </li><li name="core.sdktools.AndroidProxy#update_lib_project" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="update_lib_project(path:String,target:String):Unit"></a>
       <a id="update_lib_project(String,String):Unit"></a>
       <h4 class="signature">
@@ -514,8 +523,10 @@
         <span class="name">update_lib_project</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#update_project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Updates an Android library project.</p><div class="fullcomment"><div class="comment cmt"><p>Updates an Android library project. Must already have an
+<code>AndroidManifest.xml</code>.
+</p></div></div>
+    </li><li name="core.sdktools.AndroidProxy#update_project" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="update_project(path:String,library:String,name:String,target:String,subprojects:Boolean):Unit"></a>
       <a id="update_project(String,String,String,String,Boolean):Unit"></a>
       <h4 class="signature">
@@ -527,8 +538,10 @@
         <span class="name">update_project</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="library">library: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="subprojects">subprojects: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#update_sdk" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Updates an Android project.</p><div class="fullcomment"><div class="comment cmt"><p>Updates an Android project. Must already have
+an <code>AndroidManifest.xml</code>.
+</p></div></div>
+    </li><li name="core.sdktools.AndroidProxy#update_sdk" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="update_sdk(filter:String,noHttps:Boolean,all:Boolean,force:Boolean):Unit"></a>
       <a id="update_sdk(String,Boolean,Boolean,Boolean):Unit"></a>
       <h4 class="signature">
@@ -540,8 +553,8 @@
         <span class="name">update_sdk</span><span class="params">(<span name="filter">filter: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="noHttps">noHttps: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="all">all: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="force">force: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li name="core.AndroidProxy#update_test_project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Updates the SDK by suggesting new platforms to install if available.</p>
+    </li><li name="core.sdktools.AndroidProxy#update_test_project" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="update_test_project(main:String,path:String):Unit"></a>
       <a id="update_test_project(String,String):Unit"></a>
       <h4 class="signature">
@@ -553,7 +566,9 @@
         <span class="name">update_test_project</span><span class="params">(<span name="main">main: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Updates the Android project for a test package.</p><div class="fullcomment"><div class="comment cmt"><p>Updates the Android project for a test package. Must already
+have an <code>AndroidManifest.xml</code>.
+</p></div></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
