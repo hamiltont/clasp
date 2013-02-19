@@ -4,3 +4,4 @@ bin/
 application.conf
 application.json
 *.swp
+target/*
