@@ -35,7 +35,7 @@
 		<repository>
 			<id>claspMaster</id>
 			<name>MasterNode</name>
-			<url>scpexe://ataack.ece.vt.edu/hamilton/clasp</url>
+			<url>scpexe://clasp@ataack.ece.vt.edu/home/clasp</url>
 		</repository>
 
 	</distributionManagement>
@@ -128,7 +128,7 @@
 						</goals>
 						<configuration>
 							<keyfile>${user.home}/.ssh/id_rsa</keyfile>
-							<location>scpexe://ataack.ece.vt.edu/hamilton/clasp</location>
+							<location>scpexe://clasp@ataack.ece.vt.edu/home/clasp/</location>
 							<command>java -jar ClaspSDK-1.0.0.jar</command>
 						</configuration>
 					</execution>
