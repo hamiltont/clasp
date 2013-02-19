@@ -5,3 +5,5 @@ application.conf
 application.json
 *.swp
 target/*
+project/project
+project/target
