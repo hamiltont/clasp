@@ -10,6 +10,8 @@ version := "1.0"
 
 scalaVersion := "2.10.0"
 
+maxErrors := 5
+
 scalaSource in Compile <<= baseDirectory(_ / "src")
 
 unmanagedJars in Compile +=
@@ -32,5 +34,3 @@ unmanagedJars in Compile +=
 
 unmanagedJars in Compile +=
     file("lib/logback-1.0.9/logback-core-1.0.9.jar")
-
-maxErrors := 5

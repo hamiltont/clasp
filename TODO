@@ -1,6 +1,5 @@
 Brandon
 
-	1 - Document building with sbt.
 	2 - Write unit tests for various parts of the system. 
 	    Lookup scala standard for this e.g. are tests 
 	    placed in one separate location or placed into 
