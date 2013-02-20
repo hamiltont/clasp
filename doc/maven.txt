@@ -1,3 +1,16 @@
+__Basic Usage__
+
+Create a Jar (currently fat) and place it into the target dir
+  $ mvn package
+
+Run the node_launcher on the ataack cloud
+  $ mvn deploy
+
+TODO: Create documentation
+TODO:  $ mvn 
+
+
+_______________________________________________
 If it's required to modify some of those parameter, please, add this chunk of code to your ~/.m2/settings.xml	
 	
 <settings>
