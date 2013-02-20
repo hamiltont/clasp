@@ -1,13 +1,11 @@
 Brandon
 
-	2.1 - Determine how to build entire framework as a single
-	    jar file. Determine if jar file can be linked into 
-	    an existing Java code base
-	5 - Write unit tests for various parts of the system. 
+	1 - Document building with sbt.
+	2 - Write unit tests for various parts of the system. 
 	    Lookup scala standard for this e.g. are tests 
 	    placed in one separate location or placed into 
 	    their respective classes?
-	6 - Fill in the TelnetProxy trait
+	3 - Fill in the TelnetProxy trait
     
 Hamilton
 
@@ -17,7 +15,7 @@ Hamilton
 	4 - Implement emulator hibernation
 
 
-JosŽ
+Josï¿½
 	1 - Setup maven on ATAACK and enable use of "maven install" to automatically deploy clasp to ataack
 
 Other
