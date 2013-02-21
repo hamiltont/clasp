@@ -1,0 +1,20 @@
+package core
+
+import org.scalatest.junit.AssertionsForJUnit
+import org.junit.Assert._
+import org.junit.Test
+import org.junit.Before
+import org.junit.After
+
+import java.io.File
+import org.apache.commons.io.FileUtils
+
+class NodeTest extends AssertionsForJUnit {
+  
+  @Test def testNode {
+    val node = new Node
+    val emulator = node.run_emulator
+    Thread.sleep(1000);
+    emulator.cleanup
+  }
+}

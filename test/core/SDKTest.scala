@@ -9,7 +9,7 @@ import org.junit.After
 import java.io.File
 import org.apache.commons.io.FileUtils
 
-class ToolFacadeTest extends AssertionsForJUnit {
+class SDKTest extends AssertionsForJUnit {
   import core.sdktools.sdk._
   
   @Before def initialize() {
