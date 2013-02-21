@@ -60,7 +60,8 @@ trait AndroidProxy {
                  target: String,
                  force: Boolean = false): Boolean = {
     if (!force && (get_avd_names contains name)) {
-      error(s"Error: AVD '$name' already exists.")
+      val errorMsg = s"Error: AVD '$name' already exists."
+      error(errorMsg)
       return false
     }
     

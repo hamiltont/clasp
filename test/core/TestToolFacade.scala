@@ -4,12 +4,21 @@ import org.scalatest.junit.AssertionsForJUnit
 import org.junit.Assert._
 import org.junit.Test
 import org.junit.Before
+import org.junit.After
 
 import java.io.File
 import org.apache.commons.io.FileUtils
 
 class ToolFacadeTest extends AssertionsForJUnit {
   import core.sdktools.sdk._
+  
+  @Before def initialize() {
+    start_adb
+  }
+  
+  @After def tearDown() {
+    kill_adb
+  }
   
   @Test def testAndroidAVDCreation() { 
     assert(get_targets contains "android-17")
@@ -55,7 +64,7 @@ class ToolFacadeTest extends AssertionsForJUnit {
     
     update_project(projDirStr, libProjDirStr)
     
-    create_uitest_project("claspUitest", uiTestStr, "android-17")
+    create_uitest_project("claspUitest", projDirStr, "android-17")
     
     for (fileStr <- dirList) {
       val file: File = new File(fileStr)
@@ -73,18 +82,38 @@ class ToolFacadeTest extends AssertionsForJUnit {
     
     var emuOpts = new core.sdktools.EmulatorOptions
     emuOpts.noBootAnim = true
+    emuOpts.noWindow = true
+    emuOpts.noSnapShotLoad = true
     val emulatorInfo = start_emulator(avdName, 5554, emuOpts)
     val proc = emulatorInfo._1
     val serial = emulatorInfo._2
     
-    Thread.sleep(5000);
-    
-    val devList = get_device_list
-    println(devList)
-    // assert(devList contains serial)
-    
-    kill_emulator(serial)
-    delete_avd(avdName)
+
+    val tmpFileStr = sys.env("HOME") + "/clasp-temp-file"
+    val backupStr = sys.env("HOME") + "/clasp-backup"
+    val tmpFile = new File(tmpFileStr)
+    val backupFile = new File(backupStr)
+    try {
+	    wait_for_device(serial)
+	    
+	    logcat_regex(serial, "Boot is finished")
+	    
+	    val devList = get_device_list
+	    assert(devList contains serial)
+	    
+	    val packages = get_installed_packages(serial)
+	    assert(packages contains "com.android.browser")
+	    
+	    tmpFile.createNewFile()
+	    push_to_device(serial, tmpFileStr, "/data")
+	    pull_from_device(serial, "/data/clasp-temp-file", tmpFileStr)
+	    
+	    remote_shell(serial, "ls")
+    } finally {
+	    tmpFile.delete()
+	    backupFile.delete()
+	    kill_emulator(serial)
+	    delete_avd(avdName)
+    }
   }
-  
 }

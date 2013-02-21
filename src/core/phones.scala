@@ -13,6 +13,7 @@ import akka.actor.Props
 import scala.concurrent.duration._
 import akka.event.Logging
 import org.hyperic.sigar.ProcTime
+import core.sdktools._
 
 case class Load_Tick
 class EmulatorLoadMonitor(pid: Long) extends Actor {

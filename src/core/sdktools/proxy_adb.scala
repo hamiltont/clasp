@@ -1,6 +1,7 @@
 package core.sdktools
 
 import scala.sys.process.stringToProcess
+import scala.sys.process.Process
 
 import sdk_config.log.debug
 import sdk_config.log.error
@@ -18,7 +19,6 @@ trait AdbProxy {
   val adb:String = sdk_config.config.getString(sdk_config.adb_config)
   import sdk_config.log.{error, debug, info, trace}
     
-  // TODO: Improve and test
   /**
    * Return the current devices.
    */
@@ -32,7 +32,7 @@ trait AdbProxy {
     result.toVector
   }
   
-  // TODO: Test
+  // TODO: Unsure how to test thihs.
   /**
    * Connect to the device via TCP/IP.
    */
@@ -43,7 +43,7 @@ trait AdbProxy {
     info(output);
   }
   
-  // TODO: Test
+  // TODO: Unsure how to test this.
   /**
    * Disconnect from the device via TCP/IP.
    */
@@ -54,40 +54,36 @@ trait AdbProxy {
     info(output);
   }
   
-  // TODO: Test
   /**
    * Push a file or directory to the device.
    */
   def push_to_device(serial: String, localPath: String, remotePath: String) {
-    val command = s"$adb -s $serial adb push $localPath $remotePath"
-    var output: String = command !!
+    val command = Seq(s"$adb", "-s", s"$serial", "push", s"$localPath", s"$remotePath")
+    var output: String = Process(command) !!
     
     info(output);
   }
   
-  // TODO: Test
   /**
    * Pull a file or directory from a device.
    */
   def pull_from_device(serial: String, remotePath: String, localPath: String) {
-    val command = s"$adb -s $serial adb pull $remotePath $localPath"
-    var output: String = command !!
+    val command = Seq(s"$adb", "-s", s"$serial", "pull", s"$remotePath", s"$localPath")
+    var output: String = Process(command) !!
     
     info(output);
   }
   
-  // TODO: Test
   /**
    * Copy from host to device only if changed.
    */
   def sync_to_device(serial: String, directory: String) {
-    val command = s"$adb -s $serial adb sync $directory"
-    var output: String = command !!
+    val command = Seq(s"$adb", "-s", s"$serial", "sync", s"$directory")
+    var output: String = Process(command) !!
     
     info(output);    
   }
   
-  // TODO: Test
   /**
    * Run a remote shell command.
    */
@@ -98,7 +94,6 @@ trait AdbProxy {
     info(output);  
   }
   
-  // TODO: Test
   /**
    * Run an emulator console command.
    */
@@ -109,7 +104,7 @@ trait AdbProxy {
     info(output);
   }
   
-  // TODO: Test
+  // TODO: Unsure how to test this.
   /**
    * Forward socket connections.
    */
@@ -120,7 +115,21 @@ trait AdbProxy {
     info(output);
   }
   
-  // TODO: Test
+
+  /**
+   * Blocks until a pattern is matched in logcat.
+   */
+  def logcat_regex(serial: String, regex: String) {
+    val command = s"""$adb -s "$serial" logcat"""
+    // TODO: Platform independent way?
+    val grepCmd = Seq("grep", "-q",  "-m",  "1", s"$regex")
+    // TODO: What should the timeout be?
+    var output: String = runWithTimeout(60000, "Process timed out.") {
+      command #| grepCmd !!
+    }
+  }
+  
+  // TODO: Unsure how to test this.
   /**
    * List PIDs of processes hosting a JDWP transport.
    */
@@ -133,33 +142,40 @@ trait AdbProxy {
     result.toVector
   }
   
-  // TODO: In general needs a method to timeout
   /**
    * Push a package file to the device and install it.
    */
   def install_package(serial: String, apk_path: String): Boolean = {
     val command = s"""$adb -s "$serial" install $apk_path"""
     println(command)
-    val output: String = command !!
+    // TODO: Timeout duration?
+    val output: String = runWithTimeout(60000, "Process timed out.") {
+      command  !!
+    }
 
     println(output)
     return output.contains("Success")
   }
   
-  // TODO: In general needs a method to timeout
   /**
    * Remove a package from a device.
    */
   def uninstall_package(serial: String, pkg: String, keepData: Boolean = false): Boolean = {
     var command = s"""$adb -s "$serial" uninstall $pkg"""
     if (keepData) command += s" -k"
-    val output: String = command !!
+    // TODO: Timeout duration?
+    val output: String = runWithTimeout(60000, "Process timed out.") {
+      command  !!
+    }
 
     println(output)
     return output.contains("Success")
   }
   
-  // TODO: Test
+  // TODO: It might not be necessary to include this.
+  // When `adb backup ...` is called, it displays a password
+  // prompt on the emulator. We could rewrite this to send keys
+  // to the emulator.
   /**
    * Write an archive of the device's data to disk.
    */
@@ -188,7 +204,6 @@ trait AdbProxy {
     debug(output)
   }
   
-  // TODO: Test
   /**
    * Restore device contents from the backup archive.
    */
@@ -212,9 +227,8 @@ trait AdbProxy {
    * Block until device is online.
    */
   def wait_for_device(serial: String) {
-    //TODO: Block until this returns.
-    val command = s"""$adb -s "$serial" wait-for-device"""
-    val output: String = command !!
+    val command = s"$adb -s $serial wait-for-device"
+    command !!
   }
   
   /**
@@ -230,14 +244,14 @@ trait AdbProxy {
    */
   def kill_adb {
     val command = s"$adb kill-server"
-    val output: String = command !!
+    val output: String = command !!;
   }
   
   /**
    * Return the state of the device.
    */
   def get_state(serial: String): String = {
-    val command = s"""$adb "$serial" get-state"""
+    val command = s"$adb $serial get-state"
     val output: String = command !!
     
     output
@@ -247,7 +261,7 @@ trait AdbProxy {
    * Return the device path of the device.
    */
   def get_devpath(serial: String): String = {
-    val command = s"""$adb "$serial" get-devpath"""
+    val command = s"$adb $serial get-devpath"
     val output: String = command !!
     
     output
@@ -309,16 +323,18 @@ trait AdbProxy {
     val output: String = command !!
   }
   
-  // TODO: Test
   /**
    * Return the installed packages.
    */
-  def get_installed_packages(serial: String) {
+  def get_installed_packages(serial: String) : Vector[String] = {
     val command = s"$adb -s $serial shell pm list packages"
     println(command)
     var output: String = command !!
 
-    println(output)
+    val regex = """package:(.*)""".r
+    
+    var result = for (regex(name) <- regex findAllIn output) yield name
+    result.toVector
   }
 
   def is_adb_available: Boolean = {
