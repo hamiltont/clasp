@@ -195,6 +195,34 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#avd_start" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="avd_start(port:Int):Unit"></a>
+      <a id="avd_start(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">avd_start</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Start/restart the virtual device.</p><div class="fullcomment"><div class="comment cmt"><p>Start/restart the virtual device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#avd_stop" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="avd_stop(port:Int):Unit"></a>
+      <a id="avd_stop(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">avd_stop</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Stop the virtual device.</p><div class="fullcomment"><div class="comment cmt"><p>Stop the virtual device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="core.sdktools.AdbProxy#backup_device" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="backup_device(serial:String,file:String,apk:Boolean,sharedStorage:Boolean,all:Boolean,system:Boolean,packages:String):Unit"></a>
       <a id="backup_device(String,String,Boolean,Boolean,Boolean,Boolean,String):Unit"></a>
@@ -209,6 +237,49 @@
       </h4>
       <p class="shortcomment cmt">Write an archive of the device's data to disk.</p><div class="fullcomment"><div class="comment cmt"><p>Write an archive of the device's data to disk.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#cdma_capture_start" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cdma_capture_start(port:Int,file:String):Unit"></a>
+      <a id="cdma_capture_start(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cdma_capture_start</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Dump network packets to file.</p><div class="fullcomment"><div class="comment cmt"><p>Dump network packets to file.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#cdma_capture_stop" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cdma_capture_stop(port:Int):Unit"></a>
+      <a id="cdma_capture_stop(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cdma_capture_stop</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Stop dumping network packets.</p><div class="fullcomment"><div class="comment cmt"><p>Stop dumping network packets.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#cdma_ssource" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cdma_ssource(port:Int,ssource:String):Unit"></a>
+      <a id="cdma_ssource(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cdma_ssource</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="ssource">ssource: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">'cdma ssource &lt;ssource&gt;' allows you to specify where to read the subscription from</p><div class="fullcomment"><div class="comment cmt"><p>'cdma ssource &lt;ssource&gt;' allows you to specify where to read the subscription from</p><p>	nv: Read subscription from non-volatile RAM
+   ruim: Read subscription from RUIM
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -309,6 +380,20 @@
       </h4>
       <p class="shortcomment cmt">Deletes an Android Virtual Device.</p><div class="fullcomment"><div class="comment cmt"><p>Deletes an Android Virtual Device.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#delete_snapshot" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="delete_snapshot(port:Int,name:String):Unit"></a>
+      <a id="delete_snapshot(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">delete_snapshot</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Delete snapshot state.</p><div class="fullcomment"><div class="comment cmt"><p>Delete snapshot state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="core.sdktools.EmulatorProxy#emulator" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="emulator:String"></a>
       <a id="emulator:String"></a>
@@ -418,6 +503,20 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#get_avd_name" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_avd_name(port:Int):String"></a>
+      <a id="get_avd_name(Int):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_avd_name</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Query virtual device name.</p><div class="fullcomment"><div class="comment cmt"><p>Query virtual device name.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="core.sdktools.AndroidProxy#get_avd_names" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="get_avd_names:Vector[String]"></a>
       <a id="get_avd_names:Vector[String]"></a>
@@ -432,6 +531,50 @@
       </h4>
       <p class="shortcomment cmt">Return the available Android Virtual Devices.</p><div class="fullcomment"><div class="comment cmt"><p>Return the available Android Virtual Devices.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#get_avd_snapshots" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_avd_snapshots(port:Int):Vector[String]"></a>
+      <a id="get_avd_snapshots(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_avd_snapshots</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List available state snapshots.</p><div class="fullcomment"><div class="comment cmt"><p>List available state snapshots.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#get_avd_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_avd_status(port:Int):String"></a>
+      <a id="get_avd_status(Int):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_avd_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Query virtual device status.</p><div class="fullcomment"><div class="comment cmt"><p>Query virtual device status.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#get_cdma_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_cdma_status(port:Int):Vector[String]"></a>
+      <a id="get_cdma_status(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_cdma_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Dump network status.</p><div class="fullcomment"><div class="comment cmt"><p>Dump network status.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A vector with the download speed and upload speed (in bits/s),
+        and the minimum and maximum latency (in ms).
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="core.sdktools.AdbProxy#get_device_list" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="get_device_list:Vector[String]"></a>
       <a id="get_device_list:Vector[String]"></a>
@@ -473,16 +616,58 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="EmulatorProxy.html" class="extype" name="core.sdktools.EmulatorProxy">EmulatorProxy</a></dd></dl></div>
-    </li><li name="core.sdktools.AdbProxy#get_installed_packages" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="get_installed_packages(serial:String):Unit"></a>
-      <a id="get_installed_packages(String):Unit"></a>
+    </li><li name="core.sdktools.TelnetProxy#get_event_codes" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_event_codes(port:Int,typeStr:String):Vector[String]"></a>
+      <a id="get_event_codes(Int,String):Vector[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get_installed_packages</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">get_event_codes</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="typeStr">typeStr: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List all code aliases for a given type.</p><div class="fullcomment"><div class="comment cmt"><p>List all code aliases for a given type.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#get_event_types" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_event_types(port:Int):Vector[String]"></a>
+      <a id="get_event_types(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_event_types</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List all type aliases.</p><div class="fullcomment"><div class="comment cmt"><p>List all type aliases.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#get_gsm_list" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_gsm_list(port:Int):Vector[String]"></a>
+      <a id="get_gsm_list(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_gsm_list</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List current phone calls.</p><div class="fullcomment"><div class="comment cmt"><p>List current phone calls.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.AdbProxy#get_installed_packages" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_installed_packages(serial:String):Vector[String]"></a>
+      <a id="get_installed_packages(String):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_installed_packages</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Return the installed packages.</p><div class="fullcomment"><div class="comment cmt"><p>Return the installed packages.
@@ -501,6 +686,52 @@
       </h4>
       <p class="shortcomment cmt">List PIDs of processes hosting a JDWP transport.</p><div class="fullcomment"><div class="comment cmt"><p>List PIDs of processes hosting a JDWP transport.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#get_network_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_network_status(port:Int):Vector[String]"></a>
+      <a id="get_network_status(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_network_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Dump network status.</p><div class="fullcomment"><div class="comment cmt"><p>Dump network status.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A vector with the download speed and upload speed (in bits/s),
+        and the minimum and maximum latency (in ms).
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#get_power_state" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_power_state(port:Int):Vector[String]"></a>
+      <a id="get_power_state(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_power_state</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Display battery and charger state.</p><div class="fullcomment"><div class="comment cmt"><p>Display battery and charger state.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A vector with AC, status, health, present, and capacity
+        in indices 0-4.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#get_redir_list" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_redir_list(port:Int):Vector[String]"></a>
+      <a id="get_redir_list(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_redir_list</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List current redirections.</p><div class="fullcomment"><div class="comment cmt"><p>List current redirections.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="core.sdktools.AndroidProxy#get_sdk" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="get_sdk:Vector[String]"></a>
       <a id="get_sdk:Vector[String]"></a>
@@ -515,6 +746,36 @@
       </h4>
       <p class="shortcomment cmt">Lists remote SDK repository.</p><div class="fullcomment"><div class="comment cmt"><p>Lists remote SDK repository.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#get_sensor_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_sensor_status(port:Int):Vector[String]"></a>
+      <a id="get_sensor_status(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_sensor_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List all sensors and their status.</p><div class="fullcomment"><div class="comment cmt"><p>List all sensors and their status.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A vector with the elements 'acceleration, magnetic-field,
+        orientation, temperature, proximity
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#get_sensor_val" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_sensor_val(port:Int,sensorName:String):String"></a>
+      <a id="get_sensor_val(Int,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_sensor_val</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="sensorName">sensorName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get sensor value.</p><div class="fullcomment"><div class="comment cmt"><p>Get sensor value.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="core.sdktools.EmulatorProxy#get_snapshot_list" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="get_snapshot_list(avd_name:String):Vector[String]"></a>
       <a id="get_snapshot_list(String):Vector[String]"></a>
@@ -571,6 +832,152 @@
       </h4>
       <p class="shortcomment cmt">Return a list of web cameras available for emulation.</p><div class="fullcomment"><div class="comment cmt"><p>Return a list of web cameras available for emulation.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="EmulatorProxy.html" class="extype" name="core.sdktools.EmulatorProxy">EmulatorProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#gsm_accept" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_accept(port:Int,number:String):Unit"></a>
+      <a id="gsm_accept(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_accept</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change the state of an outbound call to 'active'.</p><div class="fullcomment"><div class="comment cmt"><p>Change the state of an outbound call to 'active'.
+</p></div><dl class="paramcmts block"><dt class="param">number</dt><dd class="cmt"><p>The phone number format with only digits, '#', and '+'.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#gsm_busy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_busy(port:Int,number:String):Unit"></a>
+      <a id="gsm_busy(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_busy</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Close waiting outbound call as busy.</p><div class="fullcomment"><div class="comment cmt"><p>Close waiting outbound call as busy.
+</p></div><dl class="paramcmts block"><dt class="param">number</dt><dd class="cmt"><p>The phone number format with only digits, '#', and '+'.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#gsm_call" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_call(port:Int,number:String):Unit"></a>
+      <a id="gsm_call(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_call</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create inbound phone call.</p><div class="fullcomment"><div class="comment cmt"><p>Create inbound phone call.
+</p></div><dl class="paramcmts block"><dt class="param">number</dt><dd class="cmt"><p>The phone number format with only digits, '#', and '+'.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#gsm_cancel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_cancel(port:Int,number:String):Unit"></a>
+      <a id="gsm_cancel(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_cancel</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Disconnect an inbound or outbound phone call.</p><div class="fullcomment"><div class="comment cmt"><p>Disconnect an inbound or outbound phone call.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#gsm_data" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_data(port:Int,state:String):Unit"></a>
+      <a id="gsm_data(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_data</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="state">state: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Modify data connection state.</p><div class="fullcomment"><div class="comment cmt"><p>Modify data connection state.</p><p>Valid values for &lt;state&gt; are the following:</p><p>  unregistered    no network available
+  home            on local network, non-roaming
+  roaming         on roaming network
+  searching       searching networks
+  denied          emergency calls only
+  off             same as 'unregistered'
+  on              same as 'home'
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#gsm_hold" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_hold(port:Int,number:String):Unit"></a>
+      <a id="gsm_hold(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_hold</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change the state of an outbound call to 'held'
+</p><div class="fullcomment"><div class="comment cmt"><p>Change the state of an outbound call to 'held'
+</p></div><dl class="paramcmts block"><dt class="param">number</dt><dd class="cmt"><p>The phone number format with only digits, '#', and '+'.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#gsm_signal" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_signal(port:Int,rssi:Int,ber:Int):Unit"></a>
+      <a id="gsm_signal(Int,Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_signal</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="rssi">rssi: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">99</span></span>, <span name="ber">ber: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">99</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets the rssi and ber.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the rssi and ber.
+</p></div><dl class="paramcmts block"><dt class="param">rssi</dt><dd class="cmt"><p>range is 0..31 and 99 for unknown</p></dd><dt class="param">ber</dt><dd class="cmt"><p>range is 0..7 percent and 99 for unknown
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#gsm_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_status(port:Int):Vector[String]"></a>
+      <a id="gsm_status(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Return GSM status.</p><div class="fullcomment"><div class="comment cmt"><p>Return GSM status.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A Vector with the first element being the voice
+        status and the second being the data status.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#gsm_voice" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_voice(port:Int,state:String):Unit"></a>
+      <a id="gsm_voice(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_voice</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="state">state: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Modify voice connection state.</p><div class="fullcomment"><div class="comment cmt"><p>Modify voice connection state.</p><p>Valid values for &lt;state&gt; are the following:</p><p>  unregistered    no network available
+  home            on local network, non-roaming
+  roaming         on roaming network
+  searching       searching networks
+  denied          emergency calls only
+  off             same as 'unregistered'
+  on              same as 'home'
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -652,6 +1059,34 @@
       </h4>
       <p class="shortcomment cmt">Kill an emulator's process.</p><div class="fullcomment"><div class="comment cmt"><p>Kill an emulator's process.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#load_snapshot" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="load_snapshot(port:Int,name:String):Unit"></a>
+      <a id="load_snapshot(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">load_snapshot</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Load snapshot state.</p><div class="fullcomment"><div class="comment cmt"><p>Load snapshot state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.AdbProxy#logcat_regex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logcat_regex(serial:String,regex:String):Unit"></a>
+      <a id="logcat_regex(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logcat_regex</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="regex">regex: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Blocks until a pattern is matched in logcat.</p><div class="fullcomment"><div class="comment cmt"><p>Blocks until a pattern is matched in logcat.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
     </li><li name="core.sdktools.AndroidProxy#move_avd" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="move_avd(name:String,path:String,newName:String):Boolean"></a>
       <a id="move_avd(String,String,String):Boolean"></a>
@@ -679,6 +1114,34 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#network_capture_start" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="network_capture_start(port:Int,file:String):Unit"></a>
+      <a id="network_capture_start(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">network_capture_start</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Dump network packets to file.</p><div class="fullcomment"><div class="comment cmt"><p>Dump network packets to file.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#network_capture_stop" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="network_capture_stop(port:Int):Unit"></a>
+      <a id="network_capture_stop(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">network_capture_stop</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Stop dumping network packets.</p><div class="fullcomment"><div class="comment cmt"><p>Stop dumping network packets.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
@@ -705,6 +1168,77 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#power_ac_state" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="power_ac_state(port:Int,isOn:Boolean):Unit"></a>
+      <a id="power_ac_state(Int,Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">power_ac_state</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="isOn">isOn: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set AC charging state.</p><div class="fullcomment"><div class="comment cmt"><p>Set AC charging state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#power_capacity" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="power_capacity(port:Int,percentage:Int):Unit"></a>
+      <a id="power_capacity(Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">power_capacity</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="percentage">percentage: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set battery capacity state.</p><div class="fullcomment"><div class="comment cmt"><p>Set battery capacity state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#power_health" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="power_health(port:Int,status:String):Unit"></a>
+      <a id="power_health(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">power_health</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="status">status: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set battery health state.</p><div class="fullcomment"><div class="comment cmt"><p>Set battery health state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#power_present" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="power_present(port:Int,isPresent:Boolean):Unit"></a>
+      <a id="power_present(Int,Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">power_present</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="isPresent">isPresent: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set battery present state.</p><div class="fullcomment"><div class="comment cmt"><p>Set battery present state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#power_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="power_status(port:Int,status:String):Unit"></a>
+      <a id="power_status(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">power_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="status">status: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set battery status.</p><div class="fullcomment"><div class="comment cmt"><p>Set battery status.
+</p></div><dl class="paramcmts block"><dt class="param">status</dt><dd class="cmt"><p>unknown|charging|discharging|not-charging|full&quot;
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="core.sdktools.AdbProxy#pull_from_device" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pull_from_device(serial:String,remotePath:String,localPath:String):Unit"></a>
       <a id="pull_from_device(String,String,String):Unit"></a>
@@ -775,6 +1309,35 @@
       </h4>
       <p class="shortcomment cmt">Reboots the device into recovery mode.</p><div class="fullcomment"><div class="comment cmt"><p>Reboots the device into recovery mode.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#redir_add" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="redir_add(port:Int,protocol:String,hostPort:Int,devicePort:Int):Unit"></a>
+      <a id="redir_add(Int,String,Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">redir_add</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="protocol">protocol: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="hostPort">hostPort: <span class="extype" name="scala.Int">Int</span></span>, <span name="devicePort">devicePort: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Add new redirection.</p><div class="fullcomment"><div class="comment cmt"><p>Add new redirection.
+</p></div><dl class="paramcmts block"><dt class="param">protocol</dt><dd class="cmt"><p>tcp|udp
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#redir_del" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="redir_del(port:Int,protocol:String,hostPort:Int):Unit"></a>
+      <a id="redir_del(Int,String,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">redir_del</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="protocol">protocol: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="hostPort">hostPort: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Remove existing redirection.</p><div class="fullcomment"><div class="comment cmt"><p>Remove existing redirection.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="core.sdktools.AdbProxy#remote_shell" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="remote_shell(serial:String,shellCommand:String):Unit"></a>
       <a id="remote_shell(String,String):Unit"></a>
@@ -859,6 +1422,76 @@
       </h4>
       <p class="shortcomment cmt">Restore device contents from the backup archive.</p><div class="fullcomment"><div class="comment cmt"><p>Restore device contents from the backup archive.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#save_snapshot" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="save_snapshot(port:Int,name:String):Unit"></a>
+      <a id="save_snapshot(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">save_snapshot</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Save snapshot state.</p><div class="fullcomment"><div class="comment cmt"><p>Save snapshot state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#send_event_text" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="send_event_text(port:Int,text:String):String"></a>
+      <a id="send_event_text(Int,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">send_event_text</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="text">text: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Simulate keystrokes from a given text.</p><div class="fullcomment"><div class="comment cmt"><p>Simulate keystrokes from a given text.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#send_geo_fix" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="send_geo_fix(port:Int,longitude:String,latitude:String,altitude:String,satellites:String):Unit"></a>
+      <a id="send_geo_fix(Int,String,String,String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">send_geo_fix</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="longitude">longitude: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="latitude">latitude: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="altitude">altitude: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="satellites">satellites: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send a simple GPS fix.</p><div class="fullcomment"><div class="comment cmt"><p>Send a simple GPS fix.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#send_geo_nmea" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="send_geo_nmea(port:Int,sentence:String):Unit"></a>
+      <a id="send_geo_nmea(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">send_geo_nmea</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="sentence">sentence: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send a GPS NMEA sentence.</p><div class="fullcomment"><div class="comment cmt"><p>Send a GPS NMEA sentence.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#send_hardware_event" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="send_hardware_event(port:Int,typeStr:String,code:String,value:String):String"></a>
+      <a id="send_hardware_event(Int,String,String,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">send_hardware_event</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="typeStr">typeStr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="code">code: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send a series of events to the kernel.</p><div class="fullcomment"><div class="comment cmt"><p>Send a series of events to the kernel.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="core.sdktools.TelnetProxy#send_telnet_command" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="send_telnet_command(port:Int,command:String):String"></a>
       <a id="send_telnet_command(Int,String):String"></a>
@@ -871,7 +1504,110 @@
         <span class="name">send_telnet_command</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="command">command: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+      <p class="shortcomment cmt">Send a telnet command to an Android device and return the output.</p><div class="fullcomment"><div class="comment cmt"><p>Send a telnet command to an Android device and return the output.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#set_cdma_delay" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set_cdma_delay(port:Int,value:String):Unit"></a>
+      <a id="set_cdma_delay(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set_cdma_delay</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change network latency.</p><div class="fullcomment"><div class="comment cmt"><p>Change network latency.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#set_cdma_speed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set_cdma_speed(port:Int,value:String):Unit"></a>
+      <a id="set_cdma_speed(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set_cdma_speed</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change network speed.</p><div class="fullcomment"><div class="comment cmt"><p>Change network speed.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#set_network_delay" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set_network_delay(port:Int,value:String):Unit"></a>
+      <a id="set_network_delay(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set_network_delay</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change network latency.</p><div class="fullcomment"><div class="comment cmt"><p>Change network latency.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#set_network_speed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set_network_speed(port:Int,value:String):Unit"></a>
+      <a id="set_network_speed(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set_network_speed</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change network speed.</p><div class="fullcomment"><div class="comment cmt"><p>Change network speed.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#set_sensor_val" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set_sensor_val(port:Int,sensorName:String,value:String):Unit"></a>
+      <a id="set_sensor_val(Int,String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set_sensor_val</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="sensorName">sensorName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set sensor value.</p><div class="fullcomment"><div class="comment cmt"><p>Set sensor value.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#sms_pdu" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sms_pdu(port:Int,hex:String):Unit"></a>
+      <a id="sms_pdu(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sms_pdu</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="hex">hex: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">'sms pdu &lt;hexstring&gt;' allows you to simulate a new inbound sms PDU
+(used internally when one emulator sends SMS messages to another instance).</p><div class="fullcomment"><div class="comment cmt"><p>'sms pdu &lt;hexstring&gt;' allows you to simulate a new inbound sms PDU
+(used internally when one emulator sends SMS messages to another instance).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#sms_send" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sms_send(port:Int,number:String,message:String):Unit"></a>
+      <a id="sms_send(Int,String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sms_send</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">'sms send &lt;phonenumber&gt; &lt;message&gt;' allows you to simulate a new
+inbound sms message.</p><div class="fullcomment"><div class="comment cmt"><p>'sms send &lt;phonenumber&gt; &lt;message&gt;' allows you to simulate a new
+inbound sms message.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="core.sdktools.AdbProxy#start_adb" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="start_adb:Unit"></a>
       <a id="start_adb:Unit"></a>
@@ -955,6 +1691,20 @@
       </h4>
       <p class="shortcomment cmt">Disconnect from the device via TCP/IP.</p><div class="fullcomment"><div class="comment cmt"><p>Disconnect from the device via TCP/IP.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#telnet_kill" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="telnet_kill(port:Int):Unit"></a>
+      <a id="telnet_kill(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">telnet_kill</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Kill the emulator instance.</p><div class="fullcomment"><div class="comment cmt"><p>Kill the emulator instance.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>
@@ -1133,6 +1883,20 @@ have an <code>AndroidManifest.xml</code>.
       </h4>
       <p class="shortcomment cmt">Block until device is online.</p><div class="fullcomment"><div class="comment cmt"><p>Block until device is online.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="core.sdktools.TelnetProxy#window_scale" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="window_scale(port:Int,scale:String):Unit"></a>
+      <a id="window_scale(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">window_scale</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="scale">scale: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change the window scale.</p><div class="fullcomment"><div class="comment cmt"><p>Change the window scale.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
     </li></ol>
             </div>
 
