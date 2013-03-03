@@ -34,3 +34,5 @@ unmanagedJars in Compile +=
 
 unmanagedJars in Compile +=
     file("lib/logback-1.0.9/logback-core-1.0.9.jar")
+
+libraryDependencies += "org.scala-lang" % "scala-actors" % "2.10.0-M6"
