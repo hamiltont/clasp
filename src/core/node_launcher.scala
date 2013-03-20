@@ -4,7 +4,7 @@ package core
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.MutableList
 
-import org.hyperic.sigar.Sigar
+//import org.hyperic.sigar.Sigar
 import org.slf4j.LoggerFactory
 
 import core.sdktools.sdk
@@ -24,11 +24,11 @@ object NodeLauncher extends App {
 
   val nodes = ListBuffer[Node]()
   
-  var s: Sigar = new Sigar
-  info(s.getCpuPerc.toString)
+  //var s: Sigar = new Sigar
+  //info(s.getCpuPerc.toString)
 
   var n: Node = new Node
-  val emu: Emulator = n run_emulator
+  val emu: Emulator = n.run_emulator(null)
   //val pt: ProcTime = new ProcTime
   //pt.gather(s, emu.emulator_processid)
   //info(pt)
@@ -58,6 +58,7 @@ object NodeLauncher extends App {
 class Node() {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
+  import core.sdktools.EmulatorOptions
   
   val devices: MutableList[Emulator] = MutableList[Emulator]()
   var current_emulator_port = 5555
@@ -103,8 +104,8 @@ class Node() {
     sumOfSquares / count.toDouble
   }
 
-  def run_emulator: Emulator = {
-    devices += EmulatorBuilder.build(current_emulator_port)
+  def run_emulator(opts: EmulatorOptions = null): Emulator = {
+    devices += EmulatorBuilder.build(current_emulator_port, opts)
     current_emulator_port += 2
     devices.last.asInstanceOf[Emulator]
   }

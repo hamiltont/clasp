@@ -149,12 +149,20 @@ trait AdbProxy {
     val command = s"""$adb -s "$serial" install $apk_path"""
     println(command)
     // TODO: Timeout duration?
-    val output: String = runWithTimeout(60000, "Process timed out.") {
+    // TODO: Error with `runWithTimeout` in fat jar?
+    // java.lang.NoClassDefFoundError: scala/runtime/AbstractFunction1$mcVL$sp
+    // val output: String = runWithTimeout(60000, "Process timed out.") {
       command  !!
-    }
+    //}
 
-    println(output)
-    return output.contains("Success")
+    // TODO, don't sleep.
+    import scala.actors._
+    Thread.sleep(30000)
+
+    // TODO: Get output.
+    //println(output)
+    //return output.contains("Success")
+    true
   }
   
   /**
