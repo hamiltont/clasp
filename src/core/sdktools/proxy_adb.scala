@@ -146,18 +146,27 @@ trait AdbProxy {
    * Push a package file to the device and install it.
    */
   def install_package(serial: String, apk_path: String): Boolean = {
-    val command = s"""$adb -s "$serial" install $apk_path"""
+    get_device_list.foreach(println)
+    // TODO: no quote vs single vs double quote issues?
+    // TODO: Could be device vs emulator issue?
+    val command = s"""$adb -s $serial install $apk_path"""
     println(command)
     // TODO: Timeout duration?
     // TODO: Error with `runWithTimeout` in fat jar?
     // java.lang.NoClassDefFoundError: scala/runtime/AbstractFunction1$mcVL$sp
     // val output: String = runWithTimeout(60000, "Process timed out.") {
-      command  !!
+    //  command  !!
     //}
 
-    // TODO, don't sleep.
-    import scala.actors._
-    Thread.sleep(30000)
+    // TODO: Futures?
+    //import akka.dispatch.{Await,Future}
+    //import akka.util.duration._
+    //val myfuture =
+    //  Future {
+    //    command !!
+    //`}
+    //val result = Await.result(myfuture, 1 second)
+    command !!
 
     // TODO: Get output.
     //println(output)
