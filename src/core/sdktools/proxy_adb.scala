@@ -120,7 +120,7 @@ trait AdbProxy {
    * Blocks until a pattern is matched in logcat.
    */
   def logcat_regex(serial: String, regex: String) {
-    val command = s"""$adb -s "$serial" logcat"""
+    val command = s"""$adb -s $serial logcat"""
     // TODO: Platform independent way?
     val grepCmd = Seq("grep", "-q",  "-m",  "1", s"$regex")
     // TODO: What should the timeout be?
@@ -178,7 +178,7 @@ trait AdbProxy {
    * Remove a package from a device.
    */
   def uninstall_package(serial: String, pkg: String, keepData: Boolean = false): Boolean = {
-    var command = s"""$adb -s "$serial" uninstall $pkg"""
+    var command = s"""$adb -s $serial uninstall $pkg"""
     if (keepData) command += s" -k"
     // TODO: Timeout duration?
     val output: String = runWithTimeout(60000, "Process timed out.") {
@@ -207,7 +207,7 @@ trait AdbProxy {
       error("Error: Iff the -all or -shared flags are passed, "+
           "then the package list is optional.")
     }
-    var command = s"""$adb -s "$serial" backup -f $file"""
+    var command = s"""$adb -s $serial backup -f $file"""
     if (apk) command += " -apk"
       else command += " -noapk"
     if (sharedStorage) command += " -shared"
@@ -225,7 +225,7 @@ trait AdbProxy {
    * Restore device contents from the backup archive.
    */
   def restore_device(serial: String, file: String) {
-    val command = s"""$adb -s "$serial" restore -f $file"""
+    val command = s"""$adb -s $serial restore -f $file"""
     val output: String = command !!
 
     println(output)
@@ -288,7 +288,7 @@ trait AdbProxy {
    * Remounts the `/system` partition on the device read-write.
    */
   def remount_system(serial: String) = {
-    val command = s"""$adb "$serial" remount"""
+    val command = s"""$adb $serial remount"""
     val output: String = command !!
   }
   
@@ -296,7 +296,7 @@ trait AdbProxy {
    * Reboots the device normally.
    */
   def reboot_normal(serial: String) {
-    val command = s"""$adb "$serial" reboot"""
+    val command = s"""$adb $serial reboot"""
     val output: String = command !!
   }
   
@@ -304,7 +304,7 @@ trait AdbProxy {
    * Reboots the device into the bootloader.
    */
   def reboot_bootloader(serial: String) {
-    val command = s"""$adb "$serial" reboot-bootloader"""
+    val command = s"""$adb $serial reboot-bootloader"""
     val output: String = command !!
   }
   
@@ -312,7 +312,7 @@ trait AdbProxy {
    * Reboots the device into recovery mode.
    */
   def reboot_recovery(serial: String) {
-    val command = s"""$adb "$serial" reboot recovery"""
+    val command = s"""$adb $serial reboot recovery"""
     val output: String = command !!
   }
   
