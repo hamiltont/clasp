@@ -11,5 +11,6 @@ sdk {
 	adb       = ${sdk.root}platform-tools/adb
 	emulator  = ${sdk.root}tools/emulator
 	android   = ${sdk.root}tools/android
+  aapt      = ${sdk.root}platform-tools/aapt
 }
 
