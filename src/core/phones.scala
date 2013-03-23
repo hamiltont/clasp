@@ -82,6 +82,11 @@ class Emulator(process: Process, val SerialID: String, val telnetPort: Int) {
   def pull(remotePath: String, localPath: String) {
     sdk.pull_from_device(SerialID, remotePath, localPath)
   }
+
+  def stopPackage(name: String) {
+    sdk.remote_shell(SerialID,
+      s"""am force-stop "$name" """);
+  }
 }
 
 /* Physical hardware */
