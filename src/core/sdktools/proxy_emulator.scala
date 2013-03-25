@@ -15,6 +15,7 @@ import sdk_config.log.info
  */
 trait EmulatorProxy {
   val emulator:String = sdk_config.config.getString(sdk_config.emulator_config)
+  val mksdcard:String = sdk_config.config.getString(sdk_config.mksdcard_config)
   import sdk_config.log.{error, debug, info, trace}
 
   /**
@@ -132,6 +133,11 @@ trait EmulatorProxy {
     
     val result = for (regex(name) <- regex findAllIn output) yield name
     result.toVector.last
+  }
+
+  def mksdcard(size: String, path: String) {
+    val command = s"$mksdcard $size $path"
+    command !!
   }
 }
 

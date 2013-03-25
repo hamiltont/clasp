@@ -104,6 +104,7 @@ class Node() {
     sumOfSquares / count.toDouble
   }
 
+  // TODO: Option to run a specific AVD.
   def run_emulator(opts: EmulatorOptions = null): Emulator = {
     devices += EmulatorBuilder.build(current_emulator_port, opts)
     current_emulator_port += 2
