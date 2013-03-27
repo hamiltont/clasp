@@ -1,5 +1,7 @@
 package core.sdktools
 
+import scala.language.postfixOps
+
 import java.io.BufferedReader
 import java.io.IOException
 import org.apache.commons.net.telnet.TelnetClient

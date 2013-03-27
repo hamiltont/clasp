@@ -1,4 +1,5 @@
 package main
+import scala.language.postfixOps
 import scala.sys.process.stringToProcess
 
 class Main extends App { 

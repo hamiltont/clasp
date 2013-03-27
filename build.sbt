@@ -38,3 +38,5 @@ unmanagedJars in Compile +=
 // libraryDependencies += "org.fusesource" % "sigar" % "1.6.4"
 
 libraryDependencies += "org.scala-lang" % "scala-actors" % "2.10.0-M6"
+
+scalacOptions ++= Seq("-feature", "-unchecked", "-deprecation")

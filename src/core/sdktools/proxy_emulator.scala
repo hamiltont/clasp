@@ -1,5 +1,7 @@
 package core.sdktools
 
+import scala.language.postfixOps
+
 import scala.sys.process.Process
 import scala.sys.process.stringToProcess
 
