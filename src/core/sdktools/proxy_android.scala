@@ -35,7 +35,7 @@ trait AndroidProxy {
   def get_targets: Vector[String] = {
     val command = s"$android list targets";
     val output: String = command !!
-    val regex = """id: [0-9]* or \"(.*)\"""".r
+    val regex = "id: [0-9]* or \"(.*)\"".r
     
     val result = for (regex(target) <- regex findAllIn output) yield target
     result.toVector
