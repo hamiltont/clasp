@@ -112,7 +112,13 @@ object EmulatorBuilder {
     if (avds.length != 0)
       return build(avds.head, port, opts)
 
-    sdk.create_avd("initial", "1")
+    // TODO
+    // @Hamilton, how should the abi be specified?
+    // Should it be a configuration option that defaults to this,
+    // or, should it be hard coded in here?
+    //
+    // I was running into problems running this with multiple ABIs.
+    sdk.create_avd("initial", "1", "armeabi-v7a")
     build("initial", port, opts)
   }
 }

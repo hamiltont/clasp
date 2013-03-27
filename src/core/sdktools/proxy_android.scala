@@ -58,6 +58,7 @@ trait AndroidProxy {
    */
   def create_avd(name: String,
                  target: String,
+                 abiName: String,
                  force: Boolean = false): Boolean = {
     if (!force && (get_avd_names contains name)) {
       val errorMsg = s"Error: AVD '$name' already exists."
@@ -65,7 +66,7 @@ trait AndroidProxy {
       return false
     }
     
-    var command = s"$android create avd -n $name -t $target"
+    var command = s"$android create avd -n $name -t $target -b $abiName"
     if (force) {
       command += " --force"
     }
