@@ -11,7 +11,3 @@ Hamilton
 Jos�
   1 - Setup maven on ATAACK and enable use of "maven install" to
   automatically deploy clasp to ataack
-
-Other
-  0 - Build setup script for application.conf that uses "which android",
-  etc to locate binaries.  Also look at "ANDROID_HOME"
