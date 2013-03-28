@@ -7,7 +7,8 @@
 //   ${sdk.root} + "tools/emulator" => The '+' operator is not understood
 
 sdk {
-  root      = "/Development/adt-bundle-mac-x86_64/"
+  // root = "/Development/adt-bundle-mac-x86_64/"
+  root      = ##ANDROID_ROOT##
   aapt      = ${sdk.root}platform-tools/aapt
   adb       = ${sdk.root}platform-tools/adb
   android   = ${sdk.root}tools/android

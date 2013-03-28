@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# autodetect.sh
+# Automatically detects path to ANDROID_HOME and writes them to
+# `application.conf`.
+
+function die { echo $@; exit 42; }
+
+function write_conf {
+  local ANDROID_HOME=$1 # Does not have trailing backslash.
+  sed "s|##ANDROID_ROOT##|\"$ANDROID_HOME/\"|g" \
+    src/application.conf.example \
+    > src/application.conf
+  exit 0
+}
+
+# 1. Check ANDROID_HOME.
+[[ $ANDROID_HOME ]] && write_conf $ANDROID_HOME
+
+# 2. Check `which` and trim.
+ANDROID=$(which android)
+[[ $ANDROID ]] && write_conf ${ANDROID%/*/*}
+
+die "Unable to find Android SDK."

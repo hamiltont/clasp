@@ -1,22 +1,17 @@
 Brandon
-
-    4 - Antimalware in Scala
+  4 - Antimalware in Scala
     
 Hamilton
-
-	3 - Locate cross-network client and implement cross-network node launching. Potentially use 
-	       central hostfile to define nodes and their respective SDK locations. Nodes need to 
-	       register their connected devices and emulators with a central registry
-	4 - Implement emulator hibernation
+  3 - Locate cross-network client and implement cross-network node
+  launching. Potentially use central hostfile to define nodes and their
+  respective SDK locations. Nodes need to register their connected devices
+  and emulators with a central registry 4 - Implement emulator hibernation
 
 
 Jos�
-	1 - Setup maven on ATAACK and enable use of "maven install" to automatically deploy clasp to ataack
+  1 - Setup maven on ATAACK and enable use of "maven install" to
+  automatically deploy clasp to ataack
 
 Other
-
-	0 - Build setup script for application.conf that uses "which android", etc to locate binaries. 
-	       Also look at "ANDROID_HOME"
-
- 
- 
+  0 - Build setup script for application.conf that uses "which android",
+  etc to locate binaries.  Also look at "ANDROID_HOME"
