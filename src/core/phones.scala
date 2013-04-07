@@ -56,6 +56,7 @@ class Emulator(process: Process, val SerialID: String, val telnetPort: Int) {
   def cleanup {
     //load_tick_timer.cancel
     process.destroy
+    process.exitValue // Block until process is destroyed.
   }
 
   // TODO: This might not be the best way to include options within
