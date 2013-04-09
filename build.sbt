@@ -35,8 +35,15 @@ unmanagedJars in Compile +=
 unmanagedJars in Compile +=
   file("lib/logback-1.0.9/logback-core-1.0.9.jar")
 
+// TODO: Get sigar working.
 // libraryDependencies += "org.fusesource" % "sigar" % "1.6.4"
 
-libraryDependencies += "org.scala-lang" % "scala-actors" % "2.10.0-M6"
+libraryDependencies ++= Seq(
+  "org.scala-lang" % "scala-actors" % "2.10.0-M6",
+  "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
+  "com.novocode" % "junit-interface" % "0.10-M2" % "test"
+)
 
 scalacOptions ++= Seq("-feature", "-unchecked", "-deprecation")
+
+testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-a", "-n")
