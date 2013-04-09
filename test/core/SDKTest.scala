@@ -27,8 +27,8 @@ class SDKTest extends AssertionsForJUnit {
     
     val avdName = "clasp-test"
     val avdNewName = avdName + "-new-name"
-    assert(create_avd(avdName, "android-17", true))
-    assert(!create_avd(avdName, "android-17"))
+    assert(create_avd(avdName, "android-17", "armeabi-v7a", true))
+    assert(!create_avd(avdName, "android-17", "armeabi-v7a"))
     val avds = get_avd_names
     assert(avds contains avdName)
     assertFalse(avds contains "not-clasp-test")
@@ -76,7 +76,7 @@ class SDKTest extends AssertionsForJUnit {
     assertEquals("21.1.0", get_emulator_version)
     
     val avdName = "clasp-test"
-    assert(create_avd(avdName, "android-17", true))
+    assert(create_avd(avdName, "android-17", "armeabi-v7a", true))
     val camList = get_webcam_list(avdName)
     assert(camList contains "webcam0")
     
@@ -119,7 +119,7 @@ class SDKTest extends AssertionsForJUnit {
   
   @Test def testTelnet {
     val avdName = "clasp-test"
-    assert(create_avd(avdName, "android-17", true))
+    assert(create_avd(avdName, "android-17", "armeabi-v7a", true))
     
     var emuOpts = new core.sdktools.EmulatorOptions
     emuOpts.noBootAnim = true

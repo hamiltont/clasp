@@ -9,14 +9,13 @@ import java.io.File
 import org.apache.commons.io.FileUtils
 import akka.testkit.TestKit
 
-
 class NodeTest extends AssertionsForJUnit {
   
   @Test def testNode {    
     val node = new Node
-    val emulator = node.run_emulator
+    val emulator = node.run_emulator()
     Thread.sleep(1000);
-    val actor = emulator.actor
+    // val actor = emulator.actor
     
     emulator.cleanup
   }
