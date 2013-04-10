@@ -42,6 +42,8 @@ Unallocated - Features
       If I want to wipe data from an emulator, I have to restart it
       with this option.
       A `cleanAndRestart` method could be helpful.
+ 15 - Add `sigar` libraries when building with `sbt`.
+      Reference: http://stackoverflow.com/questions/14966414/including-hyperic-sigar-library-within-jar-while-using-sbt-assembly-for-scala-pr
 
 Unallocated - Modules
   8 - SMS network modeling.
