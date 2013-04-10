@@ -6,6 +6,8 @@ name := "Clasp"
 
 jarName in assembly := "Clasp-Assembly.jar"
 
+test in assembly := {}
+
 version := "1.0"
 
 scalaVersion := "2.10.0"
