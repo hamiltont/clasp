@@ -1,13 +1,49 @@
 Brandon
-  4 - Antimalware in Scala
+  4 - Antimalware.
     
 Hamilton
   3 - Locate cross-network client and implement cross-network node
-  launching. Potentially use central hostfile to define nodes and their
-  respective SDK locations. Nodes need to register their connected devices
-  and emulators with a central registry 4 - Implement emulator hibernation
+      launching. Potentially use central hostfile to define nodes and their
+      respective SDK locations. Nodes need to register their connected devices
+      and emulators with a central registry 4 - Implement emulator hibernation
 
+Noah
+  2 - Parallelization.
+
+Tanner
+  6 - Obtain a list of abi's and add tests for it.
+ 14 - Make an avd default to an available abi (preferably armeabi-v7a)
+      if none is specified.
+
+      Reference:
+      https://magnum.beanstalkapp.com/clasp/changesets/944d29f7f4f5bcbebd186fc4d42bc514e17cc628
+
+      - Instead of `sdk.create_avd("initial", "1", "armeabi-v7a")`,
+        I should just have to call 
+          `sdk.create_avd("initial", "1", "armeabi-v7a")`
+        if I don't care about the abi and have multiple abis.
+
+George
+  7 - Error checking.
+ 13 - Block for calling `run_emulator` from the node.
 
 Jos�
   1 - Setup maven on ATAACK and enable use of "maven install" to
-  automatically deploy clasp to ataack
+      automatically deploy clasp to ataack
+
+
+
+Unallocated - Features
+  9 - Manage sdcards, specifically for multiple emulators.
+      The problem is that an sdcard image can't be shared between
+      emulators, and new cards need to be created for multiple emulators.
+ 12 - Make sure the wipeData emulator option is actually wiping
+      the data from emulators.
+      If I want to wipe data from an emulator, I have to restart it
+      with this option.
+      A `cleanAndRestart` method could be helpful.
+
+Unallocated - Modules
+  8 - SMS network modeling.
+ 10 - Sensor data.
+ 11 - GPS simulation.
