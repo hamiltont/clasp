@@ -4,6 +4,7 @@ import scala.language.postfixOps
 
 import scala.sys.process.Process
 import scala.sys.process.stringToProcess
+import scala.sys.process.ProcessLogger
 
 import sdk_config.log.info
 
@@ -96,13 +97,16 @@ trait EmulatorProxy {
     
     info(command)
     val builder = Process(command)
-    return (builder.run, "emulator-" + port)
+    val serial = "emulator-" + port
+    val logger = ProcessLogger ( line => info(serial + ":out: " + line), 
+      line => info(serial + ":err: " + line) )
+    val process = builder.run(logger)
+
+    info("Process started")
+
+    return (process, serial)
 
     // TODO - read in the output and ensure that the emulator actually started
-
-    // TODO - link a process logger with some central logging mechanism, so that our 
-    // framework can have debugging
-
   }
 
   /**

@@ -37,6 +37,7 @@ class NodeLauncher extends Actor {
   var n = context.actorOf(Props[Node], name="local")
   n ! "rundefault"
   info("Created Node")
+  Thread.sleep(20000)
   n ! "cleanup"
   info("Cleaned  Node")
 
@@ -53,7 +54,7 @@ class NodeLauncher extends Actor {
 }
 
 class Node extends Actor {
-  lazy val log = LoggerFactory.getLogger(getClass())
+  val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
   import core.sdktools.EmulatorOptions
  
@@ -88,6 +89,7 @@ class Node extends Actor {
   def run_emulator(opts: EmulatorOptions = null): ActorRef = {
     info("Running an emulator")
     devices += EmulatorBuilder.build(current_emulator_port, opts, context)
+    info("emulator built")
     current_emulator_port += 2
     devices.last
   }

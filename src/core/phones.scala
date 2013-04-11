@@ -41,21 +41,11 @@ class EmulatorLoadMonitor(pid: Long) extends Actor {
   }
 }
 
-class Emulator(process: Process, val SerialID: String, val telnetPort: Int) extends Actor {
-  //val s: Sigar = new Sigar
-  //val pf: ProcessFinder = new ProcessFinder(s)
-  //val emulator_pid: Long = pf.findSingleProcess("Args.*.re=5555.5556")
-  //val system = ActorSystem("EmulatorSystem")
-  //val actor = system.actorOf(Props(new EmulatorLoadMonitor(emulator_pid)), name = "emulator-monitor")
-
-  //import system.dispatcher
-  
-  //val load_tick_timer = system.scheduler.schedule(1.seconds, 1.seconds, actor, Load_Tick)
+class Emulator(val process: Process, val SerialID: String, val telnetPort: Int) extends Actor {
  
   override def toString = "Emulator " + SerialID
 
   def cleanup {
-    //load_tick_timer.cancel
     process.destroy
     process.exitValue // Block until process is destroyed.
   }
@@ -77,6 +67,13 @@ class Emulator(process: Process, val SerialID: String, val telnetPort: Int) exte
   // to obtain the serial from the emulator and then pass it to the sdk.
   //
   // TODO @Hamilton, thoughts?
+  // @Brandon - let's differentiate the core API from the core
+  // implementation, and have an EmulatorActor (used internally)
+  // and an Emulator object (used externally). The Emulator object
+  // is created from the EmulatorActor and knows how to complete
+  // method calls such as the ones below. It can make all calls
+  // directly on the sdk object, using the ActorRef when it needs
+  // to retrieve or permanently store data
   def installApk(path: String) {
     sdk.install_package(SerialID, path)
   }
@@ -122,16 +119,23 @@ object EmulatorBuilder {
       sdk.start_emulator(avd_name, port, opts);
     
     info("Emulator built, creating actor")
-    val props = Props(new Emulator(process, serial, port));
-    val actor:ActorRef = context.actorOf(props, "emulator-" + port)
+
+
+    val actor:ActorRef = context.actorOf(new Props(new UntypedActorFactory() {
+            def create = { new Emulator(process, serial, port) }
+          }), serial)
+
     info("Emulator actor created, returning")
     return actor
   }
 
   def build(port: Int, opts: EmulatorOptions = null, context: ActorContext): ActorRef = {
     val avds = sdk.get_avd_names
-    if (avds.length != 0)
-      return build(avds.head, port, opts, context)
+    if (avds.length != 0) {
+      val actor = build(avds.head, port, opts, context)
+      info("Actor received")
+      return actor
+    }
 
     info("No AVDs exist: Building default one...")
     sdk.create_avd("initial", "1", "armeabi-v7a")
