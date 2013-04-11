@@ -7,3 +7,4 @@ application.json
 target/*
 project/project
 project/target
+.nfs*
