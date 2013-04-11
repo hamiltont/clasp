@@ -7,9 +7,8 @@ package core
 import scala.sys.process.Process
 //import org.hyperic.sigar.Sigar
 //import org.hyperic.sigar.ptql.ProcessFinder
-import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.Props
+import akka.actor._
+
 import scala.concurrent.duration._
 import akka.event.Logging
 //import org.hyperic.sigar.ProcTime
@@ -42,14 +41,14 @@ class EmulatorLoadMonitor(pid: Long) extends Actor {
   }
 }
 
-class Emulator(process: Process, val SerialID: String, val telnetPort: Int) {
+class Emulator(process: Process, val SerialID: String, val telnetPort: Int) extends Actor {
   //val s: Sigar = new Sigar
   //val pf: ProcessFinder = new ProcessFinder(s)
   //val emulator_pid: Long = pf.findSingleProcess("Args.*.re=5555.5556")
-  val system = ActorSystem("EmulatorSystem")
+  //val system = ActorSystem("EmulatorSystem")
   //val actor = system.actorOf(Props(new EmulatorLoadMonitor(emulator_pid)), name = "emulator-monitor")
 
-  import system.dispatcher
+  //import system.dispatcher
   
   //val load_tick_timer = system.scheduler.schedule(1.seconds, 1.seconds, actor, Load_Tick)
  
@@ -59,6 +58,15 @@ class Emulator(process: Process, val SerialID: String, val telnetPort: Int) {
     //load_tick_timer.cancel
     process.destroy
     process.exitValue // Block until process is destroyed.
+  }
+  
+  override def preStart() {
+    //context.actorSelection("") ! msg
+    //someService ! Register(self)
+  }
+
+  def receive = {
+    case "cleanup" => {cleanup}
   }
 
   // TODO: This might not be the best way to include options within
@@ -107,20 +115,27 @@ object EmulatorBuilder {
   
   def build(avd_name: String,
             port: Int,
-            opts: EmulatorOptions ): Emulator = {
+            opts: EmulatorOptions,
+            context: ActorContext): ActorRef = {
+    info("Building a new emulator")
     val (process: Process, serial: String) =
       sdk.start_emulator(avd_name, port, opts);
-    new Emulator(process, serial, port)
+    
+    info("Emulator built, creating actor")
+    val props = Props(new Emulator(process, serial, port));
+    val actor:ActorRef = context.actorOf(props, "emulator-" + port)
+    info("Emulator actor created, returning")
+    return actor
   }
 
-  def build(port: Int, opts: EmulatorOptions = null): Emulator = {
+  def build(port: Int, opts: EmulatorOptions = null, context: ActorContext): ActorRef = {
     val avds = sdk.get_avd_names
     if (avds.length != 0)
-      return build(avds.head, port, opts)
+      return build(avds.head, port, opts, context)
 
     info("No AVDs exist: Building default one...")
     sdk.create_avd("initial", "1", "armeabi-v7a")
-    build("initial", port, opts)
+    build("initial", port, opts, context)
   }
 }
 

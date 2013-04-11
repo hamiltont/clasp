@@ -84,7 +84,7 @@ trait AndroidProxy {
     // stdin of create
     val exit = "echo no" #| create ! logger
 
-    output.reverse
+    output = output.reverse
     output foreach info
 
     (exit == 0)

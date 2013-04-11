@@ -91,7 +91,8 @@ trait EmulatorProxy {
 		if(opts.noBootAnim) command += s" -no-boot-anim"
 		if(opts.noWindow) command += s" -no-window"
 		if(opts.force32Bit) command += s" -force-32bit"
-    }
+		if(opts.verbose) command += s" -verbose"
+  }
     
     info(command)
     val builder = Process(command)
@@ -163,4 +164,6 @@ class EmulatorOptions {
       noSnapShotLoad, noSnapShotUpdateTime, wipeData, noSkin,
       dynamicSkin, netFast, showKernel, shell, noJni, noAudio,
       rawKeys, noBootAnim, noWindow, force32Bit = false
+  
+  var verbose = true 
 }

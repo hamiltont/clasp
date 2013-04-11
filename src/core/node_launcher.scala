@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory
 import core.sdktools.sdk
 import core.sdktools.EmulatorOptions
 
+import akka.actor._
+
 /*
  * Handles starting nodes, either to represent this 
  * computer or other computers on the network. If this 
@@ -19,104 +21,79 @@ import core.sdktools.EmulatorOptions
  * response
  * 
  */
-object NodeLauncher extends App {
+object Clasp extends App {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
-  val nodes = ListBuffer[Node]()
-  
-  //var s: Sigar = new Sigar
-  //info(s.getCpuPerc.toString)
+  val system = ActorSystem("clasp")
+  val launcher = system.actorOf(Props[NodeLauncher], name="nodelauncher")
+}
 
-  var n: Node = new Node
-  val opts = new EmulatorOptions
-  opts.noWindow = true
-  val emu: Emulator = n.run_emulator(opts)
-  //val pt: ProcTime = new ProcTime
-  //pt.gather(s, emu.emulator_processid)
-  //info(pt)
+class NodeLauncher extends Actor {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
+  val nodes = ListBuffer[ActorRef]()
 
-  //info(s getCpuPerc)
-
+  var n = context.actorOf(Props[Node], name="local")
+  n ! "rundefault"
   info("Created Node")
-  info("Testing")  
-  
-  //val out = sdk.send_telnet_command(emu.telnetPort, "avd snapshot list")
-  //println(out)
-  
-
-  //pt.gather(s, emu.emulator_processid)
-  //info(pt)
-  n.cleanup
-  info("Cleaned Node")
-
-  //info(s getCpuPerc)
+  n ! "cleanup"
+  info("Cleaned  Node")
 
 
-  def testADB() {
-    assert(sdk.is_adb_available)
+  def receive = {
+    case "node_up" => nodes += sender
+    case "node_down" => nodes -= sender
+  }
+
+  // Send a PoisonPill to all Nodes
+  override def postStop() = {
+
   }
 }
 
-class Node() {
+class Node extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
   import core.sdktools.EmulatorOptions
-  
-  val devices: MutableList[Emulator] = MutableList[Emulator]()
+ 
+  override def preStart() = {
+    context.parent ! "node_up"
+  }
+
+  override def postRestart(reason: Throwable) = {
+    preStart()
+    // TODO search for emulators, manage them?
+  }
+
+  override def postStop() = {
+    // TODO crash emulators? No....
+    context.parent ! "node_down"
+  }
+
+  val devices: MutableList[ActorRef] = MutableList[ActorRef]()
   var current_emulator_port = 5555
   info("A new Node is being constructed")
-  /*val load_monitor: Actor = actor {
-    val s: Sigar = new Sigar 
-    
-    val steady_cpu: Double = (for (i <- 1 to 10) yield {Thread.sleep(10); s.getCpuPerc.getUser}).sum / 10.0 
-    
-    println("Steady state is " + "%.2f".format(100*steady_cpu))
-    val cpu = Queue[Double](steady_cpu, steady_cpu, steady_cpu, steady_cpu, steady_cpu)
 
-    loop {
-      self.receiveWithin(1000) {
-        case "EXIT" => exit()
-        case TIMEOUT => {
-          cpu enqueue s.getCpuPerc.getUser
-          cpu dequeue
-          
-          val std:Double = 100*scala.math.sqrt(variance(cpu))
-          println("%.2f".format(100*cpu.front) + ": " + "%.2f".format(std) + ": " + "%.2f".format((100*cpu.front - std)/std))
-        }
-      }
+  def receive = {
+    case "rundefault" => {
+      val opts = new EmulatorOptions
+      opts.noWindow = true
+      run_emulator(opts)
     }
-  }
-  // Allow sigar a second to build a model of system steady state
-  Thread.sleep(10 * 10)
-  * */
-  
-
-  def mean[T](item: Traversable[T])(implicit n: Numeric[T]) = {
-    n.toDouble(item.sum) / item.size.toDouble
-  }
-
-  def variance[T](items: Traversable[T])(implicit n: Numeric[T]): Double = {
-    val itemMean = mean(items)
-    val count = items.size
-    val sumOfSquares = items.foldLeft(0.0d)((total, item) => {
-      val itemDbl = n.toDouble(item)
-      val square = math.pow(itemDbl - itemMean, 2)
-      total + square
-    })
-    sumOfSquares / count.toDouble
+    case "cleanup" => {cleanup}
   }
 
   // TODO: Option to run a specific AVD.
-  def run_emulator(opts: EmulatorOptions = null): Emulator = {
+  def run_emulator(opts: EmulatorOptions = null): ActorRef = {
     info("Running an emulator")
-    devices += EmulatorBuilder.build(current_emulator_port, opts)
+    devices += EmulatorBuilder.build(current_emulator_port, opts, context)
     current_emulator_port += 2
-    devices.last.asInstanceOf[Emulator]
+    devices.last
   }
 
   def cleanup {
-    devices.foreach(phone => phone.cleanup)
+    devices.foreach(phone => phone ! "cleanup")
   }
 }
 
