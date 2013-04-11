@@ -119,7 +119,7 @@ object EmulatorBuilder {
       return build(avds.head, port, opts)
 
     info("No AVDs exist: Building default one...")
-    sdk.create_avd("initial", "1", "armeabi-v7a")
+    sdk.create_avd("initial", "android-10", "armeabi")
     build("initial", port, opts)
   }
 }
