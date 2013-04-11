@@ -37,6 +37,8 @@ unmanagedJars in Compile ++= Seq(
   file("lib/akka-2.1.0/akka/akka-actor_2.10-2.1.0.jar"),
   file("lib/akka-2.1.0/akka/config-1.0.0.jar"),
   file("lib/akka-2.1.0/akka/akka-remote_2.10-2.1.0.jar"),
+  file("lib/akka-2.1.0/akka/protobuf-java-2.4.1.jar"),
+  file("lib/akka-2.1.0/akka/netty-3.5.8.Final.jar"),
   file("lib/commons-net-3.2/commons-net-3.2.jar"),
   file("lib/commons-net-3.2/commons-net-3.2.jar"),
   file("lib/logback-1.0.9/logback-classic-1.0.9.jar"),
