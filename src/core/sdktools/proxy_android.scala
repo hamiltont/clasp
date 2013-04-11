@@ -2,7 +2,7 @@ package core.sdktools
 
 import scala.language.postfixOps
 
-import scala.sys.process.stringToProcess
+import scala.sys.process._
 
 import sdk_config.log.error
 import sdk_config.log.info
@@ -72,10 +72,34 @@ trait AndroidProxy {
     if (force) {
       command += " --force"
     }
+    info("Building an AVD using")
+    info(command)
     
-    val output: String = "echo no" #| command !!;
-    info(output)
-    true
+    var create = Process(command)
+    var output = List[String]()
+
+    val logger = ProcessLogger( line => output ::= "out: " + line, 
+      line => output ::= "err : " + line );
+    // TODO No need to create two processes, just pass "no" directly to the 
+    // stdin of create
+    val exit = "echo no" #| create ! logger
+
+    output.reverse
+    output foreach info
+
+    (exit == 0)
+  }
+
+  /** Run a command, collecting the stdout, stderr and exit status */
+  def run(cmd: String): (List[String], List[String], Int) = {
+    val pb = Process(cmd)
+    var out = List[String]()
+    var err = List[String]()
+
+    val exit = pb ! ProcessLogger(line => out ::= line,
+      line => err ::= line)
+          
+    (out.reverse, err.reverse, exit) 
   }
 
   /**

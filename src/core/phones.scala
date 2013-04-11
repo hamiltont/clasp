@@ -14,6 +14,8 @@ import scala.concurrent.duration._
 import akka.event.Logging
 //import org.hyperic.sigar.ProcTime
 import core.sdktools._
+import org.slf4j.LoggerFactory
+
 
 case class Load_Tick()
 class EmulatorLoadMonitor(pid: Long) extends Actor {
@@ -100,6 +102,9 @@ class Device(SerialID: String) {
 }
 
 object EmulatorBuilder {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
+  
   def build(avd_name: String,
             port: Int,
             opts: EmulatorOptions ): Emulator = {
@@ -113,12 +118,7 @@ object EmulatorBuilder {
     if (avds.length != 0)
       return build(avds.head, port, opts)
 
-    // TODO
-    // @Hamilton, how should the abi be specified?
-    // Should it be a configuration option that defaults to this,
-    // or, should it be hard coded in here?
-    //
-    // I was running into problems running this with multiple ABIs.
+    info("No AVDs exist: Building default one...")
     sdk.create_avd("initial", "1", "armeabi-v7a")
     build("initial", port, opts)
   }

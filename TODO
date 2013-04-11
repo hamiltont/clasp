@@ -49,3 +49,13 @@ Unallocated - Modules
   8 - SMS network modeling.
  10 - Sensor data.
  11 - GPS simulation.
+
+
+ ISSUES
+  1 - If "android list targets" is empty, then creation of an emulator will 
+      always fail. The failure currently happens when a new emulator is constructed, 
+      but it should happen sooner and a more intelligent error message should appear. 
+      When the framework starts a Node, that Node should cache the available targets
+      and something should predict from the EmulatorConfig that the emulator boot
+      will fail. More importantly, we can likely auto-fix the issue by calling
+      'android update sdk --no-gui' on the command line
