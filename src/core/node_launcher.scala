@@ -8,6 +8,7 @@ import scala.collection.mutable.MutableList
 import org.slf4j.LoggerFactory
 
 import core.sdktools.sdk
+import core.sdktools.EmulatorOptions
 
 /*
  * Handles starting nodes, either to represent this 
@@ -28,7 +29,9 @@ object NodeLauncher extends App {
   //info(s.getCpuPerc.toString)
 
   var n: Node = new Node
-  val emu: Emulator = n.run_emulator(null)
+  val opts = new EmulatorOptions
+  opts.noWindow = true
+  val emu: Emulator = n.run_emulator(opts)
   //val pt: ProcTime = new ProcTime
   //pt.gather(s, emu.emulator_processid)
   //info(pt)
@@ -36,10 +39,10 @@ object NodeLauncher extends App {
   //info(s getCpuPerc)
 
   info("Created Node")
+  info("Testing")  
   
-  
-  val out = sdk.send_telnet_command(emu.telnetPort, "avd snapshot list")
-  println(out)
+  //val out = sdk.send_telnet_command(emu.telnetPort, "avd snapshot list")
+  //println(out)
   
 
   //pt.gather(s, emu.emulator_processid)
@@ -106,6 +109,7 @@ class Node() {
 
   // TODO: Option to run a specific AVD.
   def run_emulator(opts: EmulatorOptions = null): Emulator = {
+    info("Running an emulator")
     devices += EmulatorBuilder.build(current_emulator_port, opts)
     current_emulator_port += 2
     devices.last.asInstanceOf[Emulator]
