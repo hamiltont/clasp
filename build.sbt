@@ -23,6 +23,8 @@ scalaSource in Test <<= baseDirectory(_ / "test")
 // Read `application.conf` from `src`.
 resourceDirectory in Test <<= baseDirectory(_ / "src")
 
+resourceDirectory in Compile <<= baseDirectory(_ / "src")
+
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-a", "-n")
 
 // TODO: Get sigar working.
