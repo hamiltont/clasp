@@ -12,6 +12,8 @@ import core.sdktools.EmulatorOptions
 
 import akka.actor._
 
+import com.typesafe.config.ConfigFactory
+
 // Used for command line parsing
 import org.rogach.scallop._
 
@@ -27,12 +29,18 @@ import org.rogach.scallop._
 object Clasp extends App {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
-
-  val system = ActorSystem("clasp")
+ 
+  var system: ActorSystem = null
 
   val conf = new Conf(args)
   if (conf.client()) {
     info("I am a client!") 
+    
+    val clientConf = ConfigFactory
+      .parseString("akka.remote.netty.hostname=\"10.0.2.7\"")
+      .withFallback(ConfigFactory.load)
+    system = ActorSystem("clasp", clientConf)
+    
     // Create new node, which will auto-register with
     // the NodeLauncher
     var n = system.actorOf(Props[Node], name="10.0.2.6")
@@ -41,6 +49,12 @@ object Clasp extends App {
   }
   else {
     info("I am a server!")
+    
+    val serverConf = ConfigFactory
+      .parseString("akka.remote.netty.hostname=\"10.0.2.6\"")
+      .withFallback(ConfigFactory.load)
+    system = ActorSystem("clasp", serverConf)
+
     // Create NodeLauncher, which will automatically 
     // ssh into each worker computer and properly 
     // run clasp as a client
@@ -103,7 +117,7 @@ class Node extends Actor {
  
   override def preStart() = {
     // Lookup the NodeLauncher
-    val launcher = context.actorFor("akka.tcp://clasp@10.0.2.6:2552/user/nodelauncher")
+    val launcher = context.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
     launcher ! "node_up"
   }
 
@@ -116,7 +130,7 @@ class Node extends Actor {
     // TODO crash emulators? No....
     // TODO - should I even do this, or just watch for the Terminate message from my 
     // children in the NodeLauncher
-    val launcher = context.actorSelection("akka.tcp://clasp@10.0.2.6:2552/nodelauncher")
+    val launcher = context.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
     launcher ! "node_down"
     info("Node " + hostname + " has stopped");
   }
