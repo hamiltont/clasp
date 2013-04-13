@@ -129,13 +129,13 @@ class Node extends Actor {
     case "rundefault" => {
       val opts = new EmulatorOptions
       opts.noWindow = true
-      run_emulator(opts)
+      run_emulator(opts, context)
     }
     case "cleanup" => {cleanup}
   }
 
   // TODO: Option to run a specific AVD.
-  def run_emulator(opts: EmulatorOptions = null): ActorRef = {
+  def run_emulator(opts: EmulatorOptions = null, context: ActorContext): ActorRef = {
     info("Running an emulator")
     devices += EmulatorBuilder.build(current_emulator_port, opts, context)
     info("emulator built")

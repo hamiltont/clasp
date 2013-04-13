@@ -41,13 +41,25 @@ class EmulatorLoadMonitor(pid: Long) extends Actor {
   }
 }
 
-class Emulator(val process: Process, val SerialID: String, val telnetPort: Int) extends Actor {
- 
+// An always-on presence for a single emulator process. 
+//  - Monitors process state (STARTED, READY, etc)
+//  - Can hibernate and resume process internally and transparently to the rest of clasp
+//  - Can receive, queue, and eventually deliver actions on an emulator process
+// Eventually we will have an Emulator object, which will be a proxy that allows 
+// others to interface with the EmulatorActor without having to understand its 
+// interface
+class EmulatorActor(val process: Process, val SerialID: String, val telnetPort: Int) extends Actor {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
+
   override def toString = "Emulator " + SerialID
 
-  def cleanup {
+  override def postStop = {
+    info("Stopping emulator " + SerialID)
+    // TODO can we stop politely by sending a command to the emulator? 
     process.destroy
-    process.exitValue // Block until process is destroyed.
+    process.exitValue // block until destroyed
+    info("Emulator " + SerialID + " stopped")
   }
   
   override def preStart() {
@@ -56,7 +68,7 @@ class Emulator(val process: Process, val SerialID: String, val telnetPort: Int) 
   }
 
   def receive = {
-    case "cleanup" => {cleanup}
+    case _ => { info("EmulatorActor " + SerialID + " received unknown message") }
   }
 
   // TODO: This might not be the best way to include options within
@@ -122,20 +134,20 @@ object EmulatorBuilder {
 
 
     val actor:ActorRef = context.actorOf(new Props(new UntypedActorFactory() {
-            def create = { new Emulator(process, serial, port) }
+            def create = { new EmulatorActor(process, serial, port) }
           }), serial)
 
     info("Emulator actor created, returning")
     return actor
   }
+   
+   def build(port: Int,
+            opts: EmulatorOptions,
+            context: ActorContext): ActorRef = {
 
-  def build(port: Int, opts: EmulatorOptions = null, context: ActorContext): ActorRef = {
     val avds = sdk.get_avd_names
-    if (avds.length != 0) {
-      val actor = build(avds.head, port, opts, context)
-      info("Actor received")
-      return actor
-    }
+    if (avds.length != 0)
+      return build(avds.head, port, opts, context)
 
     info("No AVDs exist: Building default one...")
     sdk.create_avd("initial", "1", "armeabi-v7a")
