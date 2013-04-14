@@ -1,12 +1,16 @@
-import AssemblyKeys._
+import com.typesafe.sbt.SbtStartScript             // Imports xsbt
+import AssemblyKeys._                              // Imports sbt-assembly keys
 
-assemblySettings
+assemblySettings       // Appends sbt-assembly settings to build settings
 
-name := "Clasp"
+seq(SbtStartScript.startScriptForClassesSettings: _*)
 
-jarName in assembly := "Clasp-Assembly.jar"
+name := "Clasp"        // Project name
 
-test in assembly := {}
+jarName in assembly := "Clasp-Assembly.jar"    // Name of fat jar built by sbt-assembly
+
+test in assembly := {}                         // Informs sbt-assembly to not run tests 
+                                               // creating the fat jar
 
 version := "1.0"
 
@@ -50,6 +54,9 @@ unmanagedJars in Test ++= Seq(
   file("lib/akka-2.1.0/akka/akka-testkit_2.10-2.1.0.jar"),
   file("lib/commons-io-2.4/commons-io-2.4.jar")
 )
+
+// TODO add "com.typesafe.akka" %% "akka-remote" % "2.1.0"
+// and remove other libraries
 
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-actors" % "2.10.0-M6",
