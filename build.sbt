@@ -38,13 +38,8 @@ testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-a", "-n")
 
 unmanagedJars in Compile ++= Seq(
   file("lib/akka-2.1.0/akka/slf4j-api-1.7.2.jar"),
-  file("lib/akka-2.1.0/akka/akka-actor_2.10-2.1.0.jar"),
   file("lib/akka-2.1.0/akka/config-1.0.0.jar"),
-  file("lib/akka-2.1.0/akka/akka-remote_2.10-2.1.0.jar"),
-  file("lib/akka-2.1.0/akka/protobuf-java-2.4.1.jar"),
-  file("lib/akka-2.1.0/akka/netty-3.5.8.Final.jar"),
-  file("lib/commons-net-3.2/commons-net-3.2.jar"),
-  file("lib/commons-net-3.2/commons-net-3.2.jar"),
+  file("lib/commons-net-3.2/commons-net-3.2.jar"),            // For proxy_telnet
   file("lib/logback-1.0.9/logback-classic-1.0.9.jar"),
   file("lib/logback-1.0.9/logback-core-1.0.9.jar")
 )
@@ -55,12 +50,11 @@ unmanagedJars in Test ++= Seq(
   file("lib/commons-io-2.4/commons-io-2.4.jar")
 )
 
-// TODO add "com.typesafe.akka" %% "akka-remote" % "2.1.0"
-// and remove other libraries
-
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-actors" % "2.10.0-M6",
   "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
   "com.novocode" % "junit-interface" % "0.10-M2" % "test",
-  "org.rogach" %% "scallop" % "0.8.1"
+  "org.rogach" %% "scallop" % "0.8.1",
+  "com.typesafe.akka" %% "akka-actor" % "2.1.0",
+  "com.typesafe.akka" %% "akka-remote" % "2.1.0"
 )
