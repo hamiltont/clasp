@@ -61,6 +61,6 @@ unmanagedJars in Test ++= Seq(
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-actors" % "2.10.0-M6",
   "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
-  "com.novocode" % "junit-interface" % "0.10-M2" % "test"
+  "com.novocode" % "junit-interface" % "0.10-M2" % "test",
   "org.rogach" %% "scallop" % "0.8.1"
 )
