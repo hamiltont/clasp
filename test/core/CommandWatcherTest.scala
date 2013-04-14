@@ -4,13 +4,8 @@ import org.scalatest.junit.AssertionsForJUnit._
 import org.scalatest.junit.AssertionsForJUnit
 import org.junit.Assert._
 import org.junit.Test
-import org.junit.Before
-import org.junit.After
-import java.io.File
-import org.apache.commons.io.FileUtils
-import akka.testkit.TestKit
-import scala.language.postfixOps
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class AndroidCommandTest extends AssertionsForJUnit  {
 
@@ -140,6 +135,9 @@ class AndroidCommandAsyncTest extends AssertionsForJUnit {
     assert(!watcher.started)
     assert(!watcher.triggered)
     cmd.run()
+    assert(watcher.started)
+    assert(!watcher.triggered)
+    cmd.await()
     assert(cmd.success != None)
     assert(watcher.started)
     assert(!watcher.triggered)
