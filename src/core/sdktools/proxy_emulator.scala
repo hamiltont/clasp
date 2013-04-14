@@ -7,6 +7,8 @@ import scala.sys.process.stringToProcess
 
 import sdk_config.log.info
 
+import core.AsynchronousCommand
+
 /**
  * Provides an interface to the
  * [[http://developer.android.com/tools/help/emulator.html `emulator`]]
@@ -109,11 +111,8 @@ trait EmulatorProxy {
    */
   def get_snapshot_list(avd_name: String): Vector[String] = {
     val command = s"$emulator @$avd_name -snapshot-list"
-    val output: String = command !!;
     val regex = """\[[0-9]+\][ ]*(.*)""".r
-    
-    val result = for (regex(name) <- regex findAllIn output) yield name
-    result.toVector
+    AsynchronousCommand.resultsOf(command, regex) getOrElse Vector()
   }
   
   /**
@@ -121,25 +120,19 @@ trait EmulatorProxy {
    */
   def get_webcam_list(avd_name: String): Vector[String] = {
     val command = s"$emulator @$avd_name -webcam-list"
-    val output: String = command !!;
     val regex = """Camera '([^']*)'""".r
-    
-    val result = for (regex(name) <- regex findAllIn output) yield name
-    result.toVector
+    AsynchronousCommand.resultsOf(command, regex) getOrElse Vector()
   }
   
   def get_emulator_version: String = {
     val command = s"$emulator -version"
-    val output: String = command !!;
     val regex = """Android emulator version ([0-9.]*)""".r
-    
-    val result = for (regex(name) <- regex findAllIn output) yield name
-    result.toVector.last
+    AsynchronousCommand.resultsOf(command, regex).map(_.last) getOrElse ""
   }
 
   def mksdcard(size: String, path: String) {
     val command = s"$mksdcard $size $path"
-    command !!
+    AsynchronousCommand.resultOf(command)
   }
 }
 
