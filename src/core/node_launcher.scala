@@ -12,6 +12,13 @@ import core.sdktools.EmulatorOptions
 
 import akka.actor._
 
+// For SSH into remotes and starting clients
+import scala.sys.process._
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import java.io.IOException
+
 import com.typesafe.config.ConfigFactory
 
 // Used for command line parsing
@@ -34,26 +41,32 @@ object Clasp extends App {
  
 
   val conf = new Conf(args)
-  if (conf.client()) 
-    run_client
+  // Was a hostname provided, or should we locate it? 
+  var ip: String = "none"
+  if (conf.ip.get == None)
+    ip = "10.0.2." + "hostname".!!
   else
-    run_master
+    ip = conf.ip()
+  ip = ip.stripLineEnd
+  info(s"Using IP $ip")
+
+  if (conf.client()) 
+    run_client(ip, "10.0.2.6")
+  else
+    // TODO make server a command line argument
+    run_master(ip, List("10.0.2.8", "10.0.2.7"))
   info("App constructor is done")
-  // TODO ask configuration if we should create a local node object
 
-  def run_client {
+  def run_client(hostname:String, server: String) {
     info("I am a client!") 
-
-    //val command = s"$adb connect $host:$port"
-    val hostname = "10.0.2.7"
-    val port = "2253"
+    
     val clientConf = ConfigFactory
       .parseString(s"""
         akka {
           remote {
             netty {
               hostname = "$hostname"
-              port = $port
+              port     = 2553
             }
           }
         }
@@ -63,23 +76,16 @@ object Clasp extends App {
 
     // Create new node, which will auto-register with
     // the NodeManger
-    var n = system.actorOf(Props(new Node(hostname, "10.0.2.6")), 
+    var n = system.actorOf(Props(new Node(hostname, server)), 
       name=s"node-$hostname")
     //n ! "rundefault"
     info("Created Node")
-    info("Chilling out for a while")
-    Thread.sleep(2000)
-  
-    info("I'm going to try and bring down the entire system!")
-    val launcher = system.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
-
-    launcher ! "shutdown"
+    info("Chilling out..I will stay alive until killed")
   }
 
-  def run_master {
+  def run_master(hostname: String, clients: Seq[String]) {
     info("I am the system manager!")
 
-    val hostname = "10.0.2.6"
     val serverConf = ConfigFactory
       .parseString(s"""akka.remote.netty.hostname="$hostname"""")
       .withFallback(ConfigFactory.load)
@@ -88,34 +94,81 @@ object Clasp extends App {
     // Create NodeManger, which will automatically 
     // ssh into each worker computer and properly 
     // run clasp as a client
-    val launcher = system.actorOf(Props[NodeManger], name="nodelauncher")
+    val launcher = system.actorOf(Props(new NodeManger(clients)), 
+      name="nodelauncher")
 
-    info("Created the launcher")
+    info("Created NodeManager")
     info("Chilling out until someone kills me")
-    // Create the local Node
-
-    //info("Shutting down system")
-    //system.shutdown
   }
 }
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
-class NodeManger extends Actor {
+class NodeManger(clients: Seq[String]) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
   val nodes = ListBuffer[ActorRef]()
   // TODO start all clients via SSH
+  start_clients(clients)
+
+  def start_clients(clients:Seq[String]):Unit = {
+    // Locate our working directory
+    val directory: String = "/home/hamiltont/clasp" //"pwd" !!
+
+    try {
+      // Write a script in our home directory 
+      // We assume all clients share the home directory
+      val home: String = System.getProperty("user.home")
+      val file: File = new File(home + "/bootstrap-clasp.sh")
+      info("Building file " + file.getCanonicalPath )
+      if (!file.exists())
+        file.createNewFile();
+      val fw: FileWriter = new FileWriter(file.getAbsoluteFile())
+      val bw: BufferedWriter = new BufferedWriter(fw)
+      bw.write(s"""#!/bin/sh\n
+        \n
+        cd $directory \n
+        nohup target/start --client &> nohup.$$1 & \n
+        """)
+      bw.close()
+
+      // Start each client
+      clients.foreach(ip => {
+          val command: String = s"ssh $ip sh bootstrap-clasp.sh $ip"
+          info(s"Starting $ip using $command")
+          val output: String = Process(command).!!
+          info(s"Output: $output")
+        })
+
+      // Remove bootstrapper
+      val file2: File = new File("~/bootstrap-clasp.sh")
+      file2.delete()
+
+    } catch {
+      case e: IOException => {
+        error("Unable to write bootstrapper, aborting")
+        e.printStackTrace
+        return
+      }
+    }
+  }
 
   // TODO replace this with monitoring child lifecycle
   def monitoring: Receive = {
     case "node_up" => { 
-      info("A node has registered!")
-      nodes += sender 
+      info(s"${nodes.length}: Node ${sender.path} has registered!")
+      nodes += sender
+
+      if (nodes.length == 2) {
+        info("With all nodes up, I'm going to try and bring down the entire system!")
+        val launcher = context.system.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
+        launcher ! "shutdown"
+      }
+
     }
     case "node_down" => {
-      info("A node has deregistered")
       nodes -= sender
+      info(s"${nodes.length}: Node ${sender.path} has deregistered!")
     }
     case "shutdown" => {
       // First register to watch all nodes
@@ -216,5 +269,7 @@ class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
     |""".stripMargin)
 
   val client = opt[Boolean](descr = "Should this run as a client instance")
+  val ip     = opt[String] (descr = "Informs Clasp of the IP address it should bind to." + 
+    "If no explicit IP is provided, then 10.0.2.{hostname} will be used")
 }
 
