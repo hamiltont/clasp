@@ -17,6 +17,8 @@ import com.typesafe.config.ConfigFactory
 // Used for command line parsing
 import org.rogach.scallop._
 
+import System.currentTimeMillis
+
 /*
  * Handles starting nodes, either to represent this 
  * computer or other computers on the network. If this 
@@ -30,97 +32,149 @@ object Clasp extends App {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
  
-  var system: ActorSystem = null
 
   val conf = new Conf(args)
-  if (conf.client()) {
+  if (conf.client()) 
+    run_client
+  else
+    run_master
+  info("App constructor is done")
+  // TODO ask configuration if we should create a local node object
+
+  def run_client {
     info("I am a client!") 
-    
+
+    //val command = s"$adb connect $host:$port"
+    val hostname = "10.0.2.7"
+    val port = "2253"
     val clientConf = ConfigFactory
-      .parseString("akka.remote.netty.hostname=\"10.0.2.7\"")
+      .parseString(s"""
+        akka {
+          remote {
+            netty {
+              hostname = "$hostname"
+              port = $port
+            }
+          }
+        }
+        """)
       .withFallback(ConfigFactory.load)
-    system = ActorSystem("clasp", clientConf)
-    
+    val system = ActorSystem("clasp", clientConf)
+
     // Create new node, which will auto-register with
-    // the NodeLauncher
-    var n = system.actorOf(Props[Node], name="10.0.2.6")
+    // the NodeManger
+    var n = system.actorOf(Props(new Node(hostname, "10.0.2.6")), 
+      name=s"node-$hostname")
     //n ! "rundefault"
     info("Created Node")
-  }
-  else {
-    info("I am a server!")
-    
-    val serverConf = ConfigFactory
-      .parseString("akka.remote.netty.hostname=\"10.0.2.6\"")
-      .withFallback(ConfigFactory.load)
-    system = ActorSystem("clasp", serverConf)
+    info("Chilling out for a while")
+    Thread.sleep(2000)
+  
+    info("I'm going to try and bring down the entire system!")
+    val launcher = system.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
 
-    // Create NodeLauncher, which will automatically 
+    launcher ! "shutdown"
+  }
+
+  def run_master {
+    info("I am the system manager!")
+
+    val hostname = "10.0.2.6"
+    val serverConf = ConfigFactory
+      .parseString(s"""akka.remote.netty.hostname="$hostname"""")
+      .withFallback(ConfigFactory.load)
+    val system = ActorSystem("clasp", serverConf)
+
+    // Create NodeManger, which will automatically 
     // ssh into each worker computer and properly 
     // run clasp as a client
-    val launcher = system.actorOf(Props[NodeLauncher], name="nodelauncher")
-    
-    // TODO ask configuration if we should create a local node object
+    val launcher = system.actorOf(Props[NodeManger], name="nodelauncher")
+
+    info("Created the launcher")
+    info("Chilling out until someone kills me")
+    // Create the local Node
+
+    //info("Shutting down system")
+    //system.shutdown
   }
-
-  info("sleeping")
-  Thread.sleep(20000)
-
-  info("Shutting down system")
-  system.shutdown
 }
 
-}
-
-// todo call into ssh and start all clients. They can
-// then register back with the nodelauncher
-class NodeLauncher extends Actor {
+// Main actor for managing the entire system
+// Starts, tracks, and stops nodes
+class NodeManger extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
   val nodes = ListBuffer[ActorRef]()
-
-  //var n = context.actorOf(Props[Node], name="10.0.2.6")
-  //n ! "rundefault"
-  //info("Created Node")
+  // TODO start all clients via SSH
 
   // TODO replace this with monitoring child lifecycle
-  def receive = {
+  def monitoring: Receive = {
     case "node_up" => { 
       info("A node has registered!")
       nodes += sender 
     }
-    case "node_down" => nodes -= sender
+    case "node_down" => {
+      info("A node has deregistered")
+      nodes -= sender
+    }
+    case "shutdown" => {
+      // First register to watch all nodes
+      nodes.foreach(node => context.watch(node))
+      info("Shutdown requested")
+
+      // Second, transition our receive loop into a Reaper
+      context.become(reaper)
+      info("Transitioned to a reaper")
+
+      // Second, ask all of our nodes to stop
+      nodes.foreach(n => n ! PoisonPill)
+      info("Pill sent to all nodes")
+    }
   }
 
-  // Send a PoisonPill to all Nodes
-  override def postStop() = {
-
+  def reaper: Receive = {
+    case Terminated(ref) =>
+      nodes -= ref
+      info("Node " + ref.path + " Termination received")
+      if (nodes.isEmpty) {
+        info("No more nodes, killing self")  
+        self ! PoisonPill
+      }
+    case _ =>
+      info("In reaper mode, ignoring messages")
   }
+
+  override def postStop = {
+    context.system.registerOnTermination {
+      info("System shutdown achieved at " + System.currentTimeMillis ) }
+    info("postStop. Requesting system shutdown at " + System.currentTimeMillis )
+    context.system.shutdown()
+  }
+
+  // Start in monitor mode
+  def receive = monitoring
+
 }
-
-class Node extends Actor {
+ 
+// Manages the running of the framework on a single node,
+// including ?startup?, shutdown, etc
+class Node(val ip: String, val serverip: String) extends Actor {
   val log = LoggerFactory.getLogger(getClass())
+  val launcher = context.actorFor("akka://clasp@" + serverip + ":2552/user/nodelauncher")
   import log.{error, debug, info, trace}
   import core.sdktools.EmulatorOptions
  
   override def preStart() = {
-    // Lookup the NodeLauncher
-    val launcher = context.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
     launcher ! "node_up"
   }
 
-  override def postRestart(reason: Throwable) = {
-    preStart()
-    // TODO search for emulators, manage them?
-  }
-
   override def postStop() = {
-    // TODO crash emulators? No....
-    // TODO - should I even do this, or just watch for the Terminate message from my 
-    // children in the NodeLauncher
-    val launcher = context.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
-    launcher ! "node_down"
-    info("Node " + hostname + " has stopped");
+    info("Node " + self.path + " has stopped");
+
+    context.system.registerOnTermination {
+      info("System shutdown achieved at " + System.currentTimeMillis) }
+    info("Requesting system shutdown at " + System.currentTimeMillis)
+    context.system.shutdown()
   }
 
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
