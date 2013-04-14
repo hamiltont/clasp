@@ -7,13 +7,14 @@ package core
 import scala.sys.process.Process
 //import org.hyperic.sigar.Sigar
 //import org.hyperic.sigar.ptql.ProcessFinder
-import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.Props
+import akka.actor._
+
 import scala.concurrent.duration._
 import akka.event.Logging
 //import org.hyperic.sigar.ProcTime
 import core.sdktools._
+import org.slf4j.LoggerFactory
+
 
 case class Load_Tick()
 class EmulatorLoadMonitor(pid: Long) extends Actor {
@@ -40,23 +41,35 @@ class EmulatorLoadMonitor(pid: Long) extends Actor {
   }
 }
 
-class Emulator(process: Process, val SerialID: String, val telnetPort: Int) {
-  //val s: Sigar = new Sigar
-  //val pf: ProcessFinder = new ProcessFinder(s)
-  //val emulator_pid: Long = pf.findSingleProcess("Args.*.re=5555.5556")
-  val system = ActorSystem("EmulatorSystem")
-  //val actor = system.actorOf(Props(new EmulatorLoadMonitor(emulator_pid)), name = "emulator-monitor")
+// An always-on presence for a single emulator process. 
+//  - Monitors process state (STARTED, READY, etc)
+//  - Can hibernate and resume process internally and transparently to the rest of clasp
+//  - Can receive, queue, and eventually deliver actions on an emulator process
+// Eventually we will have an Emulator object, which will be a proxy that allows 
+// others to interface with the EmulatorActor without having to understand its 
+// interface
+class EmulatorActor(val process: Process, val SerialID: String, val telnetPort: Int) extends Actor {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
 
-  import system.dispatcher
-  
-  //val load_tick_timer = system.scheduler.schedule(1.seconds, 1.seconds, actor, Load_Tick)
- 
   override def toString = "Emulator " + SerialID
 
-  def cleanup {
-    //load_tick_timer.cancel
+  override def postStop = {
+    info("Stopping emulator " + SerialID)
+    // TODO can we stop politely by sending a command to the emulator? 
+    // TODO verify that all emulator processes have been killed, potentially force kill
     process.destroy
-    process.exitValue // Block until process is destroyed.
+    process.exitValue // block until destroyed
+    info("Emulator " + SerialID + " stopped")
+  }
+  
+  override def preStart() {
+   //context.actorSelection("") ! msg
+    //someService ! Register(self)
+  }
+
+  def receive = {
+    case _ => { info("EmulatorActor " + SerialID + " received unknown message") }
   }
 
   // TODO: This might not be the best way to include options within
@@ -67,6 +80,13 @@ class Emulator(process: Process, val SerialID: String, val telnetPort: Int) {
   // to obtain the serial from the emulator and then pass it to the sdk.
   //
   // TODO @Hamilton, thoughts?
+  // @Brandon - let's differentiate the core API from the core
+  // implementation, and have an EmulatorActor (used internally)
+  // and an Emulator object (used externally). The Emulator object
+  // is created from the EmulatorActor and knows how to complete
+  // method calls such as the ones below. It can make all calls
+  // directly on the sdk object, using the ActorRef when it needs
+  // to retrieve or permanently store data
   def installApk(path: String) {
     sdk.install_package(SerialID, path)
   }
@@ -100,27 +120,40 @@ class Device(SerialID: String) {
 }
 
 object EmulatorBuilder {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
+  
   def build(avd_name: String,
             port: Int,
-            opts: EmulatorOptions ): Emulator = {
+            opts: EmulatorOptions,
+            context: ActorContext): ActorRef = {
+    info("Building a new emulator")
     val (process: Process, serial: String) =
       sdk.start_emulator(avd_name, port, opts);
-    new Emulator(process, serial, port)
-  }
+    
+    info("Emulator built, creating actor")
 
-  def build(port: Int, opts: EmulatorOptions = null): Emulator = {
+
+    val actor:ActorRef = context.actorOf(new Props(new UntypedActorFactory() {
+            def create = { new EmulatorActor(process, serial, port) }
+          }), serial)
+
+    info("Emulator actor created, returning")
+    return actor
+   }
+  
+   
+   def build(port: Int,
+            opts: EmulatorOptions,
+            context: ActorContext): ActorRef = {
+
     val avds = sdk.get_avd_names
     if (avds.length != 0)
-      return build(avds.head, port, opts)
+      return build(avds.head, port, opts, context)
 
-    // TODO
-    // @Hamilton, how should the abi be specified?
-    // Should it be a configuration option that defaults to this,
-    // or, should it be hard coded in here?
-    //
-    // I was running into problems running this with multiple ABIs.
+    info("No AVDs exist: Building default one...")
     sdk.create_avd("initial", "1", "armeabi-v7a")
-    build("initial", port, opts)
+    build("initial", port, opts, context)
   }
 }
 

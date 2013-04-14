@@ -4,6 +4,7 @@ import scala.language.postfixOps
 
 import scala.sys.process.Process
 import scala.sys.process.stringToProcess
+import scala.sys.process.ProcessLogger
 
 import sdk_config.log.info
 
@@ -93,17 +94,21 @@ trait EmulatorProxy {
 		if(opts.noBootAnim) command += s" -no-boot-anim"
 		if(opts.noWindow) command += s" -no-window"
 		if(opts.force32Bit) command += s" -force-32bit"
-    }
+		if(opts.verbose) command += s" -verbose"
+  }
     
     info(command)
     val builder = Process(command)
-    return (builder.run, "emulator-" + port)
+    val serial = "emulator-" + port
+    val logger = ProcessLogger ( line => info(serial + ":out: " + line), 
+      line => info(serial + ":err: " + line) )
+    val process = builder.run(logger)
+
+    info("Process started")
+
+    return (process, serial)
 
     // TODO - read in the output and ensure that the emulator actually started
-
-    // TODO - link a process logger with some central logging mechanism, so that our 
-    // framework can have debugging
-
   }
 
   /**
@@ -156,4 +161,6 @@ class EmulatorOptions {
       noSnapShotLoad, noSnapShotUpdateTime, wipeData, noSkin,
       dynamicSkin, netFast, showKernel, shell, noJni, noAudio,
       rawKeys, noBootAnim, noWindow, force32Bit = false
+  
+  var verbose = true 
 }
