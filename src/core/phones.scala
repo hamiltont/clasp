@@ -57,13 +57,14 @@ class EmulatorActor(val process: Process, val SerialID: String, val telnetPort: 
   override def postStop = {
     info("Stopping emulator " + SerialID)
     // TODO can we stop politely by sending a command to the emulator? 
+    // TODO verify that all emulator processes have been killed, potentially force kill
     process.destroy
     process.exitValue // block until destroyed
     info("Emulator " + SerialID + " stopped")
   }
   
   override def preStart() {
-    //context.actorSelection("") ! msg
+   //context.actorSelection("") ! msg
     //someService ! Register(self)
   }
 
@@ -139,7 +140,8 @@ object EmulatorBuilder {
 
     info("Emulator actor created, returning")
     return actor
-  }
+   }
+  
    
    def build(port: Int,
             opts: EmulatorOptions,
