@@ -21,6 +21,12 @@ import java.io.IOException
 
 import com.typesafe.config.ConfigFactory
 
+// Used to delay shutting down the system. Termination 
+// conditions are a bit hard to come by currently because 
+// the server is designed to stay alive
+import scala.concurrent.duration._
+import scala.language.postfixOps
+
 // Used for command line parsing
 import org.rogach.scallop._
 
@@ -54,8 +60,7 @@ object Clasp extends App {
     run_client(ip, "10.0.2.6")
   else
     // TODO make server a command line argument
-    run_master(ip, List("10.0.2.8", "10.0.2.7"))
-  info("App constructor is done")
+    run_master(ip, List("10.0.2.6","10.0.2.7")) //,"10.0.2.8","10.0.2.9","10.0.2.10","10.0.2.11"))
 
   def run_client(hostname:String, server: String) {
     info("I am a client!") 
@@ -136,8 +141,9 @@ class NodeManger(clients: Seq[String]) extends Actor {
       clients.foreach(ip => {
           val command: String = s"ssh $ip sh bootstrap-clasp.sh $ip"
           info(s"Starting $ip using $command")
-          val output: String = Process(command).!!
-          info(s"Output: $output")
+          val exit = command.!
+          if (exit != 0)
+            error(s"There was some error starting $ip")
         })
 
       // Remove bootstrapper
@@ -153,18 +159,28 @@ class NodeManger(clients: Seq[String]) extends Actor {
     }
   }
 
-  // TODO replace this with monitoring child lifecycle
+  var emulators: Int = 0
   def monitoring: Receive = {
+    case "emulator_up" => {
+      info(s"Received hello from ${sender.path}!")
+      emulators += 1
+      info(s"${emulators} emulators awake")
+    }
     case "node_up" => { 
       info(s"${nodes.length}: Node ${sender.path} has registered!")
       nodes += sender
 
       if (nodes.length == 2) {
-        info("With all nodes up, I'm going to try and bring down the entire system!")
-        val launcher = context.system.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
-        launcher ! "shutdown"
-      }
+        info("All nodes are awake and registered")
+        info("In 1 minute, I'm going to shutdown the server")
+        info("The delay should allow emulators to start")
 
+        val launcher = context.system.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
+        import context.dispatcher
+        context.system.scheduler.scheduleOnce(60 seconds) {
+          launcher ! "shutdown" 
+        }
+      }
     }
     case "node_down" => {
       nodes -= sender
@@ -216,13 +232,24 @@ class Node(val ip: String, val serverip: String) extends Actor {
   val launcher = context.actorFor("akka://clasp@" + serverip + ":2552/user/nodelauncher")
   import log.{error, debug, info, trace}
   import core.sdktools.EmulatorOptions
- 
+  val devices: MutableList[ActorRef] = MutableList[ActorRef]()
+  var current_emulator_port = 5555
+  val opts = new EmulatorOptions
+  opts.noWindow = true
+  context.actorOf(Props(new EmulatorActor(current_emulator_port, opts)),
+    s"emulator-$current_emulator_port")
+  current_emulator_port += 2
+
   override def preStart() = {
+    info(s"Node online: ${self.path}")
     launcher ! "node_up"
   }
 
   override def postStop() = {
     info("Node " + self.path + " has stopped");
+
+    devices.foreach(phone => phone ! PoisonPill)
+    info("Requested emulators to halt")
 
     context.system.registerOnTermination {
       info("System shutdown achieved at " + System.currentTimeMillis) }
@@ -230,31 +257,13 @@ class Node(val ip: String, val serverip: String) extends Actor {
     context.system.shutdown()
   }
 
-  val devices: MutableList[ActorRef] = MutableList[ActorRef]()
-  var current_emulator_port = 5555
-  info("A new Node is being constructed")
-
   def receive = {
-    case "rundefault" => {
-      val opts = new EmulatorOptions
-      opts.noWindow = true
-      run_emulator(opts, context)
+    case "register" => {
+      info(s"Emulator online: ${sender.path}")
+      devices += sender
     }
-    case "cleanup" => {cleanup}
   }
 
-  // TODO: Option to run a specific AVD.
-  def run_emulator(opts: EmulatorOptions = null, context: ActorContext): ActorRef = {
-    info("Running an emulator")
-    devices += EmulatorBuilder.build(current_emulator_port, opts, context)
-    info("emulator built")
-    current_emulator_port += 2
-    devices.last
-  }
-
-  def cleanup {
-    devices.foreach(phone => phone ! "cleanup")
-  }
 }
 
 class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {

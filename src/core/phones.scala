@@ -48,28 +48,34 @@ class EmulatorLoadMonitor(pid: Long) extends Actor {
 // Eventually we will have an Emulator object, which will be a proxy that allows 
 // others to interface with the EmulatorActor without having to understand its 
 // interface
-class EmulatorActor(val process: Process, val SerialID: String, val telnetPort: Int) extends Actor {
+class EmulatorActor(val port:Int, val opts: EmulatorOptions) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
-  override def toString = "Emulator " + SerialID
+  val (process, serialID) = EmulatorBuilder.build(port, opts)
 
   override def postStop = {
-    info("Stopping emulator " + SerialID)
+    info(s"Stopping emulator ${self.path}")
     // TODO can we stop politely by sending a command to the emulator? 
     // TODO verify that all emulator processes have been killed, potentially force kill
     process.destroy
     process.exitValue // block until destroyed
-    info("Emulator " + SerialID + " stopped")
+    info(s"Emulator ${self.path} stopped")
   }
   
   override def preStart() {
-   //context.actorSelection("") ! msg
+    context.parent ! "register"
     //someService ! Register(self)
+
+    // TODO register with a proper manager, not the nodemanager
+    val launcher = context.system.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
+    launcher ! "emulator_up"
   }
 
   def receive = {
-    case _ => { info("EmulatorActor " + SerialID + " received unknown message") }
+    case _ => { 
+      info(s"EmulatorActor ${self.path} received unknown message") 
+    }
   }
 
   // TODO: This might not be the best way to include options within
@@ -88,24 +94,24 @@ class EmulatorActor(val process: Process, val SerialID: String, val telnetPort: 
   // directly on the sdk object, using the ActorRef when it needs
   // to retrieve or permanently store data
   def installApk(path: String) {
-    sdk.install_package(SerialID, path)
+    sdk.install_package(serialID, path)
   }
 
   def startActivity(mainActivity: String) {
     val amStart = s"am start -a android.intent.action.MAIN -n $mainActivity"
-    sdk.remote_shell(SerialID, amStart)
+    sdk.remote_shell(serialID, amStart)
   }
 
   def remoteShell(command: String) {
-    sdk.remote_shell(SerialID, command)
+    sdk.remote_shell(serialID, command)
   }
 
   def pull(remotePath: String, localPath: String) {
-    sdk.pull_from_device(SerialID, remotePath, localPath)
+    sdk.pull_from_device(serialID, remotePath, localPath)
   }
 
   def stopPackage(name: String) {
-    sdk.remote_shell(SerialID,
+    sdk.remote_shell(serialID,
       s"""am force-stop "$name" """);
   }
 }
@@ -123,37 +129,15 @@ object EmulatorBuilder {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
   
-  def build(avd_name: String,
-            port: Int,
-            opts: EmulatorOptions,
-            context: ActorContext): ActorRef = {
-    info("Building a new emulator")
-    val (process: Process, serial: String) =
-      sdk.start_emulator(avd_name, port, opts);
-    
-    info("Emulator built, creating actor")
-
-
-    val actor:ActorRef = context.actorOf(new Props(new UntypedActorFactory() {
-            def create = { new EmulatorActor(process, serial, port) }
-          }), serial)
-
-    info("Emulator actor created, returning")
-    return actor
-   }
-  
-   
-   def build(port: Int,
-            opts: EmulatorOptions,
-            context: ActorContext): ActorRef = {
+   def build(port: Int, opts: EmulatorOptions): (Process, String) = {
 
     val avds = sdk.get_avd_names
     if (avds.length != 0)
-      return build(avds.head, port, opts, context)
-
+      return sdk.start_emulator(avds.head, port, opts);
+      
     info("No AVDs exist: Building default one...")
     sdk.create_avd("initial", "1", "armeabi-v7a")
-    build("initial", port, opts, context)
+    sdk.start_emulator("initial", port, opts);
   }
 }
 
