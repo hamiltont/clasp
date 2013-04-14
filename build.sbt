@@ -16,6 +16,8 @@ version := "1.0"
 
 scalaVersion := "2.10.1"
 
+resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+
 maxErrors := 5
 
 scalacOptions ++= Seq("-feature", "-unchecked", "-deprecation")
@@ -37,11 +39,7 @@ testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-a", "-n")
 //    file("lib/hyperic-sigar-1.6.4/sigar-bin/lib/sigar.jar")
 
 unmanagedJars in Compile ++= Seq(
-  file("lib/akka-2.1.0/akka/slf4j-api-1.7.2.jar"),
-  file("lib/akka-2.1.0/akka/config-1.0.0.jar"),
-  file("lib/commons-net-3.2/commons-net-3.2.jar"),            // For proxy_telnet
-  file("lib/logback-1.0.9/logback-classic-1.0.9.jar"),
-  file("lib/logback-1.0.9/logback-core-1.0.9.jar")
+  file("lib/commons-net-3.2/commons-net-3.2.jar")            // For proxy_telnet
 )
 
 unmanagedJars in Test ++= Seq(
@@ -55,6 +53,9 @@ libraryDependencies ++= Seq(
   "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
   "com.novocode" % "junit-interface" % "0.10-M2" % "test",
   "org.rogach" %% "scallop" % "0.8.1",
-  "com.typesafe.akka" %% "akka-actor" % "2.1.0",
-  "com.typesafe.akka" %% "akka-remote" % "2.1.0"
+  "com.typesafe.akka" %% "akka-actor" % "2.1.2",
+  "com.typesafe.akka" %% "akka-remote" % "2.1.2",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.1.2",
+  "ch.qos.logback" % "logback-classic" % "1.0.9",
+  "com.typesafe" % "config" % "1.0.0"
 )
