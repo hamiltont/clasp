@@ -44,7 +44,6 @@ import System.currentTimeMillis
 object Clasp extends App {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
- 
 
   val conf = new Conf(args)
   // Was a hostname provided, or should we locate it? 
@@ -109,6 +108,16 @@ object Clasp extends App {
 
     info("Created NodeManager")
     info("Chilling out until someone kills me")
+    sys addShutdownHook(kill_master(launcher))
+  }
+
+  def kill_master(launcher: ActorRef) {
+    launcher ! "shutdown"
+    // TODO: Is there a better way to block until launcher is terminated?
+    // The program is killed when this method exits.
+    while (!launcher.isTerminated) {
+      Thread.sleep(5000)
+    }
   }
 }
 
@@ -124,6 +133,7 @@ class NodeManger(val clients: Seq[String]) extends Actor {
   def start_clients(clients:Seq[String]):Unit = {
     // Locate our working directory
     val directory: String = "/home/hamiltont/clasp" //"pwd" !!
+    //val directory: String = "/home/brandon/programs/clasp"
 
     try {
       // Write a script in our home directory 
