@@ -60,7 +60,12 @@ object Clasp extends App {
     run_client(ip, "10.0.2.6")
   else
     // TODO make server a command line argument
-    run_master(ip, List("10.0.2.6","10.0.2.7")) //,"10.0.2.8","10.0.2.9","10.0.2.10","10.0.2.11"))
+    run_master(ip, 
+ List("10.0.2.1",
+      "10.0.2.2",
+      "10.0.2.4",
+      "10.0.2.5"
+    ))
 
   def run_client(hostname:String, server: String) {
     info("I am a client!") 
@@ -109,7 +114,7 @@ object Clasp extends App {
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
-class NodeManger(clients: Seq[String]) extends Actor {
+class NodeManger(val clients: Seq[String]) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
   val nodes = ListBuffer[ActorRef]()
@@ -170,7 +175,7 @@ class NodeManger(clients: Seq[String]) extends Actor {
       info(s"${nodes.length}: Node ${sender.path} has registered!")
       nodes += sender
 
-      if (nodes.length == 2) {
+      if (nodes.length == clients.length) {
         info("All nodes are awake and registered")
         info("In 1 minute, I'm going to shutdown the server")
         info("The delay should allow emulators to start")
@@ -190,6 +195,9 @@ class NodeManger(clients: Seq[String]) extends Actor {
       // First register to watch all nodes
       nodes.foreach(node => context.watch(node))
       info("Shutdown requested")
+
+      info("Sleeping for ~15 more seconds so the user can see if emulator CPU has stabilized")
+      Thread.sleep(15000)
 
       // Second, transition our receive loop into a Reaper
       context.become(reaper)
@@ -236,6 +244,12 @@ class Node(val ip: String, val serverip: String) extends Actor {
   var current_emulator_port = 5555
   val opts = new EmulatorOptions
   opts.noWindow = true
+  context.actorOf(Props(new EmulatorActor(current_emulator_port, opts)),
+    s"emulator-$current_emulator_port")
+  current_emulator_port += 2
+  context.actorOf(Props(new EmulatorActor(current_emulator_port, opts)),
+    s"emulator-$current_emulator_port")
+  current_emulator_port += 2
   context.actorOf(Props(new EmulatorActor(current_emulator_port, opts)),
     s"emulator-$current_emulator_port")
   current_emulator_port += 2
