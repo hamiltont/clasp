@@ -113,10 +113,10 @@ object Clasp extends App {
 
   def kill_master(launcher: ActorRef) {
     launcher ! "shutdown"
-    // TODO: Is there a better way to block until launcher is terminated?
-    // The program is killed when this method exits.
+    // TODO: Ask and then wait.
+    // TODO: Context.system.isterminated (launcher)?
     while (!launcher.isTerminated) {
-      Thread.sleep(5000)
+      Thread.sleep(500)
     }
   }
 }
