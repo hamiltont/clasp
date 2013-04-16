@@ -44,6 +44,8 @@ Unallocated - Features
       A `cleanAndRestart` method could be helpful.
  15 - Add `sigar` libraries when building with `sbt`.
       Reference: http://stackoverflow.com/questions/14966414/including-hyperic-sigar-library-within-jar-while-using-sbt-assembly-for-scala-pr
+ 16 - Provide an AVD manager class for utility functions.
+ 17 - Wrapper objects so the interface doesn't reveal we're using actors.
 
 Unallocated - Modules
   8 - SMS network modeling.
@@ -59,3 +61,5 @@ Unallocated - Modules
       and something should predict from the EmulatorConfig that the emulator boot
       will fail. More importantly, we can likely auto-fix the issue by calling
       'android update sdk --no-gui' on the command line
+  2 - Pass in the hostname/ips of the server.
+  3 - Pass in the hostname/ips of the clients.
