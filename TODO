@@ -8,7 +8,8 @@ Hamilton
       and emulators with a central registry 4 - Implement emulator hibernation
 
 Noah
-  2 - Parallelization.
+  2 - Pass in the hostname/ips of the server.
+  3 - Pass in the hostname/ips of the clients.
 
 Tanner
   6 - Obtain a list of abi's and add tests for it.
@@ -44,6 +45,8 @@ Unallocated - Features
       A `cleanAndRestart` method could be helpful.
  15 - Add `sigar` libraries when building with `sbt`.
       Reference: http://stackoverflow.com/questions/14966414/including-hyperic-sigar-library-within-jar-while-using-sbt-assembly-for-scala-pr
+ 16 - Provide an AVD manager class for utility functions.
+ 17 - Wrapper objects so the interface doesn't reveal we're using actors.
 
 Unallocated - Modules
   8 - SMS network modeling.
