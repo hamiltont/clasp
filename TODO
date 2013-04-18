@@ -8,7 +8,8 @@ Hamilton
       and emulators with a central registry 4 - Implement emulator hibernation
 
 Noah
-  2 - Parallelization.
+  2 - Pass in the hostname/ips of the server.
+  3 - Pass in the hostname/ips of the clients.
 
 Tanner
   6 - Obtain a list of abi's and add tests for it.
@@ -61,5 +62,3 @@ Unallocated - Modules
       and something should predict from the EmulatorConfig that the emulator boot
       will fail. More importantly, we can likely auto-fix the issue by calling
       'android update sdk --no-gui' on the command line
-  2 - Pass in the hostname/ips of the server.
-  3 - Pass in the hostname/ips of the clients.
