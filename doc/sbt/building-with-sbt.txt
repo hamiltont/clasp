@@ -10,6 +10,8 @@ After installing sbt, Clasp can be built with:
 This will compile the sources and include the libraries in a jar file
 located at `<Clasp>/target/Clasp-Assembly.jar`.
 
+Note: I've had trouble using this command from a NFS client.
+
 
 1. Overview of sbt.
 -------------------
@@ -47,6 +49,7 @@ Next, jars are manually added to the classpath with:
         file("lib/hyperic-sigar-1.6.4/sigar-bin/lib/sigar.jar")
 
 See http://www.scala-sbt.org/release/docs/Detailed-Topics/Library-Management.
+
 
 
 3. `plugins.sbt` contents.
