@@ -62,3 +62,5 @@ Unallocated - Modules
       and something should predict from the EmulatorConfig that the emulator boot
       will fail. More importantly, we can likely auto-fix the issue by calling
       'android update sdk --no-gui' on the command line
+  2 - Create test cases for nodes once development on this is more
+      complete.
