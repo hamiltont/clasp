@@ -24,6 +24,13 @@ class SDKTest extends AssertionsForJUnit {
     assert(get_targets contains "android-17")
     assert(get_sdk contains
       "Intel x86 Atom System Image, Android API 17, revision 1")
+
+    // Assume every target will have `armeabi-v7a`.
+    val allTargetABIs = get_target_ABIs
+    // println(allTargetABIs mkString " | ")
+    for (targetABIs <- allTargetABIs) {
+      assert(targetABIs contains "armeabi-v7a")
+    }
     
     val avdName = "clasp-test"
     val avdNewName = avdName + "-new-name"

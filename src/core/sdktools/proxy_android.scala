@@ -42,6 +42,20 @@ trait AndroidProxy {
     val result = for (regex(target) <- regex findAllIn output) yield target
     result.toVector
   }
+
+  /**
+   * List ABIs corresponding with each entry from the existing
+   * targets Vector.
+   */
+  def get_target_ABIs: Vector[Vector[String]] = {
+    val command = s"$android list targets";
+    val output: String = command !!
+
+    val regex = "ABIs : (.*)".r
+    val result = for (regex(target) <- regex findAllIn output)
+      yield target.split(", ").toVector
+    result.toVector
+  }
   
   /**
    * Lists remote SDK repository.
