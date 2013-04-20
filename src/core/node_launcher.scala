@@ -112,12 +112,14 @@ object Clasp extends App {
   }
 
   def kill_master(launcher: ActorRef) {
+    // TODO: Conditions for this.
     launcher ! "shutdown"
     // TODO: Ask and then wait.
     // TODO: Context.system.isterminated (launcher)?
     while (!launcher.isTerminated) {
       Thread.sleep(500)
     }
+    // TODO: Context.system.shutdown somewhere?
   }
 }
 
