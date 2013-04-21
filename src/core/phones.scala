@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 
 import scala.language.postfixOps
 
-case class Execute (f: () => Any) extends Serializable 
+case class Execute (f: () => Any, setBusy: Boolean) extends Serializable 
 
 case class Load_Tick()
 class EmulatorLoadMonitor(pid: Long) extends Actor {
@@ -108,9 +108,11 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions) extends Actor {
     // TODO: Add the option to reboot and refresh an emulator.
     // case "reboot" => {
     // }
-    case Execute(func) => {
+    case Execute(func, setBusy) => {
       info(s"Executing function.")
+      if (setBusy) isBusy = true
       func()
+      if (setBusy) isBusy = false
     }
     case _ => {
       info(s"EmulatorActor ${self.path} received unknown message")

@@ -61,7 +61,11 @@ object ClaspRunner extends App {
       println(s"serialID: ${device.serialID}, isBusy: ${device.isBusy}")
     }
 
-    devices(0).installApk("examples/antimalware/Profiler.apk")
+    info(s"Waiting for 5 minutes before installing packages.")
+    Thread.sleep(60000*5)
+    for (device <- devices) {
+      device.installApk("examples/antimalware/Profiler.apk")
+    }
 
     //println("Let's wait for 1 minute and hope the emulators load! :D")
     //Thread.sleep(60000)
@@ -212,10 +216,8 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
     return Await.result(f, 100 seconds)
   }
 
-  def installApk(path: String) {
-    info(s"Waiting for 3 minutes before installing package on $serialID.")
-    Thread.sleep(60000*3)
-    info("Installing package.")
-    emulatorActor ! Execute(() => sdk.install_package(serialID, path))
+  def installApk(path: String, setBusy: Boolean = true) {
+    info(s"Installing package: $path.")
+    emulatorActor ! Execute(() => sdk.install_package(serialID, path), setBusy)
   }
 }

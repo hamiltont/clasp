@@ -179,6 +179,10 @@ class Node(val ip: String, val serverip: String) extends Actor {
   val opts = new EmulatorOptions
   opts.noWindow = true
 
+  // TODO: Better ways to ensure device appear online?
+  sdk.kill_adb
+  sdk.start_adb
+
   // TODO: This way causes all emulators to be started with port=5561!
   //       I have to idea why, but using the loop below causes the
   //       emulators to be started on the right port.
@@ -197,14 +201,14 @@ class Node(val ip: String, val serverip: String) extends Actor {
   current_emulator_port += 2
   */
 
+  /*
   context.actorOf(Props(new EmulatorActor(base_emulator_port,
     opts)), s"emulator-${base_emulator_port}")
-  /*
+  */
   for (i <- 0 to 2) {
     context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*i,
       opts)), s"emulator-${base_emulator_port+2*i}")
   }
-  */
 
   override def preStart() = {
     info(s"Node online: ${self.path}")
