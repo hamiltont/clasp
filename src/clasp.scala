@@ -39,8 +39,14 @@ object ClaspRunner extends App {
     // TODO: We shouldn't have to sleep like this.
     //       Add an option to wait until all emulators are alive,
     //       but not necessarily entirely booted.
-    Thread.sleep(5000)
+    Thread.sleep(15000)
+
+    printf("\n\n\n=====================================\n")
     val devices = clasp.get_devices
+    if (devices isEmpty) {
+      println("Found no devices! Expect errors.")
+    }
+
     println("Device statuses:")
     for (device <- devices) {
       println(s"serialID: ${device.serialID}, isBusy: ${device.isBusy}")
@@ -53,6 +59,11 @@ object ClaspRunner extends App {
     for (device <- devices) {
       println(s"serialID: ${device.serialID}, isBusy: ${device.isBusy}")
     }
+
+    //println("Let's wait for 1 minute and hope the emulators load! :D")
+    //Thread.sleep(60000)
+
+    printf("=====================================\n\n\n")
 
     clasp.kill
   }

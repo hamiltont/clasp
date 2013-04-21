@@ -5,6 +5,7 @@
 package core
 
 import scala.sys.process.Process
+import scala.sys.process._ // TODO: Might not need...
 //import org.hyperic.sigar.Sigar
 //import org.hyperic.sigar.ptql.ProcessFinder
 import akka.actor._
@@ -15,6 +16,7 @@ import akka.event.Logging
 import core.sdktools._
 import org.slf4j.LoggerFactory
 
+import scala.language.postfixOps
 
 case class Load_Tick()
 class EmulatorLoadMonitor(pid: Long) extends Actor {
@@ -160,8 +162,26 @@ object EmulatorBuilder {
    def build(port: Int, opts: EmulatorOptions): (Process, String) = {
 
     val avds = sdk.get_avd_names
-    if (avds.length != 0)
+    if (avds.length != 0) {
+      info("Using the head avd.")
+      
+      // Give each emulator a unique sdcard.
+      // TODO: Where should this be put?
+      //       Putting it here seemed logical (and easy) to me.
+      // TODO: Make this work for multiple nodes.
+      var hostname = "hostname" !!;
+      hostname = hostname.trim
+      val sdcardName = s"sdcard-$hostname-$port"
+      info(s"Creating sdcard: '$sdcardName'")
+      sdk.mksdcard("32MB", sdcardName)
+      if (opts.sdCard != null) {
+        // TODO: What should be done in this case?
+        info("Warning: Overriding default sdcard option.")
+      }
+      opts.sdCard = sdcardName
+
       return sdk.start_emulator(avds.head, port, opts);
+    }
       
     info("No AVDs exist: Building default one...")
     sdk.create_avd("initial", "1", "armeabi-v7a")
