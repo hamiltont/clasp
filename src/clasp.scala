@@ -26,7 +26,7 @@ object ClaspRunner extends App {
 
   val conf = new ClaspConf(args)
 
-  // Was a hostname provided, or should we locate it? 
+  // Was a hostname provided, or should we locate it?
   var ip: String = "none"
   if (conf.ip.get == None)
     ip = "10.0.2." + "hostname".!!
@@ -36,13 +36,25 @@ object ClaspRunner extends App {
 
   var clasp = new Clasp(ip, conf.client())
   if (!conf.client()) {
-    // TODO: I shouldn't have to sleep like this.
+    // TODO: We shouldn't have to sleep like this.
+    //       Add an option to wait until all emulators are alive,
+    //       but not necessarily entirely booted.
     Thread.sleep(5000)
-    clasp.get_devices
-    println("Getting all serialID's from devices.")
-    for (device <- clasp.get_devices) {
-      println("serialID: "+ device.serialID)
+    val devices = clasp.get_devices
+    println("Device statuses:")
+    for (device <- devices) {
+      println(s"serialID: ${device.serialID}, isBusy: ${device.isBusy}")
     }
+    
+    println("Setting the first device as busy.")
+    devices(0).setBusy(true)
+
+    println("Device statuses:")
+    for (device <- devices) {
+      println(s"serialID: ${device.serialID}, isBusy: ${device.isBusy}")
+    }
+
+    clasp.kill
   }
 }
 
@@ -67,7 +79,7 @@ class Clasp(val ip: String, val isClient: Boolean) {
     run_master(ip, List("10.0.2.1")) //, "10.0.2.2", "10.0.2.4", "10.0.2.5"))
   }
 
-  def get_devices(): List[Emulator] = {
+  def get_devices: List[Emulator] = {
     if (isClient) {
       info("'get_devices' called on a client!")
       return null
@@ -83,6 +95,11 @@ class Clasp(val ip: String, val isClient: Boolean) {
     val emulators = emulator_actors.map(new Emulator(_)).toList
     //println(emulators)
     return emulators
+  }
+
+  def kill {
+    info("Killing Clasp and emulators.")
+    kill_master(launcher)
   }
 
   private def run_client(hostname:String, server: String) {
@@ -158,10 +175,24 @@ class Clasp(val ip: String, val isClient: Boolean) {
 }
 
 class Emulator(emulatorActor: ActorRef) {
-  /*
-  val port = emulatorActor.port
-  val serialID = emulatorActor.serialID
-  */
-  val f = ask(emulatorActor, "get_serialID", 60000).mapTo[String]
-  val serialID = Await.result(f, 100 seconds)
+  // TODO: There's possibly a better way to do thits?
+  var serialID = "unset"
+
+  {
+    val f = ask(emulatorActor, "get_serialID", 60000).mapTo[String]
+    serialID = Await.result(f, 100 seconds)
+  }
+
+  def setBusy(isBusy: Boolean) {
+    if (isBusy) {
+      emulatorActor ! "set_busy"
+    } else {
+      emulatorActor ! "unset_busy"
+    }
+  }
+
+  def isBusy: Boolean = {
+    val f = ask(emulatorActor, "is_busy", 60000).mapTo[Boolean]
+    return Await.result(f, 100 seconds)
+  }
 }

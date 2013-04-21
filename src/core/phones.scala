@@ -55,6 +55,18 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions) extends Actor {
   info(s"Port is: $port")
   val (process, serialID) = EmulatorBuilder.build(port, opts)
 
+  var isBooted = false
+  // TODO: Wait for the emulators to be booted and set an `isBooted` flag
+  // when we're certain the emulators are _entirely_ booted.
+  // Note: Only calling `wait_for_device` returns too early,
+  // before the emulators can be fully interacted with.
+
+  // Keep track if the emulator is currently performing an action
+  // in which we shouldn't start another action.
+  // For flexibility, let the user entirely control this.
+  // If they want to ignore it, let them.
+  var isBusy = false
+
   override def postStop = {
     info(s"Stopping emulator ${self.path}")
     // TODO can we stop politely by sending a command to the emulator? 
@@ -77,7 +89,19 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions) extends Actor {
     case "get_serialID" => {
       sender ! serialID
     }
-    case _ => { 
+    case "is_booted" => {
+      sender ! isBooted
+    }
+    case "is_busy" => {
+      sender ! isBusy
+    }
+    case "set_busy" => {
+      isBusy = true
+    }
+    case "unset_busy" => {
+      isBusy = false
+    }
+    case _ => {
       info(s"EmulatorActor ${self.path} received unknown message") 
     }
   }
