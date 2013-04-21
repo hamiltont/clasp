@@ -41,6 +41,22 @@ Tanner
 
 George
   7 - Error checking.
+      Currently, we're able to timeout a command.
+      Can we now try to integrate re-running commands
+      and error-recovery into the framework?
+
+      Also, give some thought to where this error recovery should go.
+      If I want to install an APK to an emulator,
+      should I give you error recovery options to say:
+        "Keep restarting this emulator if you can't install the APK."
+      
+      At what point should a command return to the code using the
+      SDK that it failed to execute, and how should this be handled?
+
+      I like how you're using Options within AsynchronousCommand,
+      would it be feasible for the SDK commands to pass along Options
+      to help with error recovery?
+
  13 - Block for calling `run_emulator` from the node.
       Modification: Inside of EmulatorActor, I've added an `isBooted`
       flag, which should be set to false until the emulator has completely
