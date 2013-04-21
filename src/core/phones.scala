@@ -103,8 +103,11 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions) extends Actor {
     case "unset_busy" => {
       isBusy = false
     }
+    // TODO: Add the option to reboot and refresh an emulator.
+    // case "reboot" => {
+    // }
     case _ => {
-      info(s"EmulatorActor ${self.path} received unknown message") 
+      info(s"EmulatorActor ${self.path} received unknown message")
     }
   }
 
