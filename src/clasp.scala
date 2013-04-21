@@ -16,6 +16,7 @@ import akka.actor._
 import akka.pattern.Patterns.ask
 
 import core._
+import core.sdktools.sdk
 
 /*
  * Example of using Clasp.
@@ -59,6 +60,8 @@ object ClaspRunner extends App {
     for (device <- devices) {
       println(s"serialID: ${device.serialID}, isBusy: ${device.isBusy}")
     }
+
+    devices(0).installApk("examples/antimalware/Profiler.apk")
 
     //println("Let's wait for 1 minute and hope the emulators load! :D")
     //Thread.sleep(60000)
@@ -154,7 +157,6 @@ class Clasp(val ip: String, val isClient: Boolean) {
       name="nodelauncher")
 
     info("Created NodeManger")
-    info("Chilling out until someone kills me")
     sys addShutdownHook(kill_master(launcher))
   }
 
@@ -185,7 +187,10 @@ class Clasp(val ip: String, val isClient: Boolean) {
   }
 }
 
-class Emulator(emulatorActor: ActorRef) {
+class Emulator(emulatorActor: ActorRef) extends Serializable {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
+
   // TODO: There's possibly a better way to do thits?
   var serialID = "unset"
 
@@ -205,5 +210,12 @@ class Emulator(emulatorActor: ActorRef) {
   def isBusy: Boolean = {
     val f = ask(emulatorActor, "is_busy", 60000).mapTo[Boolean]
     return Await.result(f, 100 seconds)
+  }
+
+  def installApk(path: String) {
+    info(s"Waiting for 3 minutes before installing package on $serialID.")
+    Thread.sleep(60000*3)
+    info("Installing package.")
+    emulatorActor ! Execute(() => sdk.install_package(serialID, path))
   }
 }

@@ -197,10 +197,14 @@ class Node(val ip: String, val serverip: String) extends Actor {
   current_emulator_port += 2
   */
 
+  context.actorOf(Props(new EmulatorActor(base_emulator_port,
+    opts)), s"emulator-${base_emulator_port}")
+  /*
   for (i <- 0 to 2) {
     context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*i,
       opts)), s"emulator-${base_emulator_port+2*i}")
   }
+  */
 
   override def preStart() = {
     info(s"Node online: ${self.path}")

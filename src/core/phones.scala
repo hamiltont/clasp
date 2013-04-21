@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory
 
 import scala.language.postfixOps
 
+case class Execute (f: () => Any) extends Serializable 
+
 case class Load_Tick()
 class EmulatorLoadMonitor(pid: Long) extends Actor {
   val log = Logging(context.system, this)
@@ -106,6 +108,10 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions) extends Actor {
     // TODO: Add the option to reboot and refresh an emulator.
     // case "reboot" => {
     // }
+    case Execute(func) => {
+      info(s"Executing function.")
+      func()
+    }
     case _ => {
       info(s"EmulatorActor ${self.path} received unknown message")
     }
@@ -126,6 +132,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions) extends Actor {
   // method calls such as the ones below. It can make all calls
   // directly on the sdk object, using the ActorRef when it needs
   // to retrieve or permanently store data
+  /*
   def installApk(path: String) {
     sdk.install_package(serialID, path)
   }
@@ -147,6 +154,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions) extends Actor {
     sdk.remote_shell(serialID,
       s"""am force-stop "$name" """);
   }
+  */
 }
 
 /* Physical hardware */
@@ -165,8 +173,8 @@ object EmulatorBuilder {
    def build(port: Int, opts: EmulatorOptions): (Process, String) = {
 
     val avds = sdk.get_avd_names
-    if (avds.length != 0) {
-      info("Using the head avd.")
+    //if (avds.length != 0) {
+    //  info("Using the head avd.")
       
       // Give each emulator a unique sdcard.
       // TODO: Where should this be put?
@@ -174,6 +182,12 @@ object EmulatorBuilder {
       // TODO: Make this work for multiple nodes.
       var hostname = "hostname" !!;
       hostname = hostname.trim
+
+      val avdName = s"$hostname-$port"
+      info("Building unique AVD.")
+      sdk.create_avd(avdName, "1", "armeabi-v7a", true)
+      sdk.start_emulator("initial", port, opts);
+
       val sdcardName = s"sdcard-$hostname-$port"
       info(s"Creating sdcard: '$sdcardName'")
       sdk.mksdcard("32MB", sdcardName)
@@ -183,12 +197,12 @@ object EmulatorBuilder {
       }
       opts.sdCard = sdcardName
 
-      return sdk.start_emulator(avds.head, port, opts);
-    }
+      return sdk.start_emulator(avdName, port, opts);
+    //}
       
-    info("No AVDs exist: Building default one...")
-    sdk.create_avd("initial", "1", "armeabi-v7a")
-    sdk.start_emulator("initial", port, opts);
+    //info("No AVDs exist: Building default one...")
+    //sdk.create_avd("initial", "1", "armeabi-v7a")
+    //sdk.start_emulator("initial", port, opts);
   }
 }
 
