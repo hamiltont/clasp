@@ -17,6 +17,7 @@ import akka.pattern.Patterns.ask
 
 import core._
 import core.sdktools.sdk
+import core.sdktools.EmulatorOptions
 
 /*
  * Example of using Clasp.
@@ -35,7 +36,10 @@ object ClaspRunner extends App {
     ip = conf.ip()
   ip = ip.stripLineEnd
 
-  var clasp = new Clasp(ip, conf.client())
+  // TODO: Add a way for emulator options to be nonuniform?
+  val opts = new EmulatorOptions
+  opts.noWindow = true
+  var clasp = new Clasp(ip, conf.client(), opts)
   if (!conf.client()) {
     // TODO: We shouldn't have to sleep like this.
     //       Add an option to wait until all emulators are alive,
@@ -84,7 +88,7 @@ object ClaspRunner extends App {
  * communication mechanism and await the callback 
  * response
  */
-class Clasp(val ip: String, val isClient: Boolean) {
+class Clasp(val ip: String, val isClient: Boolean, val emuOpts: EmulatorOptions) {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
   private var launcher: ActorRef = null
@@ -139,7 +143,7 @@ class Clasp(val ip: String, val isClient: Boolean) {
 
     // Create new node, which will auto-register with
     // the NodeManger
-    var n = system.actorOf(Props(new Node(hostname, server)), 
+    var n = system.actorOf(Props(new Node(hostname, server, emuOpts)), 
       name=s"node-$hostname")
     //n ! "rundefault"
     info("Created Node.")

@@ -169,15 +169,18 @@ class NodeManger(val clients: Seq[String]) extends Actor {
  
 // Manages the running of the framework on a single node,
 // including ?startup?, shutdown, etc.
-class Node(val ip: String, val serverip: String) extends Actor {
+class Node(val ip: String, val serverip: String,
+    val emuOpts: EmulatorOptions) extends Actor {
   val log = LoggerFactory.getLogger(getClass())
   val launcher = context.actorFor("akka://clasp@" + serverip + ":2552/user/nodelauncher")
   import log.{error, debug, info, trace}
   import core.sdktools.EmulatorOptions
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
   var base_emulator_port = 5555
-  val opts = new EmulatorOptions
-  opts.noWindow = true
+
+  // Moved outside of Node so the options can be set with the API.
+  // val opts = new EmulatorOptions
+  // opts.noWindow = true
 
   // TODO: Better ways to ensure device appear online?
   sdk.kill_adb
@@ -207,7 +210,7 @@ class Node(val ip: String, val serverip: String) extends Actor {
   */
   for (i <- 0 to 2) {
     context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*i,
-      opts)), s"emulator-${base_emulator_port+2*i}")
+      emuOpts)), s"emulator-${base_emulator_port+2*i}")
   }
 
   override def preStart() = {
