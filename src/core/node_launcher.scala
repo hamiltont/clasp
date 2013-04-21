@@ -11,6 +11,7 @@ import core.sdktools.sdk
 import core.sdktools.EmulatorOptions
 
 import akka.actor._
+import akka.pattern.Patterns.ask
 
 // For SSH into remotes and starting clients
 import scala.sys.process._
@@ -25,103 +26,13 @@ import com.typesafe.config.ConfigFactory
 // conditions are a bit hard to come by currently because 
 // the server is designed to stay alive
 import scala.concurrent.duration._
+import scala.concurrent.{Future,Await}
 import scala.language.postfixOps
 
 // Used for command line parsing
-import org.rogach.scallop._
+//import org.rogach.scallop._
 
 import System.currentTimeMillis
-
-/*
- * Handles starting nodes, either to represent this 
- * computer or other computers on the network. If this 
- * computer, we can start the node directly (granted, at some point I may want to put it in a separate process for sandboxing, but that's not important now). If another 
- * computer, we have to send a message across the 
- * communication mechanism and await the callback 
- * response
- * 
- */
-object Clasp extends App {
-  lazy val log = LoggerFactory.getLogger(getClass())
-  import log.{error, debug, info, trace}
-
-  val conf = new Conf(args)
-  // Was a hostname provided, or should we locate it? 
-  var ip: String = "none"
-  if (conf.ip.get == None)
-    ip = "10.0.2." + "hostname".!!
-  else
-    ip = conf.ip()
-  ip = ip.stripLineEnd
-  info(s"Using IP $ip")
-
-  if (conf.client()) 
-    run_client(ip, "10.0.2.6")
-  else
-    // TODO make server a command line argument
-    run_master(ip, 
- List("10.0.2.1",
-      "10.0.2.2",
-      "10.0.2.4",
-      "10.0.2.5"
-    ))
-
-  def run_client(hostname:String, server: String) {
-    info("I am a client!") 
-    
-    val clientConf = ConfigFactory
-      .parseString(s"""
-        akka {
-          remote {
-            netty {
-              hostname = "$hostname"
-              port     = 2553
-            }
-          }
-        }
-        """)
-      .withFallback(ConfigFactory.load)
-    val system = ActorSystem("clasp", clientConf)
-
-    // Create new node, which will auto-register with
-    // the NodeManger
-    var n = system.actorOf(Props(new Node(hostname, server)), 
-      name=s"node-$hostname")
-    //n ! "rundefault"
-    info("Created Node")
-    info("Chilling out..I will stay alive until killed")
-  }
-
-  def run_master(hostname: String, clients: Seq[String]) {
-    info("I am the system manager!")
-
-    val serverConf = ConfigFactory
-      .parseString(s"""akka.remote.netty.hostname="$hostname"""")
-      .withFallback(ConfigFactory.load)
-    val system = ActorSystem("clasp", serverConf)
-
-    // Create NodeManger, which will automatically 
-    // ssh into each worker computer and properly 
-    // run clasp as a client
-    val launcher = system.actorOf(Props(new NodeManger(clients)), 
-      name="nodelauncher")
-
-    info("Created NodeManager")
-    info("Chilling out until someone kills me")
-    sys addShutdownHook(kill_master(launcher))
-  }
-
-  def kill_master(launcher: ActorRef) {
-    // TODO: Conditions for this.
-    launcher ! "shutdown"
-    // TODO: Ask and then wait.
-    // TODO: Context.system.isterminated (launcher)?
-    while (!launcher.isTerminated) {
-      Thread.sleep(500)
-    }
-    // TODO: Context.system.shutdown somewhere?
-  }
-}
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
@@ -134,12 +45,13 @@ class NodeManger(val clients: Seq[String]) extends Actor {
 
   def start_clients(clients:Seq[String]):Unit = {
     // Locate our working directory
-    val directory: String = "/home/hamiltont/clasp" //"pwd" !!
+    //val directory: String = "/home/hamiltont/clasp" //"pwd" !!
     //val directory: String = "/home/brandon/programs/clasp"
+    val directory: String = "pwd" !!;
 
     try {
-      // Write a script in our home directory 
-      // We assume all clients share the home directory
+      // Write a script in our home directory.
+      // We assume all clients share the home directory.
       val home: String = System.getProperty("user.home")
       val file: File = new File(home + "/bootstrap-clasp.sh")
       info("Building file " + file.getCanonicalPath )
@@ -154,7 +66,7 @@ class NodeManger(val clients: Seq[String]) extends Actor {
         """)
       bw.close()
 
-      // Start each client
+      // Start each client.
       clients.foreach(ip => {
           val command: String = s"ssh $ip sh bootstrap-clasp.sh $ip"
           info(s"Starting $ip using $command")
@@ -163,7 +75,7 @@ class NodeManger(val clients: Seq[String]) extends Actor {
             error(s"There was some error starting $ip")
         })
 
-      // Remove bootstrapper
+      // Remove bootstrappea.r
       val file2: File = new File("~/bootstrap-clasp.sh")
       file2.delete()
 
@@ -188,7 +100,8 @@ class NodeManger(val clients: Seq[String]) extends Actor {
       nodes += sender
 
       if (nodes.length == clients.length) {
-        info("All nodes are awake and registered")
+        info("All nodes are awake and registered.")
+        /*
         info("In 1 minute, I'm going to shutdown the server")
         info("The delay should allow emulators to start")
 
@@ -197,6 +110,7 @@ class NodeManger(val clients: Seq[String]) extends Actor {
         context.system.scheduler.scheduleOnce(60 seconds) {
           launcher ! "shutdown" 
         }
+        */
       }
     }
     case "node_down" => {
@@ -208,8 +122,8 @@ class NodeManger(val clients: Seq[String]) extends Actor {
       nodes.foreach(node => context.watch(node))
       info("Shutdown requested")
 
-      info("Sleeping for ~15 more seconds so the user can see if emulator CPU has stabilized")
-      Thread.sleep(15000)
+      //info("Sleeping for ~15 more seconds so the user can see if emulator CPU has stabilized")
+      //Thread.sleep(15000)
 
       // Second, transition our receive loop into a Reaper
       context.become(reaper)
@@ -218,6 +132,14 @@ class NodeManger(val clients: Seq[String]) extends Actor {
       // Second, ask all of our nodes to stop
       nodes.foreach(n => n ! PoisonPill)
       info("Pill sent to all nodes")
+    }
+    case "get_devices" => {
+      var devices: MutableList[ActorRef] = MutableList[ActorRef]()
+      for (node <- nodes) {
+        val f = ask(node, "get_devices", 60000).mapTo[MutableList[ActorRef]]
+        devices ++= Await.result(f, 100 seconds)
+      }
+      sender ! devices
     }
   }
 
@@ -240,13 +162,13 @@ class NodeManger(val clients: Seq[String]) extends Actor {
     context.system.shutdown()
   }
 
-  // Start in monitor mode
+  // Start in monitor mode.
   def receive = monitoring
 
 }
  
 // Manages the running of the framework on a single node,
-// including ?startup?, shutdown, etc
+// including ?startup?, shutdown, etc.
 class Node(val ip: String, val serverip: String) extends Actor {
   val log = LoggerFactory.getLogger(getClass())
   val launcher = context.actorFor("akka://clasp@" + serverip + ":2552/user/nodelauncher")
@@ -288,23 +210,8 @@ class Node(val ip: String, val serverip: String) extends Actor {
       info(s"Emulator online: ${sender.path}")
       devices += sender
     }
+    case "get_devices" => {
+      sender ! devices
+    }
   }
-
 }
-
-class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
-  version("Clasp 0.0.0")
-  banner("""Usage: clasp [-c|--client]
-    |By default clasp runs as though it was a server with only 
-    |the local node. This makes it easier for people running in
-    |a non-distributed manner. If you use sbt, then to run a 
-    |client use sbt "run --client". To run a whole system you
-    |need a server running on the main node and then clients on
-    |all other nodes
-    |""".stripMargin)
-
-  val client = opt[Boolean](descr = "Should this run as a client instance")
-  val ip     = opt[String] (descr = "Informs Clasp of the IP address it should bind to." + 
-    "If no explicit IP is provided, then 10.0.2.{hostname} will be used")
-}
-
