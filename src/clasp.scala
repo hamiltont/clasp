@@ -36,8 +36,13 @@ object ClaspRunner extends App {
 
   var clasp = new Clasp(ip, conf.client())
   if (!conf.client()) {
+    // TODO: I shouldn't have to sleep like this.
     Thread.sleep(5000)
     clasp.get_devices
+    println("Getting all serialID's from devices.")
+    for (device <- clasp.get_devices) {
+      println("serialID: "+ device.serialID)
+    }
   }
 }
 
@@ -62,20 +67,22 @@ class Clasp(val ip: String, val isClient: Boolean) {
     run_master(ip, List("10.0.2.1")) //, "10.0.2.2", "10.0.2.4", "10.0.2.5"))
   }
 
-  def wait_for_init() {
-
-  }
-
-  def get_devices() {
+  def get_devices(): List[Emulator] = {
     if (isClient) {
       info("'get_devices' called on a client!")
-      return// null;
+      return null
     }
     info("Getting available devices.")
     val f = ask(launcher, "get_devices", 60000).mapTo[MutableList[ActorRef]]
     val emulator_actors = Await.result(f, 100 seconds)
-    println(emulator_actors)
-    return// null
+    //println(emulator_actors)
+    for (actor <- emulator_actors) {
+      val f = ask(actor, "get_serialID", 60000).mapTo[String]
+      val serialID = Await.result(f, 100 seconds)
+    }
+    val emulators = emulator_actors.map(new Emulator(_)).toList
+    //println(emulators)
+    return emulators
   }
 
   private def run_client(hostname:String, server: String) {
@@ -136,7 +143,7 @@ class Clasp(val ip: String, val isClient: Boolean) {
       if (timeSlept >= timeout) {
         val input = readLine(
           s"""|Waited for $timeSlept seconds, and all nodes have not responded.
-              |Continue waiting? (y/n) """.stripMargin)
+              |Continue waiting (y)/n? """.stripMargin)
         if (input.toLowerCase.charAt(0) == 'n') {
           println("Exiting.")
           println("Warning: Nodes may still have emulators running on them!")
@@ -148,4 +155,13 @@ class Clasp(val ip: String, val isClient: Boolean) {
       }
     }
   }
+}
+
+class Emulator(emulatorActor: ActorRef) {
+  /*
+  val port = emulatorActor.port
+  val serialID = emulatorActor.serialID
+  */
+  val f = ask(emulatorActor, "get_serialID", 60000).mapTo[String]
+  val serialID = Await.result(f, 100 seconds)
 }

@@ -48,10 +48,11 @@ class EmulatorLoadMonitor(pid: Long) extends Actor {
 // Eventually we will have an Emulator object, which will be a proxy that allows 
 // others to interface with the EmulatorActor without having to understand its 
 // interface
-class EmulatorActor(val port:Int, val opts: EmulatorOptions) extends Actor {
+class EmulatorActor(val port: Int, val opts: EmulatorOptions) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
+  info(s"Port is: $port")
   val (process, serialID) = EmulatorBuilder.build(port, opts)
 
   override def postStop = {
@@ -73,6 +74,9 @@ class EmulatorActor(val port:Int, val opts: EmulatorOptions) extends Actor {
   }
 
   def receive = {
+    case "get_serialID" => {
+      sender ! serialID
+    }
     case _ => { 
       info(s"EmulatorActor ${self.path} received unknown message") 
     }

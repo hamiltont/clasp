@@ -69,7 +69,7 @@ class NodeManger(val clients: Seq[String]) extends Actor {
       // Start each client.
       clients.foreach(ip => {
           val command: String = s"ssh $ip sh bootstrap-clasp.sh $ip"
-          info(s"Starting $ip using $command")
+          info(s"Starting $ip using $command.")
           val exit = command.!
           if (exit != 0)
             error(s"There was some error starting $ip")
@@ -81,7 +81,7 @@ class NodeManger(val clients: Seq[String]) extends Actor {
 
     } catch {
       case e: IOException => {
-        error("Unable to write bootstrapper, aborting")
+        error("Unable to write bootstrapper, aborting.")
         e.printStackTrace
         return
       }
@@ -93,7 +93,7 @@ class NodeManger(val clients: Seq[String]) extends Actor {
     case "emulator_up" => {
       info(s"Received hello from ${sender.path}!")
       emulators += 1
-      info(s"${emulators} emulators awake")
+      info(s"${emulators} emulators awake.")
     }
     case "node_up" => { 
       info(s"${nodes.length}: Node ${sender.path} has registered!")
@@ -120,18 +120,18 @@ class NodeManger(val clients: Seq[String]) extends Actor {
     case "shutdown" => {
       // First register to watch all nodes
       nodes.foreach(node => context.watch(node))
-      info("Shutdown requested")
+      info("Shutdown requested.")
 
       //info("Sleeping for ~15 more seconds so the user can see if emulator CPU has stabilized")
       //Thread.sleep(15000)
 
       // Second, transition our receive loop into a Reaper
       context.become(reaper)
-      info("Transitioned to a reaper")
+      info("Transitioned to a reaper.")
 
       // Second, ask all of our nodes to stop
       nodes.foreach(n => n ! PoisonPill)
-      info("Pill sent to all nodes")
+      info("Pill sent to all nodes.")
     }
     case "get_devices" => {
       var devices: MutableList[ActorRef] = MutableList[ActorRef]()
@@ -146,13 +146,13 @@ class NodeManger(val clients: Seq[String]) extends Actor {
   def reaper: Receive = {
     case Terminated(ref) =>
       nodes -= ref
-      info("Node " + ref.path + " Termination received")
+      info("Node " + ref.path + " Termination received.")
       if (nodes.isEmpty) {
-        info("No more nodes, killing self")  
+        info("No more nodes, killing self.")
         self ! PoisonPill
       }
     case _ =>
-      info("In reaper mode, ignoring messages")
+      info("In reaper mode, ignoring messages.")
   }
 
   override def postStop = {
@@ -175,18 +175,32 @@ class Node(val ip: String, val serverip: String) extends Actor {
   import log.{error, debug, info, trace}
   import core.sdktools.EmulatorOptions
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
-  var current_emulator_port = 5555
+  var base_emulator_port = 5555
   val opts = new EmulatorOptions
   opts.noWindow = true
-  context.actorOf(Props(new EmulatorActor(current_emulator_port, opts)),
+
+  // TODO: This way causes all emulators to be started with port=5561!
+  //       I have to idea why, but using the loop below causes the
+  //       emulators to be started on the right port.
+  //       I am so confused! Would love to know why the commented
+  //       way isn't working.
+  /*
+  var current_emulator_port = 5555
+  context.actorOf(Props(new EmulatorActor(5555, opts)),
     s"emulator-$current_emulator_port")
   current_emulator_port += 2
-  context.actorOf(Props(new EmulatorActor(current_emulator_port, opts)),
+  context.actorOf(Props(new EmulatorActor(5557, opts)),
     s"emulator-$current_emulator_port")
   current_emulator_port += 2
-  context.actorOf(Props(new EmulatorActor(current_emulator_port, opts)),
+  context.actorOf(Props(new EmulatorActor(5559, opts)),
     s"emulator-$current_emulator_port")
   current_emulator_port += 2
+  */
+
+  for (i <- 0 to 2) {
+    context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*i,
+      opts)), s"emulator-${base_emulator_port+2*i}")
+  }
 
   override def preStart() = {
     info(s"Node online: ${self.path}")
@@ -194,10 +208,10 @@ class Node(val ip: String, val serverip: String) extends Actor {
   }
 
   override def postStop() = {
-    info("Node " + self.path + " has stopped");
+    info("Node " + self.path + " has stopped.");
 
     devices.foreach(phone => phone ! PoisonPill)
-    info("Requested emulators to halt")
+    info("Requested emulators to halt.")
 
     context.system.registerOnTermination {
       info("System shutdown achieved at " + System.currentTimeMillis) }
