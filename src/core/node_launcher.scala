@@ -1,5 +1,5 @@
 
-package core
+package clasp.core
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.MutableList
@@ -7,8 +7,8 @@ import scala.collection.mutable.MutableList
 //import org.hyperic.sigar.Sigar
 import org.slf4j.LoggerFactory
 
-import core.sdktools.sdk
-import core.sdktools.EmulatorOptions
+import clasp.core.sdktools.sdk
+import clasp.core.sdktools.EmulatorOptions
 
 import akka.actor._
 import akka.pattern.Patterns.ask
@@ -174,7 +174,7 @@ class Node(val ip: String, val serverip: String,
   val log = LoggerFactory.getLogger(getClass())
   val launcher = context.actorFor("akka://clasp@" + serverip + ":2552/user/nodelauncher")
   import log.{error, debug, info, trace}
-  import core.sdktools.EmulatorOptions
+  import clasp.core.sdktools.EmulatorOptions
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
   var base_emulator_port = 5555
 

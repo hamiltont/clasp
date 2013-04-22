@@ -1,4 +1,4 @@
-package core
+package clasp.core
 
 import akka.actor._
 import akka.actor.ActorDSL._

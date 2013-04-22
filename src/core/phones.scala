@@ -2,7 +2,7 @@
  * @author hamiltont
  *
  */
-package core
+package clasp.core
 
 import scala.sys.process.Process
 import scala.sys.process._ // TODO: Might not need...
@@ -13,7 +13,7 @@ import akka.actor._
 import scala.concurrent.duration._
 import akka.event.Logging
 //import org.hyperic.sigar.ProcTime
-import core.sdktools._
+import clasp.core.sdktools._
 import org.slf4j.LoggerFactory
 
 import scala.language.postfixOps

@@ -1,4 +1,4 @@
-package core.sdktools
+package clasp.core.sdktools
 
 import scala.language.postfixOps
 
@@ -8,7 +8,7 @@ import scala.sys.process.ProcessLogger
 
 import sdk_config.log.info
 
-import core.AsynchronousCommand
+import clasp.core.AsynchronousCommand
 
 /**
  * Provides an interface to the
@@ -16,7 +16,7 @@ import core.AsynchronousCommand
  * command line tool.
  * 
  * This, along with other components of the Android SDK, is included in
- * [[core.sdktools.sdk]].
+ * [[clasp.core.sdktools.sdk]].
  */
 trait EmulatorProxy {
   val emulator:String = sdk_config.config.getString(sdk_config.emulator_config)

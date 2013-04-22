@@ -1,4 +1,4 @@
-package core.sdktools
+package clasp.core.sdktools
 
 import scala.language.postfixOps
 
@@ -13,7 +13,7 @@ import sdk_config.log.info
  * command line tool.
  * 
  * This, along with other components of the Android SDK, is included in
- * [[core.sdktools.sdk]].
+ * [[clasp.core.sdktools.sdk]].
  */
 trait AndroidProxy {
   val android:String = sdk_config.config.getString(sdk_config.android_config)

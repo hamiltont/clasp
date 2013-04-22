@@ -1,4 +1,4 @@
-package clasp // TODO: If this isn't `core`, where should it go?
+package clasp
 
 import scala.collection.mutable.MutableList
 
@@ -15,9 +15,9 @@ import com.typesafe.config.ConfigFactory
 import akka.actor._
 import akka.pattern.Patterns.ask
 
-import core._
-import core.sdktools.sdk
-import core.sdktools.EmulatorOptions
+import clasp.core._
+import clasp.core.sdktools.sdk
+import clasp.core.sdktools.EmulatorOptions
 
 /*
  * Example of using Clasp.
