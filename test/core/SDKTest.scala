@@ -29,7 +29,8 @@ class SDKTest extends AssertionsForJUnit {
     val allTargetABIs = get_target_ABIs
     // println(allTargetABIs mkString " | ")
     for (targetABIs <- allTargetABIs) {
-      assert(targetABIs contains "armeabi-v7a")
+      assert(targetABIs contains "armeabi-v7a"
+        || targetABIs contains "armeabi")
     }
     
     val avdName = "clasp-test"
