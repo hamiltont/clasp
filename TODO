@@ -2,10 +2,19 @@ Brandon
   4 - Antimalware.
     
 Hamilton
-  3 - Locate cross-network client and implement cross-network node
-      launching. Potentially use central hostfile to define nodes and their
-      respective SDK locations. Nodes need to register their connected devices
-      and emulators with a central registry 4 - Implement emulator hibernation
+  3 - Build central hostfile to define nodes and their respective SDK locations. 
+      Build central registry of emulators 
+  4 - Implement emulator hibernation
+ 19 - Update remote launching to recover from errors. For now, kill all processes
+      that might belong to clasp (java | emulator | emulator-64 | ...) and try 
+      again. Notice that just because we killed all of these processes does not mean
+      that the port is open--another user could be running clasp. In that case, we 
+      should probably back off and try a different node. Our configuration should
+      probably take a number of node IP addresses and the number of nodes you want
+      started, and if it cannot start a node it will try a different one. A good 
+      "final" solution would be to make all of the Android SDK commands run specific 
+      to one user e.g. only list the emulators for one user. Naturally then how do 
+      we handle physical devices? 
 
 Noah
   2 - Pass in the hostname/ips of the server.
