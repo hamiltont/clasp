@@ -104,6 +104,33 @@ trait AndroidProxy {
     (exit == 0)
   }
 
+ /**
+   * Creates a new Android Virtual Device with no ABI
+   * only RESTRICTION : target MUST be the ID not the name.
+   */
+  def create_avd(name1: String,
+                 target1: String)
+  {
+
+  /**
+   * Determines the default ABI depending on the target number passed into the
+   * method.
+   * the case are for targets:
+   * 1-14 , 16, 17 default to armeabi
+   * 15, 18 default to x86
+   * 19 - 25 default to armeabi-v7a
+   */
+    def parseTarget(arg: String): String = arg match {
+    case "1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"10"|"11"|"12"|"13"|"14"|"16"|"17" => "armeabi"
+    case "15"|"18" => "x86"
+    case "19"|"20"|"21"|"22"|"23"|"24"|"25"|"26"  => "armeabi-v7a"
+    }
+
+    val defaultABI = parseTarget(target1)
+    create_avd(name1, target1, defaultABI)
+
+  }
+  
   /** Run a command, collecting the stdout, stderr and exit status */
   def run(cmd: String): (List[String], List[String], Int) = {
     val pb = Process(cmd)
