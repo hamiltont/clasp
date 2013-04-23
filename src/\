@@ -15,9 +15,9 @@ import com.typesafe.config.ConfigFactory
 import akka.actor._
 import akka.pattern.Patterns.ask
 
-import clasp.core._
-import clasp.core.sdktools.sdk
-import clasp.core.sdktools.EmulatorOptions
+import core._
+import core.sdktools.sdk
+import core.sdktools.EmulatorOptions
 
 /*
  * Example of using Clasp. The App will be packaged and deployed to both the server and 
@@ -52,6 +52,7 @@ object ClaspRunner extends App {
   ip = ip.stripLineEnd
 
   // TODO: Add a way for emulator options to be nonuniform?
+  // @Brandon - what do you mean by the above? 
   // Setup some options for the emulator
   val opts = new EmulatorOptions
   opts.noWindow = true
@@ -68,9 +69,6 @@ object ClaspRunner extends App {
     // TODO: We shouldn't have to sleep like this.
     //       Add an option to wait until all emulators are alive,
     //       but not necessarily entirely booted.
-    // @Brandon - this is a great idea for the object-level API! Something like waitForEmulators(10)
-    // that will be called when there are 10 emulators alive and ready. Or perhaps that's how we build
-    // the main action loop - have a waitForEmulator(new Task() { // do something with emulator here })
     Thread.sleep(15000)
 
     printf("\n\n\n=====================================\n")
@@ -108,24 +106,24 @@ object ClaspRunner extends App {
 }
 
 /*
- * Handles starting the clasp system, including Node, on the local computer. Needs to be told it's 
- * external IP address so that it can bind to that 
- * 
- * TODO make it possible to support sending EmulatorOptions across the network and starting emulators
- * with different options
+ * Handles starting nodes, either to represent this 
+ * computer or other computers on the network. If this 
+ * computer, we can start the node directly (granted, at some point I may want to put it in a separate process for sandboxing, but that's not important now). If another 
+ * computer, we have to send a message across the 
+ * communication mechanism and await the callback 
+ * response
  */
 class Clasp(val ip: String, val isClient: Boolean, val emuOpts: EmulatorOptions) {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
-  // TODO let's rename this everywhere from nodelauncher to nodemanager
   private var launcher: ActorRef = null
 
   info(s"Using IP $ip")
 
   if (isClient) {
-    run_client(ip, "10.0.2.26")
+    run_client(ip, "10.0.2.6")
   } else {
-    run_master(ip, List("10.0.2.16")) //, "10.0.2.2", "10.0.2.4", "10.0.2.5"))
+    run_master(ip, List("10.0.2.1")) //, "10.0.2.2", "10.0.2.4", "10.0.2.5"))
   }
 
   def get_devices: List[Emulator] = {
@@ -151,8 +149,6 @@ class Clasp(val ip: String, val isClient: Boolean, val emuOpts: EmulatorOptions)
     kill_master(launcher)
   }
 
-  // TODO put this into a separate object so we don't have confusion over whats going on inside
-  // the 'Clasp' object
   private def run_client(hostname:String, server: String) {
     info("I am a client!")
     
@@ -224,18 +220,11 @@ class Clasp(val ip: String, val isClient: Boolean, val emuOpts: EmulatorOptions)
   }
 }
 
-/*
- * An object-oriented way to interface with an Actor. This caches multiple items 
- * from the emulator process underneath the actor, and therefore may become 
- * invalid if the emulator dies. We may want to avoid caching in the future and
- * just have this know how to ask the emulator for the right things
- */
 class Emulator(emulatorActor: ActorRef) extends Serializable {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
-  // TODO: There's possibly a better way to do this?
-  // @Brandon - I think the normal scala-ism is to use Option
+  // TODO: There's possibly a better way to do thits?
   var serialID = "unset"
 
   {
