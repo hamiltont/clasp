@@ -117,3 +117,6 @@ Unallocated - Modules
       'android update sdk --no-gui' on the command line
   2 - Create test cases for nodes once development on this is more
       complete.
+ 22 - Update autodetect-config.sh to automate the process of ssh-ing into each node
+      and then answering 'yses' to the "do you trust this node" question. This will
+      help ensure that all of the nodes can ssh into all of the other nodes
