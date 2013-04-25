@@ -150,7 +150,29 @@ class ClaspMaster(val ip: String, val client_ips: Seq[String]) {
       .parseString(s"""akka.remote.netty.hostname="$ip" """)
       .withFallback(ConfigFactory.load("master"))
 
-  val system = ActorSystem("clasp", serverConf)
+  var system:ActorSystem = null
+  try {
+    system = ActorSystem("clasp", serverConf)
+  } catch {
+    case inuse: org.jboss.netty.channel.ChannelException => {
+      error(s"Another person is using $ip as a master node!")
+      error("Refusing to start here")
+      error("Here is some debug info to help detect what is running:")
+      val ps_list: String = "ps -o user,cmd -C java".!!.stripLineEnd
+      error(s"Process List (including you!): \n$ps_list")
+      
+      error("User List (including you!):")
+      val user_list: String = "ps --no-headers -o user -C java".!!
+      import scala.collection.immutable.StringOps
+      (new StringOps(user_list)).lines.foreach(line => {
+        val user: String = (s"getent passwd $line").!!
+        error(user.stripLineEnd)
+      })
+      System.exit(0)
+    }
+  }
+  
+  
   val manager = system.actorOf(Props(new NodeManger(ip, client_ips)), name="nodemanager")
   info("Created NodeManger")
   
