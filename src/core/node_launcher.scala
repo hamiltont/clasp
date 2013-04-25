@@ -60,16 +60,23 @@ class NodeManger(val ip: String,  val client_ips: Seq[String]) extends Actor {
       bw.write(s"""#!/bin/sh\n
         \n
         cd $directory \n
-        echo "target/start --client --ip $$1 --mip $$2 &> nohup.$$1 &"\n
-        nohup target/start --client --ip $$1 --mip $$2 &> nohup.$$1 & \n
+        echo "Starting node using:"
+        echo "target/start --client --ip $$1 --mip $$2 >> nohup.$$1 2>&1 &"\n
+        nohup target/start --client --ip $$1 --mip $$2 >> nohup.$$1 2>&1 & \n
+        echo "Done"
         """)
       bw.close()
 
       // Start each client
       client_ips.foreach(client_ip => {
-          val command: String = s"ssh $client_ip sh bootstrap-clasp.sh $client_ip $ip"
+          val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh bootstrap-clasp.sh $client_ip $ip"
           info(s"Starting $client_ip using $command.")
-          val out = command.!!
+          val out = command.!!.stripLineEnd
+          
+          // TODO catch the output of the ssh session, and react if we were unable to
+          // start on this system! Also, either stop sending a "node_busy" mesage to the 
+          // manager, or actually send some relevant data out. Also, potentially wrap the
+          // work so far into a commit
           info(s"$client_ip startup output:\n$out")
         })
 
@@ -97,23 +104,16 @@ class NodeManger(val ip: String,  val client_ips: Seq[String]) extends Actor {
       info(s"${nodes.length}: Node ${sender.path} has registered!")
       nodes += sender
 
-      if (nodes.length == client_ips.length) {
+      if (nodes.length == client_ips.length)
         info("All nodes are awake and registered.")
-        /*
-        info("In 1 minute, I'm going to shutdown the server")
-        info("The delay should allow emulators to start")
-
-        val manager = context.system.actorFor("akka://clasp@10.0.2.6:2552/user/nodemanager")
-        import context.dispatcher
-        context.system.scheduler.scheduleOnce(60 seconds) {
-          manager ! "shutdown" 
-        }
-        */
-      }
     }
     case "node_down" => {
       nodes -= sender
       info(s"${nodes.length}: Node ${sender.path} has deregistered!")
+    }
+    case NodeBusy(nodeip, nodelog) => {
+      info(s"${nodes.length}: Node {ip} has declared itself busy")
+      info(s"Debug log for node IP:\n$nodelog")
     }
     case "shutdown" => {
       // First register to watch all nodes
@@ -164,6 +164,8 @@ class NodeManger(val ip: String,  val client_ips: Seq[String]) extends Actor {
   def receive = monitoring
 
 }
+
+case class NodeBusy(nodeid: String, debuglog: String)
  
 // Manages the running of the framework on a single node,
 // including ?startup?, shutdown, etc.

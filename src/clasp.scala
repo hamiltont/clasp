@@ -123,13 +123,55 @@ object ClaspRunner extends App {
  * with different options
  */
 class ClaspClient(val ip: String, val masterip: String, val emuOpts: EmulatorOptions) {
-  lazy val log = LoggerFactory.getLogger(getClass())
-  import log.{error, debug, info, trace}
-  info("I am a client!")  
+  
   val clientConf = ConfigFactory
     .parseString(s"""akka.remote.netty.hostname="$ip"""")
     .withFallback(ConfigFactory.load("client"))
-  val system = ActorSystem("clasp", clientConf)
+  var system:ActorSystem = null
+  try {
+    system = ActorSystem("clasp", clientConf)
+  } catch {
+    case inuse: org.jboss.netty.channel.ChannelException => {
+      val logbuffer = new StringBuilder(s"Another person is using $ip as a client node!\n")
+      logbuffer ++= "Refusing to start a new client here\n"
+      logbuffer ++= "Here is some debug info to help detect what is running:\n"
+      // TODO update this to include any sdk commands
+      val emu_cmds = "emulator,emulator64-arm,emulator64-mips,emulator64-x86,emulator-arm,emulator-mips,emulator-x86" 
+      val ps_list: String = s"ps -o user,cmd -C java,$emu_cmds".!!.stripLineEnd
+      logbuffer ++= s"Process List (including this java process!): \n$ps_list\n"
+      
+      logbuffer ++= "User List (including you!):\n"
+      val user_list: String = s"ps --no-headers -o user -C java,$emu_cmds".!!
+      import scala.collection.immutable.StringOps
+      (new StringOps(user_list)).lines.foreach(line => {
+        val user: String = (s"getent passwd $line").!!
+        logbuffer ++= user
+      })
+
+      // Notify manager of failure
+      val failConf = ConfigFactory
+        .parseString(s"""akka.remote.netty.hostname="$ip"""")
+        .withFallback(ConfigFactory.parseString("akka.remote.netty.port=0"))
+        .withFallback(ConfigFactory.load("application"))
+  
+      val temp = ActorSystem("clasp-failure", failConf)
+      val manager = temp.actorFor("akka://clasp@" + masterip + ":2552/user/nodemanager")
+      manager ! new NodeBusy(ip, logbuffer.toString)
+      
+      // 99% confidence the busy message was received
+      Thread.sleep(2000)
+      System.exit(1)
+      
+    }
+  }
+ 
+  // Try not to log above here. If we end up failing to start, there's no reason to 
+  // clutter up the log of the clasp instance already running on this system
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
+  info("----------------------------  Starting New Client -----------------------------") // Useful for appended logs
+  info(s"Using IP $ip")
+  info("I am a client!")  
 
   var n = system.actorOf(Props(new Node(ip, masterip, emuOpts)), name=s"node-$ip")
   info(s"Created Node for $ip")
@@ -171,7 +213,6 @@ class ClaspMaster(val ip: String, val client_ips: Seq[String]) {
       System.exit(0)
     }
   }
-  
   
   val manager = system.actorOf(Props(new NodeManger(ip, client_ips)), name="nodemanager")
   info("Created NodeManger")

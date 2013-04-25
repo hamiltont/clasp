@@ -1,6 +1,8 @@
 Brandon
   4 - Antimalware.
-    
+ 23 - Update termination conditions to catch and graceful term even if someone sends 
+      us signal 15 via the kill command
+
 Hamilton
   3 - Build central hostfile to define nodes and their respective SDK locations. 
       Build central registry of emulators 
