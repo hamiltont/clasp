@@ -7,11 +7,36 @@
 //   ${sdk.root} + "tools/emulator" => The '+' operator is not understood
 
 sdk {
-  // root = "/Development/adt-bundle-mac-x86_64/"
   root      = ##ANDROID_ROOT##
   aapt      = ${sdk.root}platform-tools/aapt
   adb       = ${sdk.root}platform-tools/adb
   android   = ${sdk.root}tools/android
   emulator  = ${sdk.root}tools/emulator
   mksdcard  = ${sdk.root}tools/mksdcard
+}
+
+akka {
+  actor {
+    provider = "akka.remote.RemoteActorRefProvider"
+  }
+
+  log-config-on-start = off
+
+  remote {
+    log-received-messages = on
+
+    log-sent-messages = on
+
+    command-ack-timeout = 3 s
+
+    connection-timeout = 12 s
+
+    remote-daemon-ack-timeout = 5s
+
+    transport = "akka.remote.netty.NettyRemoteTransport"
+
+    netty {
+      port = 2552
+    }
+  }
 }

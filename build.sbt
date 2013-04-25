@@ -1,16 +1,22 @@
-import AssemblyKeys._
+import com.typesafe.sbt.SbtStartScript             // Imports xsbt
+import AssemblyKeys._                              // Imports sbt-assembly keys
 
-assemblySettings
+assemblySettings       // Appends sbt-assembly settings to build settings
 
-name := "Clasp"
+seq(SbtStartScript.startScriptForClassesSettings: _*)
 
-jarName in assembly := "Clasp-Assembly.jar"
+name := "Clasp"        // Project name
 
-test in assembly := {}
+jarName in assembly := "Clasp-Assembly.jar"    // Name of fat jar built by sbt-assembly
+
+test in assembly := {}                         // Informs sbt-assembly to not run tests 
+                                               // creating the fat jar
 
 version := "1.0"
 
-scalaVersion := "2.10.0"
+scalaVersion := "2.10.1"
+
+resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 maxErrors := 5
 
@@ -33,13 +39,7 @@ testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-a", "-n")
 //    file("lib/hyperic-sigar-1.6.4/sigar-bin/lib/sigar.jar")
 
 unmanagedJars in Compile ++= Seq(
-  file("lib/akka-2.1.0/akka/slf4j-api-1.7.2.jar"),
-  file("lib/akka-2.1.0/akka/akka-actor_2.10-2.1.0.jar"),
-  file("lib/akka-2.1.0/akka/config-1.0.0.jar"),
-  file("lib/commons-net-3.2/commons-net-3.2.jar"),
-  file("lib/commons-net-3.2/commons-net-3.2.jar"),
-  file("lib/logback-1.0.9/logback-classic-1.0.9.jar"),
-  file("lib/logback-1.0.9/logback-core-1.0.9.jar")
+  file("lib/commons-net-3.2/commons-net-3.2.jar")            // For proxy_telnet
 )
 
 unmanagedJars in Test ++= Seq(
@@ -51,5 +51,11 @@ unmanagedJars in Test ++= Seq(
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-actors" % "2.10.0-M6",
   "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
-  "com.novocode" % "junit-interface" % "0.10-M2" % "test"
+  "com.novocode" % "junit-interface" % "0.10-M2" % "test",
+  "org.rogach" %% "scallop" % "0.8.1",
+  "com.typesafe.akka" %% "akka-actor" % "2.1.2",
+  "com.typesafe.akka" %% "akka-remote" % "2.1.2",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.1.2",
+  "ch.qos.logback" % "logback-classic" % "1.0.9",
+  "com.typesafe" % "config" % "1.0.0"
 )

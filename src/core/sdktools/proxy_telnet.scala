@@ -1,4 +1,4 @@
-package core.sdktools
+package clasp.core.sdktools
 
 import scala.language.postfixOps
 

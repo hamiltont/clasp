@@ -2,7 +2,7 @@
  * @author hamiltont
  *
  */
-package core.sdktools
+package clasp.core.sdktools
 
 import org.slf4j.LoggerFactory
 
@@ -27,7 +27,7 @@ object sdk_config {
   val mksdcard_config = "sdk.mksdcard"
   val config: Config  = ConfigFactory.load()
   // TODO make this return the proper class at runtime.
-  // Currently only returns core.sdk_config
+  // Currently only returns clasp.core.sdk_config
   lazy val log = LoggerFactory.getLogger(getClass()) 
 }
 

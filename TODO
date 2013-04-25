@@ -2,14 +2,32 @@ Brandon
   4 - Antimalware.
     
 Hamilton
-  3 - Locate cross-network client and implement cross-network node
-      launching. Potentially use central hostfile to define nodes and their
-      respective SDK locations. Nodes need to register their connected devices
-      and emulators with a central registry 4 - Implement emulator hibernation
+  3 - Build central hostfile to define nodes and their respective SDK locations. 
+      Build central registry of emulators 
+  4 - Implement emulator hibernation
+ 19 - Update remote launching to recover from errors. For now, kill all processes
+      that might belong to clasp (java | emulator | emulator-64 | ...) and try 
+      again. Notice that just because we killed all of these processes does not mean
+      that the port is open--another user could be running clasp. In that case, we 
+      should probably back off and try a different node. Our configuration should
+      probably take a number of node IP addresses and the number of nodes you want
+      started, and if it cannot start a node it will try a different one. A good 
+      "final" solution would be to make all of the Android SDK commands run specific 
+      to one user e.g. only list the emulators for one user. Naturally then how do 
+      we handle physical devices? 
 
 Noah
   2 - Pass in the hostname/ips of the server.
   3 - Pass in the hostname/ips of the clients.
+  4 - Add the option for Clasp to create custom sdcards for emulators.
+      Currently, I've hard-coded this into EmulatorBuilder to
+      always build an sdcard, but this is not optimal.
+      For this, you'll have to reason the most logical
+      place to put this flag and code.
+      Hamilton might also have some input to this.
+  5 - Create and use a directory for sdcard images so they aren't
+      all in the Clasp root direcotry.
+  6 - Delete all sdcard images on shutdown.
 
 Tanner
   6 - Obtain a list of abi's and add tests for it.
@@ -23,10 +41,42 @@ Tanner
         I should just have to call 
           `sdk.create_avd("initial", "1", "armeabi-v7a")`
         if I don't care about the abi and have multiple abis.
+ 15 - Add the functionality within EmulatorActor to restart an emulator.
+      Add this to the Emulator wrapper object.
+      Work with George to tie in the error checking to this.
+ 16 - Once we have rebooting, add a flag to wipe the device when
+      rebooting, and test this thoroughly.
+      I've had issues wiping an entire device before.
 
 George
   7 - Error checking.
+      Currently, we're able to timeout a command.
+      Can we now try to integrate re-running commands
+      and error-recovery into the framework?
+
+      Also, give some thought to where this error recovery should go.
+      If I want to install an APK to an emulator,
+      should I give you error recovery options to say:
+        "Keep restarting this emulator if you can't install the APK."
+      
+      At what point should a command return to the code using the
+      SDK that it failed to execute, and how should this be handled?
+
+      I like how you're using Options within AsynchronousCommand,
+      would it be feasible for the SDK commands to pass along Options
+      to help with error recovery?
+
  13 - Block for calling `run_emulator` from the node.
+      Modification: Inside of EmulatorActor, I've added an `isBooted`
+      flag, which should be set to false until the emulator has completely
+      booted.
+      There's an email Hamilton sent that describes how we should
+      check this numerous ways.
+      I currently can't find it.
+      Basically, find out how many ways we can detect if an emulator
+      is booted and we'll want to use them all.
+      Be aware that the `wait_for_device` functionality within the SDK
+      returns early when emulators are NOT fully usable.
 
 Jos�
   1 - Setup maven on ATAACK and enable use of "maven install" to
@@ -47,6 +97,9 @@ Unallocated - Features
       Reference: http://stackoverflow.com/questions/14966414/including-hyperic-sigar-library-within-jar-while-using-sbt-assembly-for-scala-pr
  16 - Provide an AVD manager class for utility functions.
  17 - Wrapper objects so the interface doesn't reveal we're using actors.
+ 18 - Make it so that `Clasp:get_devices` blocks until all emulators
+      have a process so we only have to call it once to get
+      this list.
 
 Unallocated - Modules
   8 - SMS network modeling.
@@ -62,3 +115,8 @@ Unallocated - Modules
       and something should predict from the EmulatorConfig that the emulator boot
       will fail. More importantly, we can likely auto-fix the issue by calling
       'android update sdk --no-gui' on the command line
+  2 - Create test cases for nodes once development on this is more
+      complete.
+ 22 - Update autodetect-config.sh to automate the process of ssh-ing into each node
+      and then answering 'yses' to the "do you trust this node" question. This will
+      help ensure that all of the nodes can ssh into all of the other nodes

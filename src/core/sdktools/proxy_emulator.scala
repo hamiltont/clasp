@@ -1,11 +1,14 @@
-package core.sdktools
+package clasp.core.sdktools
 
 import scala.language.postfixOps
 
 import scala.sys.process.Process
 import scala.sys.process.stringToProcess
+import scala.sys.process.ProcessLogger
 
 import sdk_config.log.info
+
+import clasp.core.AsynchronousCommand
 
 /**
  * Provides an interface to the
@@ -13,7 +16,7 @@ import sdk_config.log.info
  * command line tool.
  * 
  * This, along with other components of the Android SDK, is included in
- * [[core.sdktools.sdk]].
+ * [[clasp.core.sdktools.sdk]].
  */
 trait EmulatorProxy {
   val emulator:String = sdk_config.config.getString(sdk_config.emulator_config)
@@ -91,17 +94,21 @@ trait EmulatorProxy {
 		if(opts.noBootAnim) command += s" -no-boot-anim"
 		if(opts.noWindow) command += s" -no-window"
 		if(opts.force32Bit) command += s" -force-32bit"
-    }
+		if(opts.verbose) command += s" -verbose"
+  }
     
     info(command)
     val builder = Process(command)
-    return (builder.run, "emulator-" + port)
+    val serial = "emulator-" + port
+    val logger = ProcessLogger ( line => info(serial + ":out: " + line), 
+      line => info(serial + ":err: " + line) )
+    val process = builder.run(logger)
+
+    info("Process started")
+
+    return (process, serial)
 
     // TODO - read in the output and ensure that the emulator actually started
-
-    // TODO - link a process logger with some central logging mechanism, so that our 
-    // framework can have debugging
-
   }
 
   /**
@@ -109,11 +116,8 @@ trait EmulatorProxy {
    */
   def get_snapshot_list(avd_name: String): Vector[String] = {
     val command = s"$emulator @$avd_name -snapshot-list"
-    val output: String = command !!;
     val regex = """\[[0-9]+\][ ]*(.*)""".r
-    
-    val result = for (regex(name) <- regex findAllIn output) yield name
-    result.toVector
+    AsynchronousCommand.resultsOf(command, regex) getOrElse Vector()
   }
   
   /**
@@ -121,25 +125,19 @@ trait EmulatorProxy {
    */
   def get_webcam_list(avd_name: String): Vector[String] = {
     val command = s"$emulator @$avd_name -webcam-list"
-    val output: String = command !!;
     val regex = """Camera '([^']*)'""".r
-    
-    val result = for (regex(name) <- regex findAllIn output) yield name
-    result.toVector
+    AsynchronousCommand.resultsOf(command, regex) getOrElse Vector()
   }
   
   def get_emulator_version: String = {
     val command = s"$emulator -version"
-    val output: String = command !!;
     val regex = """Android emulator version ([0-9.]*)""".r
-    
-    val result = for (regex(name) <- regex findAllIn output) yield name
-    result.toVector.last
+    AsynchronousCommand.resultsOf(command, regex).map(_.last) getOrElse ""
   }
 
   def mksdcard(size: String, path: String) {
     val command = s"$mksdcard $size $path"
-    command !!
+    AsynchronousCommand.resultOf(command)
   }
 }
 
@@ -163,4 +161,6 @@ class EmulatorOptions {
       noSnapShotLoad, noSnapShotUpdateTime, wipeData, noSkin,
       dynamicSkin, netFast, showKernel, shell, noJni, noAudio,
       rawKeys, noBootAnim, noWindow, force32Bit = false
+  
+  var verbose = true 
 }

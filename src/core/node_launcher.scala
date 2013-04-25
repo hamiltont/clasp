@@ -1,5 +1,5 @@
 
-package core
+package clasp.core
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.MutableList
@@ -7,113 +7,236 @@ import scala.collection.mutable.MutableList
 //import org.hyperic.sigar.Sigar
 import org.slf4j.LoggerFactory
 
-import core.sdktools.sdk
+import clasp.core.sdktools.sdk
+import clasp.core.sdktools.EmulatorOptions
 
-/*
- * Handles starting nodes, either to represent this 
- * computer or other computers on the network. If this 
- * computer, we can start the node directly (granted, at some point I may want to put it in a separate process for sandboxing, but that's not important now). If another 
- * computer, we have to send a message across the 
- * communication mechanism and await the callback 
- * response
- * 
- */
-object NodeLauncher extends App {
+import akka.actor._
+import akka.pattern.Patterns.ask
+
+// For SSH into remotes and starting clients
+import scala.sys.process._
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import java.io.IOException
+
+import com.typesafe.config.ConfigFactory
+
+// Used to delay shutting down the system. Termination 
+// conditions are a bit hard to come by currently because 
+// the server is designed to stay alive
+import scala.concurrent.duration._
+import scala.concurrent.{Future,Await}
+import scala.language.postfixOps
+
+// Used for command line parsing
+//import org.rogach.scallop._
+
+import System.currentTimeMillis
+
+// Main actor for managing the entire system
+// Starts, tracks, and stops nodes
+class NodeManger(val clients: Seq[String]) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
+  val nodes = ListBuffer[ActorRef]()
+  // TODO start all clients via SSH
+  start_clients(clients)
 
-  val nodes = ListBuffer[Node]()
-  
-  //var s: Sigar = new Sigar
-  //info(s.getCpuPerc.toString)
+  def start_clients(clients:Seq[String]):Unit = {
+    // Locate our working directory
+    //val directory: String = "/home/hamiltont/clasp" //"pwd" !!
+    //val directory: String = "/home/brandon/programs/clasp"
+    val directory: String = "pwd" !!;
 
-  var n: Node = new Node
-  val emu: Emulator = n.run_emulator(null)
-  //val pt: ProcTime = new ProcTime
-  //pt.gather(s, emu.emulator_processid)
-  //info(pt)
+    try {
+      // Write a script in our home directory.
+      // We assume all clients share the home directory.
+      val home: String = System.getProperty("user.home")
+      val file: File = new File(home + "/bootstrap-clasp.sh")
+      info("Building file " + file.getCanonicalPath )
+      if (!file.exists())
+        file.createNewFile();
+      val fw: FileWriter = new FileWriter(file.getAbsoluteFile())
+      val bw: BufferedWriter = new BufferedWriter(fw)
+      bw.write(s"""#!/bin/sh\n
+        \n
+        cd $directory \n
+        nohup target/start --client &> nohup.$$1 & \n
+        """)
+      bw.close()
 
-  //info(s getCpuPerc)
+      // Start each client.
+      clients.foreach(ip => {
+          val command: String = s"ssh $ip sh bootstrap-clasp.sh $ip"
+          info(s"Starting $ip using $command.")
+          val exit = command.!
+          if (exit != 0)
+            error(s"There was some error starting $ip")
+        })
 
-  info("Created Node")
-  
-  
-  val out = sdk.send_telnet_command(emu.telnetPort, "avd snapshot list")
-  println(out)
-  
+      // Remove bootstrappea.r
+      val file2: File = new File("~/bootstrap-clasp.sh")
+      file2.delete()
 
-  //pt.gather(s, emu.emulator_processid)
-  //info(pt)
-  n.cleanup
-  info("Cleaned Node")
-
-  //info(s getCpuPerc)
-
-
-  def testADB() {
-    assert(sdk.is_adb_available)
-  }
-}
-
-class Node() {
-  lazy val log = LoggerFactory.getLogger(getClass())
-  import log.{error, debug, info, trace}
-  import core.sdktools.EmulatorOptions
-  
-  val devices: MutableList[Emulator] = MutableList[Emulator]()
-  var current_emulator_port = 5555
-  info("A new Node is being constructed")
-  /*val load_monitor: Actor = actor {
-    val s: Sigar = new Sigar 
-    
-    val steady_cpu: Double = (for (i <- 1 to 10) yield {Thread.sleep(10); s.getCpuPerc.getUser}).sum / 10.0 
-    
-    println("Steady state is " + "%.2f".format(100*steady_cpu))
-    val cpu = Queue[Double](steady_cpu, steady_cpu, steady_cpu, steady_cpu, steady_cpu)
-
-    loop {
-      self.receiveWithin(1000) {
-        case "EXIT" => exit()
-        case TIMEOUT => {
-          cpu enqueue s.getCpuPerc.getUser
-          cpu dequeue
-          
-          val std:Double = 100*scala.math.sqrt(variance(cpu))
-          println("%.2f".format(100*cpu.front) + ": " + "%.2f".format(std) + ": " + "%.2f".format((100*cpu.front - std)/std))
-        }
+    } catch {
+      case e: IOException => {
+        error("Unable to write bootstrapper, aborting.")
+        e.printStackTrace
+        return
       }
     }
   }
-  // Allow sigar a second to build a model of system steady state
-  Thread.sleep(10 * 10)
-  * */
-  
 
-  def mean[T](item: Traversable[T])(implicit n: Numeric[T]) = {
-    n.toDouble(item.sum) / item.size.toDouble
+  var emulators: Int = 0
+  def monitoring: Receive = {
+    case "emulator_up" => {
+      info(s"Received hello from ${sender.path}!")
+      emulators += 1
+      info(s"${emulators} emulators awake.")
+    }
+    case "node_up" => { 
+      info(s"${nodes.length}: Node ${sender.path} has registered!")
+      nodes += sender
+
+      if (nodes.length == clients.length) {
+        info("All nodes are awake and registered.")
+        /*
+        info("In 1 minute, I'm going to shutdown the server")
+        info("The delay should allow emulators to start")
+
+        val launcher = context.system.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
+        import context.dispatcher
+        context.system.scheduler.scheduleOnce(60 seconds) {
+          launcher ! "shutdown" 
+        }
+        */
+      }
+    }
+    case "node_down" => {
+      nodes -= sender
+      info(s"${nodes.length}: Node ${sender.path} has deregistered!")
+    }
+    case "shutdown" => {
+      // First register to watch all nodes
+      nodes.foreach(node => context.watch(node))
+      info("Shutdown requested.")
+
+      //info("Sleeping for ~15 more seconds so the user can see if emulator CPU has stabilized")
+      //Thread.sleep(15000)
+
+      // Second, transition our receive loop into a Reaper
+      context.become(reaper)
+      info("Transitioned to a reaper.")
+
+      // Second, ask all of our nodes to stop
+      nodes.foreach(n => n ! PoisonPill)
+      info("Pill sent to all nodes.")
+    }
+    case "get_devices" => {
+      var devices: MutableList[ActorRef] = MutableList[ActorRef]()
+      for (node <- nodes) {
+        val f = ask(node, "get_devices", 60000).mapTo[MutableList[ActorRef]]
+        devices ++= Await.result(f, 100 seconds)
+      }
+      sender ! devices
+    }
   }
 
-  def variance[T](items: Traversable[T])(implicit n: Numeric[T]): Double = {
-    val itemMean = mean(items)
-    val count = items.size
-    val sumOfSquares = items.foldLeft(0.0d)((total, item) => {
-      val itemDbl = n.toDouble(item)
-      val square = math.pow(itemDbl - itemMean, 2)
-      total + square
-    })
-    sumOfSquares / count.toDouble
+  def reaper: Receive = {
+    case Terminated(ref) =>
+      nodes -= ref
+      info("Node " + ref.path + " Termination received.")
+      if (nodes.isEmpty) {
+        info("No more nodes, killing self.")
+        self ! PoisonPill
+      }
+    case _ =>
+      info("In reaper mode, ignoring messages.")
   }
 
-  // TODO: Option to run a specific AVD.
-  def run_emulator(opts: EmulatorOptions = null): Emulator = {
-    devices += EmulatorBuilder.build(current_emulator_port, opts)
-    current_emulator_port += 2
-    devices.last.asInstanceOf[Emulator]
+  override def postStop = {
+    context.system.registerOnTermination {
+      info("System shutdown achieved at " + System.currentTimeMillis ) }
+    info("postStop. Requesting system shutdown at " + System.currentTimeMillis )
+    context.system.shutdown()
   }
 
-  def cleanup {
-    devices.foreach(phone => phone.cleanup)
+  // Start in monitor mode.
+  def receive = monitoring
+
+}
+ 
+// Manages the running of the framework on a single node,
+// including ?startup?, shutdown, etc.
+class Node(val ip: String, val serverip: String,
+    val emuOpts: EmulatorOptions) extends Actor {
+  val log = LoggerFactory.getLogger(getClass())
+  val launcher = context.actorFor("akka://clasp@" + serverip + ":2552/user/nodelauncher")
+  import log.{error, debug, info, trace}
+  import clasp.core.sdktools.EmulatorOptions
+  val devices: MutableList[ActorRef] = MutableList[ActorRef]()
+  var base_emulator_port = 5555
+
+  // Moved outside of Node so the options can be set with the API.
+  // val opts = new EmulatorOptions
+  // opts.noWindow = true
+
+  // TODO: Better ways to ensure device appear online?
+  sdk.kill_adb
+  sdk.start_adb
+
+  // TODO: This way causes all emulators to be started with port=5561!
+  //       I have to idea why, but using the loop below causes the
+  //       emulators to be started on the right port.
+  //       I am so confused! Would love to know why the commented
+  //       way isn't working.
+  /*
+  var current_emulator_port = 5555
+  context.actorOf(Props(new EmulatorActor(5555, opts)),
+    s"emulator-$current_emulator_port")
+  current_emulator_port += 2
+  context.actorOf(Props(new EmulatorActor(5557, opts)),
+    s"emulator-$current_emulator_port")
+  current_emulator_port += 2
+  context.actorOf(Props(new EmulatorActor(5559, opts)),
+    s"emulator-$current_emulator_port")
+  current_emulator_port += 2
+  */
+
+  /*
+  context.actorOf(Props(new EmulatorActor(base_emulator_port,
+    opts)), s"emulator-${base_emulator_port}")
+  */
+  for (i <- 0 to 2) {
+    devices += context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*i,
+      emuOpts, serverip)), s"emulator-${base_emulator_port+2*i}")
+  }
+
+  override def preStart() = {
+    info(s"Node online: ${self.path}")
+    launcher ! "node_up"
+  }
+
+  override def postStop() = {
+    info("Node " + self.path + " has stopped.");
+
+    devices.foreach(phone => phone ! PoisonPill)
+    info("Requested emulators to halt.")
+
+    context.system.registerOnTermination {
+      info("System shutdown achieved at " + System.currentTimeMillis) }
+    info("Requesting system shutdown at " + System.currentTimeMillis)
+    context.system.shutdown()
+  }
+
+  def receive = {
+    case "register" => {
+      info(s"Emulator online: ${sender.path}")
+      devices += sender
+    }
+    case "get_devices" => {
+      sender ! devices
+    }
   }
 }
-
-

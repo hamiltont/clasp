@@ -1,4 +1,4 @@
-package core.sdktools
+package clasp.core.sdktools
 
 import scala.language.postfixOps
 
@@ -13,7 +13,7 @@ import sdk_config.log.info
  * command line tool.
  * 
  * This, along with other components of the Android SDK, is included in
- * [[core.sdktools.sdk]].
+ * [[clasp.core.sdktools.sdk]].
  */
 trait AndroidProxy {
   val android:String = sdk_config.config.getString(sdk_config.android_config)
@@ -42,6 +42,20 @@ trait AndroidProxy {
     val result = for (regex(target) <- regex findAllIn output) yield target
     result.toVector
   }
+
+  /**
+   * List ABIs corresponding with each entry from the existing
+   * targets Vector.
+   */
+  def get_target_ABIs: Vector[Vector[String]] = {
+    val command = s"$android list targets";
+    val output: String = command !!
+
+    val regex = "ABIs : (.*)".r
+    val result = for (regex(target) <- regex findAllIn output)
+      yield target.split(", ").toVector
+    result.toVector
+  }
   
   /**
    * Lists remote SDK repository.
@@ -68,12 +82,13 @@ trait AndroidProxy {
       return false
     }
     
-    var command = s"$android create avd -n $name -t $target -b $abiName"
+    // TODO can we verify that the eabi exists for this target before we attempt to 
+    // run this? 
+    var command:String = s"$android create avd -n $name -t $target -b $abiName"
     if (force) {
       command += " --force"
     }
-    info("Building an AVD using")
-    info(command)
+    info(s"Building an AVD using $command")
     
     var create = Process(command)
     var output = List[String]()
@@ -82,14 +97,42 @@ trait AndroidProxy {
       line => output ::= "err : " + line );
     // TODO No need to create two processes, just pass "no" directly to the 
     // stdin of create
-    val exit = "echo no" #| create ! logger
+    val echocommand = """echo no"""
+    val exit = echocommand.#|(create).!(logger)
 
-    output.reverse
+    output = output.reverse
     output foreach info
 
     (exit == 0)
   }
 
+ /**
+   * Creates a new Android Virtual Device with no ABI
+   * only RESTRICTION : target MUST be the ID not the name.
+   */
+  def create_avd(name1: String,
+                 target1: String)
+  {
+
+  /**
+   * Determines the default ABI depending on the target number passed into the
+   * method.
+   * the case are for targets:
+   * 1-14 , 16, 17 default to armeabi
+   * 15, 18 default to x86
+   * 19 - 25 default to armeabi-v7a
+   */
+    def parseTarget(arg: String): String = arg match {
+    case "1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"10"|"11"|"12"|"13"|"14"|"16"|"17" => "armeabi"
+    case "15"|"18" => "x86"
+    case "19"|"20"|"21"|"22"|"23"|"24"|"25"|"26"  => "armeabi-v7a"
+    }
+
+    val defaultABI = parseTarget(target1)
+    create_avd(name1, target1, defaultABI)
+
+  }
+  
   /** Run a command, collecting the stdout, stderr and exit status */
   def run(cmd: String): (List[String], List[String], Int) = {
     val pb = Process(cmd)
