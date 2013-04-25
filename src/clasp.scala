@@ -47,7 +47,7 @@ object ClaspRunner extends App {
     ip = "10.0.2." + "hostname".!!
   else
     ip = conf.ip()
-  // TODO move this into the core so that we don't have to require a user to fix their entry 
+  // TODO move this into scallop or the core so that we don't have to require a user to fix their entry 
   // strings
   ip = ip.stripLineEnd
 
@@ -58,13 +58,22 @@ object ClaspRunner extends App {
   // Create a new instance of the framework. There should be at least one instance of Clasp
   // started per computer in your cluster, although you should probably let the master handle
   // starting all of the workers
-  var clasp = new Clasp(ip, conf.client(), opts)
   
-  // If we are the server, we require some termination conditions to trigger the shutdown
-  // This code will run on the server only
-  // TODO should we update the system so the user extends "ClaspServer" and only writes this 
-  // part of the codebase? Everything above seems like boilerplate code
-  if (!conf.client()) {
+  val client_ips = List("10.0.2.26")
+
+  if (conf.client()) {
+    if (conf.mip.get == None) {
+      error("Client started without an ip address for the master node, aborting")
+      System.exit(1)
+    }
+    val masterip = conf.mip().stripLineEnd
+    new ClaspClient(ip, masterip, opts)
+  } else {
+
+    var clasp = new ClaspMaster(ip, client_ips)
+  
+    // TODO should we update the system so the user extends "ClaspServer" and only writes this 
+    // part of the codebase? Everything above seems like boilerplate code
     // TODO: We shouldn't have to sleep like this.
     //       Add an option to wait until all emulators are alive,
     //       but not necessarily entirely booted.
@@ -105,35 +114,49 @@ object ClaspRunner extends App {
     printf("=====================================\n\n\n")
 
     clasp.kill
-  }
+    
+  } // End of clasp master logic
 }
+ 
 
-/*
- * Handles starting the clasp system, including Node, on the local computer. Needs to be told it's 
- * external IP address so that it can bind to that 
- * 
- * TODO make it possible to support sending EmulatorOptions across the network and starting emulators
+/* TODO make it possible to support sending EmulatorOptions across the network and starting emulators
  * with different options
  */
-class Clasp(val ip: String, val isClient: Boolean, val emuOpts: EmulatorOptions) {
+class ClaspClient(val ip: String, val masterip: String, val emuOpts: EmulatorOptions) {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
-  // TODO let's rename this everywhere from nodemanager to nodemanager
-  private var manager: ActorRef = null
+  info("I am a client!")  
+  val clientConf = ConfigFactory
+    .parseString(s"""akka.remote.netty.hostname="$ip"""")
+    .withFallback(ConfigFactory.load("client"))
+  val system = ActorSystem("clasp", clientConf)
+
+  var n = system.actorOf(Props(new Node(ip, masterip, emuOpts)), name=s"node-$ip")
+  info(s"Created Node for $ip")
+}
+
+
+/*
+ * Interface to the clasp system. Creating this will start a clasp worker on all clients 
+ * 
+ */
+class ClaspMaster(val ip: String, val client_ips: Seq[String]) {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
 
   info(s"Using IP $ip")
+  info("I am the master!")
+  val serverConf = ConfigFactory
+      .parseString(s"""akka.remote.netty.hostname="$ip" """)
+      .withFallback(ConfigFactory.load("master"))
 
-  if (isClient) {
-    run_client(ip, "10.0.2.6")
-  } else {
-    run_master(ip, List("10.0.2.26")) //, "10.0.2.2", "10.0.2.4", "10.0.2.5"))
-  }
+  val system = ActorSystem("clasp", serverConf)
+  val manager = system.actorOf(Props(new NodeManger(ip, client_ips)), name="nodemanager")
+  info("Created NodeManger")
+  
+  sys addShutdownHook(shutdown_listener(manager))
 
   def get_devices: List[Emulator] = {
-    if (isClient) {
-      info("'get_devices' called on a client!")
-      return null
-    }
     info("Getting available devices.")
     val f = ask(manager, "get_devices", 60000).mapTo[MutableList[ActorRef]]
     val emulator_actors = Await.result(f, 100 seconds)
@@ -149,49 +172,10 @@ class Clasp(val ip: String, val isClient: Boolean, val emuOpts: EmulatorOptions)
 
   def kill {
     info("Killing Clasp and emulators.")
-    kill_master(manager)
+    shutdown_listener(manager)
   }
 
-  // TODO put this into a separate object so we don't have confusion over whats going on inside
-  // the 'Clasp' object
-  private def run_client(hostname:String, server: String) {
-    info("I am a client!")
-    
-    val clientConf = ConfigFactory
-      .parseString(s"""akka.remote.netty.hostname="$hostname"""")
-      .withFallback(ConfigFactory.load("client"))
-    val system = ActorSystem("clasp", clientConf)
-
-    // Create new node, which will auto-register with
-    // the NodeManger
-    var n = system.actorOf(Props(new Node(hostname, server, emuOpts)), 
-      name=s"node-$hostname")
-    //n ! "rundefault"
-    info("Created Node.")
-    info("Chilling out..I will stay alive until killed.")
-  }
-
-  private def run_master(hostname: String, clients: Seq[String]) {
-    info("I am the system manager!")
-
-    val serverConf = ConfigFactory
-      .parseString(s"""akka.remote.netty.hostname="$hostname" """)
-      .withFallback(ConfigFactory.load("master"))
-    info("Debugging server:")
-    info(serverConf.root.render)
-    val system = ActorSystem("clasp", serverConf)
-
-    // Create NodeManger, which will automatically 
-    // ssh into each worker computer and properly 
-    // run clasp as a client
-    manager = system.actorOf(Props(new NodeManger(clients)), 
-      name="nodemanager")
-
-    info("Created NodeManger")
-    sys addShutdownHook(kill_master(manager))
-  }
-
-  private def kill_master(manager: ActorRef) {
+  private def shutdown_listener(manager: ActorRef) {
     // TODO: Context.system.shutdown somewhere?
     if (manager != null && !manager.isTerminated) {
       manager ! "shutdown"

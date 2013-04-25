@@ -36,22 +36,20 @@ import System.currentTimeMillis
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
-class NodeManger(val clients: Seq[String]) extends Actor {
+class NodeManger(val ip: String,  val client_ips: Seq[String]) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
   val nodes = ListBuffer[ActorRef]()
-  // TODO start all clients via SSH
-  start_clients(clients)
+  // TODO start all client_ips via SSH
+  start_client_ips(client_ips)
 
-  def start_clients(clients:Seq[String]):Unit = {
+  def start_client_ips(client_ips:Seq[String]):Unit = {
     // Locate our working directory
-    //val directory: String = "/home/hamiltont/clasp" //"pwd" !!
-    //val directory: String = "/home/brandon/programs/clasp"
     val directory: String = "pwd" !!;
 
     try {
       // Write a script in our home directory.
-      // We assume all clients share the home directory.
+      // We assume all client_ips share the home directory.
       val home: String = System.getProperty("user.home")
       val file: File = new File(home + "/bootstrap-clasp.sh")
       info("Building file " + file.getCanonicalPath )
@@ -62,17 +60,17 @@ class NodeManger(val clients: Seq[String]) extends Actor {
       bw.write(s"""#!/bin/sh\n
         \n
         cd $directory \n
-        nohup target/start --client &> nohup.$$1 & \n
+        echo "target/start --client --ip $$1 --mip $$2 &> nohup.$$1 &"\n
+        nohup target/start --client --ip $$1 --mip $$2 &> nohup.$$1 & \n
         """)
       bw.close()
 
-      // Start each client.
-      clients.foreach(ip => {
-          val command: String = s"ssh $ip sh bootstrap-clasp.sh $ip"
-          info(s"Starting $ip using $command.")
-          val exit = command.!
-          if (exit != 0)
-            error(s"There was some error starting $ip")
+      // Start each client
+      client_ips.foreach(client_ip => {
+          val command: String = s"ssh $client_ip sh bootstrap-clasp.sh $client_ip $ip"
+          info(s"Starting $client_ip using $command.")
+          val out = command.!!
+          info(s"$client_ip startup output:\n$out")
         })
 
       // Remove bootstrappea.r
@@ -99,7 +97,7 @@ class NodeManger(val clients: Seq[String]) extends Actor {
       info(s"${nodes.length}: Node ${sender.path} has registered!")
       nodes += sender
 
-      if (nodes.length == clients.length) {
+      if (nodes.length == client_ips.length) {
         info("All nodes are awake and registered.")
         /*
         info("In 1 minute, I'm going to shutdown the server")
