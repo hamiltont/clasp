@@ -85,8 +85,8 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
     //someService ! Register(self)
 
     // TODO register with a proper manager, not the nodemanager
-    val launcher = context.system.actorFor("akka://clasp@" + serverip + ":2552/user/nodelauncher")
-    launcher ! "emulator_up"
+    val manager = context.system.actorFor("akka://clasp@" + serverip + ":2552/user/nodemanager")
+    manager ! "emulator_up"
   }
 
   def receive = {

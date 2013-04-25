@@ -105,10 +105,10 @@ class NodeManger(val clients: Seq[String]) extends Actor {
         info("In 1 minute, I'm going to shutdown the server")
         info("The delay should allow emulators to start")
 
-        val launcher = context.system.actorFor("akka://clasp@10.0.2.6:2552/user/nodelauncher")
+        val manager = context.system.actorFor("akka://clasp@10.0.2.6:2552/user/nodemanager")
         import context.dispatcher
         context.system.scheduler.scheduleOnce(60 seconds) {
-          launcher ! "shutdown" 
+          manager ! "shutdown" 
         }
         */
       }
@@ -172,7 +172,7 @@ class NodeManger(val clients: Seq[String]) extends Actor {
 class Node(val ip: String, val serverip: String,
     val emuOpts: EmulatorOptions) extends Actor {
   val log = LoggerFactory.getLogger(getClass())
-  val launcher = context.actorFor("akka://clasp@" + serverip + ":2552/user/nodelauncher")
+  val manager = context.actorFor("akka://clasp@" + serverip + ":2552/user/nodemanager")
   import log.{error, debug, info, trace}
   import clasp.core.sdktools.EmulatorOptions
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
@@ -215,7 +215,7 @@ class Node(val ip: String, val serverip: String,
 
   override def preStart() = {
     info(s"Node online: ${self.path}")
-    launcher ! "node_up"
+    manager ! "node_up"
   }
 
   override def postStop() = {

@@ -76,7 +76,8 @@ object ClaspRunner extends App {
     printf("\n\n\n=====================================\n")
     val devices = clasp.get_devices
     if (devices isEmpty) {
-      println("Found no devices! Expect errors.")
+      println("Found no devices, aborting to avoid errors!")
+      clasp.kill
     }
 
     println("Device statuses:")
@@ -117,8 +118,8 @@ object ClaspRunner extends App {
 class Clasp(val ip: String, val isClient: Boolean, val emuOpts: EmulatorOptions) {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
-  // TODO let's rename this everywhere from nodelauncher to nodemanager
-  private var launcher: ActorRef = null
+  // TODO let's rename this everywhere from nodemanager to nodemanager
+  private var manager: ActorRef = null
 
   info(s"Using IP $ip")
 
@@ -134,7 +135,7 @@ class Clasp(val ip: String, val isClient: Boolean, val emuOpts: EmulatorOptions)
       return null
     }
     info("Getting available devices.")
-    val f = ask(launcher, "get_devices", 60000).mapTo[MutableList[ActorRef]]
+    val f = ask(manager, "get_devices", 60000).mapTo[MutableList[ActorRef]]
     val emulator_actors = Await.result(f, 100 seconds)
     //println(emulator_actors)
     for (actor <- emulator_actors) {
@@ -148,7 +149,7 @@ class Clasp(val ip: String, val isClient: Boolean, val emuOpts: EmulatorOptions)
 
   def kill {
     info("Killing Clasp and emulators.")
-    kill_master(launcher)
+    kill_master(manager)
   }
 
   // TODO put this into a separate object so we don't have confusion over whats going on inside
@@ -157,17 +158,8 @@ class Clasp(val ip: String, val isClient: Boolean, val emuOpts: EmulatorOptions)
     info("I am a client!")
     
     val clientConf = ConfigFactory
-      .parseString(s"""
-        akka {
-          remote {
-            netty {
-              hostname = "$hostname"
-              port     = 2553
-            }
-          }
-        }
-        """)
-      .withFallback(ConfigFactory.load)
+      .parseString(s"""akka.remote.netty.hostname="$hostname"""")
+      .withFallback(ConfigFactory.load("client"))
     val system = ActorSystem("clasp", clientConf)
 
     // Create new node, which will auto-register with
@@ -184,27 +176,29 @@ class Clasp(val ip: String, val isClient: Boolean, val emuOpts: EmulatorOptions)
 
     val serverConf = ConfigFactory
       .parseString(s"""akka.remote.netty.hostname="$hostname" """)
-      .withFallback(ConfigFactory.load)
+      .withFallback(ConfigFactory.load("master"))
+    info("Debugging server:")
+    info(serverConf.root.render)
     val system = ActorSystem("clasp", serverConf)
 
     // Create NodeManger, which will automatically 
     // ssh into each worker computer and properly 
     // run clasp as a client
-    launcher = system.actorOf(Props(new NodeManger(clients)), 
-      name="nodelauncher")
+    manager = system.actorOf(Props(new NodeManger(clients)), 
+      name="nodemanager")
 
     info("Created NodeManger")
-    sys addShutdownHook(kill_master(launcher))
+    sys addShutdownHook(kill_master(manager))
   }
 
-  private def kill_master(launcher: ActorRef) {
+  private def kill_master(manager: ActorRef) {
     // TODO: Context.system.shutdown somewhere?
-    if (launcher != null && !launcher.isTerminated) {
-      launcher ! "shutdown"
+    if (manager != null && !manager.isTerminated) {
+      manager ! "shutdown"
     }
 
     var timeSlept = 0.0d; var timeout = 10.0d
-    while (launcher != null && !launcher.isTerminated) {
+    while (manager != null && !manager.isTerminated) {
       Thread.sleep(500)
       timeSlept += 0.5d
       if (timeSlept >= timeout) {
