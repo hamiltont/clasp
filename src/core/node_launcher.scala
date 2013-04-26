@@ -30,6 +30,7 @@ import com.typesafe.config.ConfigFactory
 import scala.concurrent.duration._
 import scala.concurrent.{Future,Await}
 import scala.language.postfixOps
+import scala.util.Random
 
 // Used for command line parsing
 //import org.rogach.scallop._
@@ -113,7 +114,7 @@ class NodeBooter(val master_ip: String) extends Actor {
   // TODO randomly sort this
   val pool_list = config.getStringList("clasp.workerpool")
   val it = pool_list.iterator
-  val pool: ArrayStack[String] = (new ArrayStack) union pool_list.asScala
+  val pool: ArrayStack[String] = Random.shuffle((new ArrayStack) union pool_list.asScala)
 
   def receive = { 
     case BootNode => boot_any
