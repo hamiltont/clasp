@@ -2,6 +2,7 @@ package clasp
 
 import scala.collection.mutable.MutableList
 
+import scala.collection.mutable.ListBuffer
 import scala.sys.process._
 import scala.language.postfixOps
 
@@ -221,8 +222,8 @@ class ClaspMaster(val ip: String, var initial_workers: Int) {
 
   def get_devices: List[Emulator] = {
     info("Getting available devices.")
-    val f = ask(manager, "get_devices", 60000).mapTo[MutableList[ActorRef]]
-    val emulator_actors = Await.result(f, 100 seconds)
+    val f = ask(emanager, "get_devices", 60000).mapTo[ListBuffer[ActorRef]]
+    val emulator_actors = Await.result(f, 5 seconds)
     //println(emulator_actors)
     for (actor <- emulator_actors) {
       val f = ask(actor, "get_serialID", 60000).mapTo[String]

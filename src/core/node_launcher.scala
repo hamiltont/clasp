@@ -79,14 +79,6 @@ class NodeManger(val ip: String, val initial_workers: Int) extends Actor {
       // TODO lookup PP semantics and potentially remove this line if it's redundant 
       booter ! PoisonPill
     }
-    case "get_devices" => {
-      var devices: MutableList[ActorRef] = MutableList[ActorRef]()
-      for (node <- nodes) {
-        val f = ask(node, "get_devices", 60000).mapTo[MutableList[ActorRef]]
-        devices ++= Await.result(f, 100 seconds)
-      }
-      sender ! devices
-    }
   }
 
   def reaper: Receive = {
@@ -110,7 +102,6 @@ class NodeManger(val ip: String, val initial_workers: Int) extends Actor {
 
   // Start in monitor mode.
   def receive = monitoring
-
 }
 
 
@@ -196,9 +187,9 @@ case class NodeBusy(nodeid: String, debuglog: String)
 class Node(val ip: String, val serverip: String,
     val emuOpts: EmulatorOptions) extends Actor {
   val log = LoggerFactory.getLogger(getClass())
-  val manager = context.actorFor("akka://clasp@" + serverip + ":2552/user/nodemanager")
   import log.{error, debug, info, trace}
-  import clasp.core.sdktools.EmulatorOptions
+  
+  val manager = context.actorFor("akka://clasp@" + serverip + ":2552/user/nodemanager")
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
   var base_emulator_port = 5555
 
@@ -255,12 +246,6 @@ class Node(val ip: String, val serverip: String,
   }
 
   def receive = {
-    case "register" => {
-      info(s"Emulator online: ${sender.path}")
-      devices += sender
-    }
-    case "get_devices" => {
-      sender ! devices
-    }
+    case _ => info("Node received a message, but it doesn't do anything!")
   }
 }

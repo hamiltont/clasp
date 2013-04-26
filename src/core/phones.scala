@@ -4,6 +4,7 @@
  */
 package clasp.core
 
+import scala.collection.mutable.ListBuffer
 import scala.sys.process.Process
 import scala.sys.process._ // TODO: Might not need...
 //import org.hyperic.sigar.Sigar
@@ -24,12 +25,22 @@ case class Execute (f: () => Any, setBusy: Boolean) extends Serializable
 class EmulatorManager extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
-  var emulators: Int = 0
+
+  val emulators = ListBuffer[ActorRef]()
 
   def receive = {
     case "emulator_up" => {
-      emulators += 1
-      info(s"${emulators} emulators awake.")
+      emulators += sender
+      info(s"${emulators.length} emulators awake: ${sender.path}")
+    }
+    case "emulator_down" => {
+      emulators -= sender
+      info(s"${emulators.length} still awake: Lost ${sender.path}")
+    }
+    case "get_devices" => {
+      // TODO this is sending a mutable list over the wire!! Need to 
+      // copy into an immutable form
+      sender ! emulators
     }
   }
 }
@@ -63,20 +74,19 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
 
   override def postStop = {
     info(s"Stopping emulator ${self.path}")
+    
     // TODO can we stop politely by sending a command to the emulator? 
-    // TODO verify that all emulator processes have been killed, potentially force kill
     process.destroy
     process.exitValue // block until destroyed
     info(s"Emulator ${self.path} stopped")
+    
+    val emanager = context.system.actorFor("akka://clasp@" + serverip + ":2552/user/emulatormanager")
+    emanager ! "emulator_down"
   }
   
   override def preStart() {
-    context.parent ! "register"
-    //someService ! Register(self)
-
-    // TODO register with a proper manager, not the nodemanager
-    val manager = context.system.actorFor("akka://clasp@" + serverip + ":2552/user/nodemanager")
-    manager ! "emulator_up"
+    val emanager = context.system.actorFor("akka://clasp@" + serverip + ":2552/user/emulatormanager")
+    emanager ! "emulator_up"
   }
 
   def receive = {
