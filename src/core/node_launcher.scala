@@ -5,8 +5,8 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.MutableList
 import scala.collection.mutable.ArrayStack
 import scala.collection.JavaConverters._
+import scala.util.Random
 
-//import org.hyperic.sigar.Sigar
 import org.slf4j.LoggerFactory
 
 import clasp.core.sdktools.sdk
@@ -42,32 +42,40 @@ import System.currentTimeMillis
 class NodeManger(val ip: String, val initial_workers: Int) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
+  
+  // Build a pool of worker IP addresses
+  val config = ConfigFactory.load("client")
+  val pool_list = config.getStringList("clasp.workerpool")
+  val it = pool_list.iterator
+  val pool: ArrayStack[String] = Random.shuffle((new ArrayStack) union pool_list.asScala)
 
-  val booter = context.actorOf(Props(new NodeBooter(ip)), name="booter")
-  for (i <- 1 to initial_workers) yield (booter ! BootNode)
+  for (i <- 1 to initial_workers) yield (self ! BootNode)
 
   val nodes = ListBuffer[ActorRef]()
+  // Tracks how many nodes have been triggered but have not yet replied
+  var outstanding: Int = 0
 
   def monitoring: Receive = {
-   case "node_up" => { 
+   case NodeUp => { 
       info(s"${nodes.length}: Node ${sender.path} has registered!")
       nodes += sender
+      outstanding -= 1
 
-      if (nodes.length == initial_workers)
-        info("All nodes are awake and registered.")
+      if (outstanding == 0)
+        info("All nodes requested (to this point) are awake and registered")
     }
-    case "node_down" => {
-      nodes -= sender
-      info(s"${nodes.length}: Node ${sender.path} has deregistered!")
-    }
-    
-    case "shutdown" => {
+   case NodeBusy(nodeip, nodelog) => {
+      info(s"Node $nodeip has declared itself busy")
+      info(s"Debug log for node $nodeip:\n$nodelog")
+      info("Requesting a new node to replace $nodeip")
+      outstanding -= 1
+      boot_any
+    } 
+    case BootNode => boot_any
+    case Shutdown => {
       // First register to watch all nodes
       nodes.foreach(node => context.watch(node))
       info("Shutdown requested.")
-
-      //info("Sleeping for ~15 more seconds so the user can see if emulator CPU has stabilized")
-      //Thread.sleep(15000)
 
       // Second, transition our receive loop into a Reaper
       context.become(reaper)
@@ -76,22 +84,33 @@ class NodeManger(val ip: String, val initial_workers: Int) extends Actor {
       // Second, ask all of our nodes to stop
       nodes.foreach(n => n ! PoisonPill)
       info("Pill sent to all nodes.")
-
-      // TODO lookup PP semantics and potentially remove this line if it's redundant 
-      booter ! PoisonPill
     }
+    case _ => error("Received unknown message!")
   }
 
   def reaper: Receive = {
-    case Terminated(ref) =>
+
+    case Terminated(ref) => {
       nodes -= ref
-      info("Node " + ref.path + " Termination received.")
-      if (nodes.isEmpty) {
-        info("No more nodes, killing self.")
+      info(s"Reaper: Termination received for ${ref.path}")
+      if (nodes.isEmpty && outstanding==0 ) {
+        info("No more remote nodes or outstanding boot requests, killing self.")
         self ! PoisonPill
       }
-    case _ =>
-      info("In reaper mode, ignoring messages.")
+    }
+    case NodeUp => {
+      outstanding -= 1
+      info(s"Reaper: Node registered at ${sender.path}")
+      info(s"Reaper: Replying with a PoisonPill")
+      context.watch(sender)
+      sender ! PoisonPill
+    }
+    case BootNode => info("Reaper: Ignoring boot request")
+    case NodeBusy(id, log) => {
+      outstanding -= 1
+      info(s"Reaper: Ignoring busy node $id")
+    } 
+    case Shutdown => info("Reaper: Ignoring shutdown")
   }
 
   override def postStop = {
@@ -99,31 +118,6 @@ class NodeManger(val ip: String, val initial_workers: Int) extends Actor {
       info("System shutdown achieved at " + System.currentTimeMillis ) }
     info("postStop. Requesting system shutdown at " + System.currentTimeMillis )
     context.system.shutdown()
-  }
-
-  // Start in monitor mode.
-  def receive = monitoring
-}
-
-
-class NodeBooter(val master_ip: String) extends Actor {
-  lazy val log = LoggerFactory.getLogger(getClass())
-  import log.{error, debug, info, trace}
-  
-  val config = ConfigFactory.load("client")
-  // TODO randomly sort this
-  val pool_list = config.getStringList("clasp.workerpool")
-  val it = pool_list.iterator
-  val pool: ArrayStack[String] = Random.shuffle((new ArrayStack) union pool_list.asScala)
-
-  def receive = { 
-    case BootNode => boot_any
-    case NodeBusy(nodeip, nodelog) => {
-      info(s"Node $nodeip has declared itself busy")
-      info(s"Debug log for node $nodeip:\n$nodelog")
-      info("Requesting a new node to replace $nodeip")
-      boot_any
-    }
   }
 
   def boot_any = {
@@ -134,7 +128,7 @@ class NodeBooter(val master_ip: String) extends Actor {
       error("Node boot request failed - worker pool is empty")
   }
 
-  def bootstrap(client_ip:String) = {
+  def bootstrap(client_ip:String):Unit = {
     // TODO put this somewhere besides the home directory. Best option
     // would be to pass this directly into SSH and forgo the entire 
     // temporary file stuff. There is a race condition where the same
@@ -162,10 +156,9 @@ class NodeBooter(val master_ip: String) extends Actor {
         echo "Done"
         """)
       bw.close()
-      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh bootstrap-clasp.sh $client_ip $master_ip"
+      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh bootstrap-clasp.sh $client_ip $ip"
       info(s"Starting $client_ip using $command")
-
-      command.!!.stripLineEnd
+      command.!!
 
       // Remove bootstrapper
       val file2: File = new File("~/bootstrap-clasp.sh")
@@ -175,13 +168,22 @@ class NodeBooter(val master_ip: String) extends Actor {
       case e: IOException => {
         error("Unable to write bootstrapper, aborting.")
         e.printStackTrace
+        return
       }
     }
+
+    outstanding += 1 
   } // End bootstrap
+  
+  // Start in monitor mode.
+  def receive = monitoring
 
 }
-case class BootNode()
-case class NodeBusy(nodeid: String, debuglog: String)
+sealed trait NM_Message
+case class Shutdown() extends NM_Message
+case class NodeUp() extends NM_Message
+case class BootNode() extends NM_Message
+case class NodeBusy(nodeid: String, debuglog: String) extends NM_Message
 
 // Manages the running of the framework on a single node,
 // including ?startup?, shutdown, etc.
@@ -231,18 +233,18 @@ class Node(val ip: String, val serverip: String,
 
   override def preStart() = {
     info(s"Node online: ${self.path}")
-    manager ! "node_up"
+    manager ! NodeUp
   }
 
   override def postStop() = {
-    info("Node " + self.path + " has stopped.");
+    info(s"Node ${self.path} has stopped");
 
     devices.foreach(phone => phone ! PoisonPill)
-    info("Requested emulators to halt.")
+    info("Requested emulators to halt")
 
     context.system.registerOnTermination {
-      info("System shutdown achieved at " + System.currentTimeMillis) }
-    info("Requesting system shutdown at " + System.currentTimeMillis)
+      info(s"System shutdown achieved at ${System.currentTimeMillis}") }
+    info(s"Requesting system shutdown at ${System.currentTimeMillis}")
     context.system.shutdown()
   }
 

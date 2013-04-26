@@ -154,13 +154,13 @@ class ClaspClient(val ip: String, val masterip: String, val emuOpts: EmulatorOpt
         .withFallback(ConfigFactory.load("application"))
   
       val temp = ActorSystem("clasp-failure", failConf)
-      val booter = temp.actorFor("akka://clasp@" + masterip + ":2552/user/nodemanager/booter")
-      booter ! NodeBusy(ip, logbuffer.toString)
-      
+      val manager = temp.actorFor("akka://clasp@" + masterip + ":2552/user/nodemanager")
+      manager ! NodeBusy(ip, logbuffer.toString)
+      // TODO replace above with ask and terminate as soon as the Ack received
+
       // 99% confidence the busy message was received
       Thread.sleep(2000)
       System.exit(1)
-      
     }
   }
  
@@ -245,7 +245,7 @@ class ClaspMaster(val ip: String, var initial_workers: Int) {
 
     if (manager != null && !manager.isTerminated) {
       // First shutdown everything from Node down the hierarchy
-      manager ! "shutdown"
+      manager ! Shutdown
 
       // Second shutdown all other high-level management activities
       emanager ! PoisonPill
