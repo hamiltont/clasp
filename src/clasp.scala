@@ -59,8 +59,6 @@ object ClaspRunner extends App {
   // started per computer in your cluster, although you should probably let the master handle
   // starting all of the workers
   
-  val client_ips = List("10.0.2.26")
-
   if (conf.client()) {
     if (conf.mip.get == None) {
       error("Client started without an ip address for the master node, aborting")
@@ -70,7 +68,7 @@ object ClaspRunner extends App {
     new ClaspClient(ip, masterip, opts)
   } else {
 
-    var clasp = new ClaspMaster(ip, client_ips)
+    var clasp = new ClaspMaster(ip, conf.workers())
   
     // TODO should we update the system so the user extends "ClaspServer" and only writes this 
     // part of the codebase? Everything above seems like boilerplate code
@@ -144,19 +142,19 @@ class ClaspClient(val ip: String, val masterip: String, val emuOpts: EmulatorOpt
       val user_list: String = s"ps --no-headers -o user -C java,$emu_cmds".!!
       import scala.collection.immutable.StringOps
       (new StringOps(user_list)).lines.foreach(line => {
-        val user: String = (s"getent passwd $line").!!
+        val user: String = (s"getent passwd $line").!!.stripLineEnd
         logbuffer ++= user
       })
 
-      // Notify manager of failure
+      // Notify failure
       val failConf = ConfigFactory
         .parseString(s"""akka.remote.netty.hostname="$ip"""")
         .withFallback(ConfigFactory.parseString("akka.remote.netty.port=0"))
         .withFallback(ConfigFactory.load("application"))
   
       val temp = ActorSystem("clasp-failure", failConf)
-      val manager = temp.actorFor("akka://clasp@" + masterip + ":2552/user/nodemanager")
-      manager ! new NodeBusy(ip, logbuffer.toString)
+      val booter = temp.actorFor("akka://clasp@" + masterip + ":2552/user/nodemanager/booter")
+      booter ! NodeBusy(ip, logbuffer.toString)
       
       // 99% confidence the busy message was received
       Thread.sleep(2000)
@@ -169,7 +167,7 @@ class ClaspClient(val ip: String, val masterip: String, val emuOpts: EmulatorOpt
   // clutter up the log of the clasp instance already running on this system
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
-  info("----------------------------  Starting New Client -----------------------------") // Useful for appended logs
+  info("----------------------------  Starting New Client -----------------------------")
   info(s"Using IP $ip")
   info("I am a client!")  
 
@@ -182,7 +180,7 @@ class ClaspClient(val ip: String, val masterip: String, val emuOpts: EmulatorOpt
  * Interface to the clasp system. Creating this will start a clasp worker on all clients 
  * 
  */
-class ClaspMaster(val ip: String, val client_ips: Seq[String]) {
+class ClaspMaster(val ip: String, var initial_workers: Int) {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
@@ -214,10 +212,12 @@ class ClaspMaster(val ip: String, val client_ips: Seq[String]) {
     }
   }
   
-  val manager = system.actorOf(Props(new NodeManger(ip, client_ips)), name="nodemanager")
+  val emanager = system.actorOf(Props[EmulatorManager], name="emulatormanager")
+  info("Created EmulatorManager")
+  val manager = system.actorOf(Props(new NodeManger(ip, initial_workers)), name="nodemanager")
   info("Created NodeManger")
   
-  sys addShutdownHook(shutdown_listener(manager))
+  sys addShutdownHook(shutdown_listener)
 
   def get_devices: List[Emulator] = {
     info("Getting available devices.")
@@ -235,13 +235,19 @@ class ClaspMaster(val ip: String, val client_ips: Seq[String]) {
 
   def kill {
     info("Killing Clasp and emulators.")
-    shutdown_listener(manager)
+    shutdown_listener
   }
 
-  private def shutdown_listener(manager: ActorRef) {
+  private def shutdown_listener() {
     // TODO: Context.system.shutdown somewhere?
+
+
     if (manager != null && !manager.isTerminated) {
+      // First shutdown everything from Node down the hierarchy
       manager ! "shutdown"
+
+      // Second shutdown all other high-level management activities
+      emanager ! PoisonPill
     }
 
     var timeSlept = 0.0d; var timeout = 10.0d

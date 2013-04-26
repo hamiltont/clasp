@@ -20,28 +20,17 @@ import scala.language.postfixOps
 
 case class Execute (f: () => Any, setBusy: Boolean) extends Serializable 
 
-case class Load_Tick()
-class EmulatorLoadMonitor(pid: Long) extends Actor {
-  val log = Logging(context.system, this)
-  import log.{info, debug, error}
-  
 
-  //var s: Sigar = new Sigar
-  //val pt: ProcTime = new ProcTime
-
-
-  override def preStart {
-    // someService | Register(self)
-  }
+class EmulatorManager extends Actor {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
+  var emulators: Int = 0
 
   def receive = {
-    case "test" => info("received test")
-    case Load_Tick => {
-      info("Load Tick")
-      //pt.gather(s, pid)
-      //info("Emulator: " + pt)
+    case "emulator_up" => {
+      emulators += 1
+      info(s"${emulators} emulators awake.")
     }
-
   }
 }
 
@@ -53,6 +42,7 @@ class EmulatorLoadMonitor(pid: Long) extends Actor {
 // others to interface with the EmulatorActor without having to understand its 
 // interface
 class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) extends Actor {
+
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
@@ -203,3 +193,22 @@ object EmulatorBuilder {
   }
 }
 
+/*case class Load_Tick()
+class EmulatorLoadMonitor(pid: Long) extends Actor {
+  val log = Logging(context.system, this)
+  import log.{info, debug, error}
+
+  override def preStart {
+    // someService | Register(self)
+  }
+
+  def receive = {
+    case "test" => info("received test")
+    case Load_Tick => {
+      info("Load Tick")
+      //pt.gather(s, pid)
+      //info("Emulator: " + pt)
+    }
+
+  }
+}*/

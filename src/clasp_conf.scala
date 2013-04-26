@@ -6,6 +6,7 @@ import org.rogach.scallop._
 class ClaspConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   version("Clasp 0.0.0")
   banner("""Usage: clasp [-c|--client] [-i|--ip <external ip>] [-m|--mip <master ip>]
+    | [-w|--workers <number>]
     |By default clasp runs as though it was a server with only 
     |the local node. This makes it easier for people running in
     |a non-distributed manner. If you use sbt, then to run a 
@@ -21,4 +22,9 @@ class ClaspConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   // TODO figure out how to make scallop enfore this requirement for us
   val mip    = opt[String] (descr = "The server ip address. Does nothing without the " + 
     "flag indicating that this is a client. Required for clients")
+
+  val workers= opt[Int]    (descr = "The number of worker clients Clasp should start " +
+    "by default. This number can grow or shrink dynamically as the system runs. All " + 
+    "clients are picked from a pool of IP addresses inside server.conf", 
+    default=Some(3))
 }
