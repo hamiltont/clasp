@@ -42,34 +42,18 @@ object ClaspRunner extends App {
   // Used to parse the command line arguments
   val conf = new ClaspConf(args)
 
-  // Check if you are the server, or one of the workers 
-  var ip: String = "none"
-  if (conf.ip.get == None)
-    ip = "10.0.2." + "hostname".!!
-  else
-    ip = conf.ip()
-  // TODO move this into scallop or the core so that we don't have to require a user to fix their entry 
-  // strings
-  ip = ip.stripLineEnd
-
   // TODO: Add a way for emulator options to be nonuniform?
   // Setup some options for the emulator
   val opts = new EmulatorOptions
   opts.noWindow = true
+  
   // Create a new instance of the framework. There should be at least one instance of Clasp
   // started per computer in your cluster, although you should probably let the master handle
   // starting all of the workers
-  
-  if (conf.client()) {
-    if (conf.mip.get == None) {
-      error("Client started without an ip address for the master node, aborting")
-      System.exit(1)
-    }
-    val masterip = conf.mip().stripLineEnd
-    new ClaspClient(ip, masterip, opts)
-  } else {
-
-    var clasp = new ClaspMaster(ip, conf.workers())
+  if (conf.client()) 
+    new ClaspClient(conf, opts)
+  else {
+    var clasp = new ClaspMaster(conf)
   
     // TODO should we update the system so the user extends "ClaspServer" and only writes this 
     // part of the codebase? Everything above seems like boilerplate code
@@ -96,7 +80,7 @@ object ClaspRunner extends App {
     println("Setting the first device as busy.")
     devices(0).setBusy(true)
 
-    println("Device statuses:")
+    println("Device statuse9s:")
     for (device <- devices) {
       println(s"serialID: ${device.serialID}, isBusy: ${device.isBusy}")
     }
@@ -121,11 +105,14 @@ object ClaspRunner extends App {
 /* TODO make it possible to support sending EmulatorOptions across the network and starting emulators
  * with different options
  */
-class ClaspClient(val ip: String, val masterip: String, val emuOpts: EmulatorOptions) {
-  
+class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
+  val ip = conf.ip()
   val clientConf = ConfigFactory
     .parseString(s"""akka.remote.netty.hostname="$ip"""")
     .withFallback(ConfigFactory.load("client"))
+
+  // Turn on the actor system, avoiding logging until we are sure we can run so we 
+  // don't mix our logs in with someone already running on this node
   var system:ActorSystem = null
   try {
     system = ActorSystem("clasp", clientConf)
@@ -172,6 +159,12 @@ class ClaspClient(val ip: String, val masterip: String, val emuOpts: EmulatorOpt
   info(s"Using IP $ip")
   info("I am a client!")  
 
+  if (conf.mip.get == None) {
+    error("Client started without an ip address for the master node, aborting")
+    System.exit(1)
+  }
+  val masterip = conf.mip().stripLineEnd
+
   var n = system.actorOf(Props(new Node(ip, masterip, emuOpts)), name=s"node-$ip")
   info(s"Created Node for $ip")
 }
@@ -181,10 +174,11 @@ class ClaspClient(val ip: String, val masterip: String, val emuOpts: EmulatorOpt
  * Interface to the clasp system. Creating this will start a clasp worker on all clients 
  * 
  */
-class ClaspMaster(val ip: String, var initial_workers: Int) {
+class ClaspMaster(val conf: ClaspConf) {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
+  val ip = conf.ip()
   info(s"Using IP $ip")
   info("I am the master!")
   val serverConf = ConfigFactory
@@ -215,7 +209,9 @@ class ClaspMaster(val ip: String, var initial_workers: Int) {
   
   val emanager = system.actorOf(Props[EmulatorManager], name="emulatormanager")
   info("Created EmulatorManager")
-  val manager = system.actorOf(Props(new NodeManger(ip, initial_workers)), name="nodemanager")
+ 
+  var manager = system.actorOf(Props(
+    new NodeManger(ip, conf.workers(), conf.pool.get)), name="nodemanager")
   info("Created NodeManger")
   
   sys addShutdownHook(shutdown_listener)

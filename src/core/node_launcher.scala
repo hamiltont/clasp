@@ -39,15 +39,23 @@ import System.currentTimeMillis
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
-class NodeManger(val ip: String, val initial_workers: Int) extends Actor {
+class NodeManger(val ip: String, val initial_workers: Int, manual_pool: Option[String] = None) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
-  
-  // Build a pool of worker IP addresses
-  val config = ConfigFactory.load("client")
-  val pool_list = config.getStringList("clasp.workerpool")
-  val it = pool_list.iterator
-  val pool: ArrayStack[String] = Random.shuffle((new ArrayStack) union pool_list.asScala)
+
+  var pool: ArrayStack[String] = null
+  manual_pool match {
+    case Some(mpool) => {
+      pool = (new ArrayStack) union mpool.split(',')
+    }
+    case None => {
+      // Build a pool of worker IP addresses
+      val config = ConfigFactory.load("client")
+      val pool_list = config.getStringList("clasp.workerpool")
+      val it = pool_list.iterator
+      pool = Random.shuffle((new ArrayStack) union pool_list.asScala)
+    }
+  }
 
   for (i <- 1 to initial_workers) yield (self ! BootNode)
 
@@ -56,15 +64,15 @@ class NodeManger(val ip: String, val initial_workers: Int) extends Actor {
   var outstanding: Int = 0
 
   def monitoring: Receive = {
-   case NodeUp => { 
-      info(s"${nodes.length}: Node ${sender.path} has registered!")
+    case NodeUp => { 
       nodes += sender
+      info(s"${nodes.length}: Node ${sender.path} has registered!")
       outstanding -= 1
 
       if (outstanding == 0)
         info("All nodes requested (to this point) are awake and registered")
     }
-   case NodeBusy(nodeip, nodelog) => {
+    case NodeBusy(nodeip, nodelog) => {
       info(s"Node $nodeip has declared itself busy")
       info(s"Debug log for node $nodeip:\n$nodelog")
       info("Requesting a new node to replace $nodeip")
