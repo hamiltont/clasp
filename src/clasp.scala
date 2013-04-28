@@ -278,13 +278,10 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
-  // TODO: There's possibly a better way to do this?
-  // @Brandon - I think the normal scala-ism is to use Option
-  var serialID = "unset"
-
+  var serialID: Option[String] = _
   {
     val f = ask(emulatorActor, "get_serialID", 60000).mapTo[String]
-    serialID = Await.result(f, 100 seconds)
+    serialID = Option(Await.result(f, 100 seconds))
   }
 
   def setBusy(isBusy: Boolean) {
@@ -302,6 +299,6 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
 
   def installApk(path: String, setBusy: Boolean = true) {
     info(s"Installing package: $path.")
-    emulatorActor ! Execute(() => sdk.install_package(serialID, path), setBusy)
+    emulatorActor ! Execute(() => sdk.install_package(serialID.get, path), setBusy)
   }
 }
