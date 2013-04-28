@@ -2,4 +2,4 @@
 #
 # Clean up the Clasp directory.
 
-rm -rf nohup.* sdcard-*
+rm -f nohup.* sdcard-*
