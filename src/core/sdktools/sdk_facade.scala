@@ -28,6 +28,6 @@ object sdk_config {
   val config: Config  = ConfigFactory.load()
   // TODO make this return the proper class at runtime.
   // Currently only returns clasp.core.sdk_config
-  lazy val log = LoggerFactory.getLogger(getClass()) 
+  lazy val log = LoggerFactory.getLogger(getClass())
 }
 

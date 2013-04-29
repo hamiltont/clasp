@@ -287,4 +287,23 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
     emulatorActor ! Execute(() =>
       sdk.emulator_console(serialID.get, cmd))
   }
+
+  def pull(remotePath: String, localPath: String) {
+    info(s"Pulling '$remotePath' to '$localPath'")
+    emulatorActor ! Execute(() =>
+      sdk.pull_from_device(serialID.get, remotePath, localPath))
+  }
+
+  def startActivity(mainActivity: String) {
+    info(s"Starting activity: $mainActivity.")
+    val amStart = s"am start -a android.intent.action.MAIN -n $mainActivity"
+    emulatorActor ! Execute(() =>
+      sdk.remote_shell(serialID.get, amStart))
+  }
+
+  def stopPackage(name: String) {
+    info(s"Stopping package: $name")
+    emulatorActor ! Execute(() =>
+      sdk.remote_shell(serialID.get, s"""am force-stop "$name" """))
+  }
 }
