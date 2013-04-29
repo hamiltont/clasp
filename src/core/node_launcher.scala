@@ -6,6 +6,7 @@ import scala.collection.mutable.MutableList
 import scala.collection.mutable.ArrayStack
 import scala.collection.JavaConverters._
 import scala.util.Random
+import scala.collection.immutable.StringOps
 
 import org.slf4j.LoggerFactory
 
@@ -24,11 +25,7 @@ import java.io.IOException
 
 import com.typesafe.config.ConfigFactory
 
-// Used to delay shutting down the system. Termination 
-// conditions are a bit hard to come by currently because 
-// the server is designed to stay alive
-import scala.concurrent.duration._
-import scala.concurrent.{Future,Await}
+import scala.concurrent._
 import scala.language.postfixOps
 import scala.util.Random
 
@@ -137,51 +134,13 @@ class NodeManger(val ip: String, val initial_workers: Int, manual_pool: Option[S
   }
 
   def bootstrap(client_ip:String):Unit = {
-    // TODO put this somewhere besides the home directory. Best option
-    // would be to pass this directly into SSH and forgo the entire 
-    // temporary file stuff. There is a race condition where the same
-    // file might be used multiple times
-    try {
-      // Write a script in our home directory.
-      // We assume all client_ips share the home directory.
-      val home: String = System.getProperty("user.home")
+   val directory: String = "pwd".!!.stripLineEnd
+   val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $directory ; nohup target/start --client --ip $client_ip --mip $ip >> nohup.$client_ip 2>&1 &' "
+   info(s"Starting $client_ip using $command")
+   command.!!
 
-      // Locate our working directory
-      val directory: String = "pwd" !!;
-
-      val file: File = new File(home + "/bootstrap-clasp.sh")
-      info("Building file " + file.getCanonicalPath )
-      if (!file.exists())
-        file.createNewFile();
-      val fw: FileWriter = new FileWriter(file.getAbsoluteFile())
-      val bw: BufferedWriter = new BufferedWriter(fw)
-      bw.write(s"""#!/bin/sh\n
-        \n
-        cd $directory \n
-        echo "Starting node using:"
-        echo "target/start --client --ip $$1 --mip $$2 >> nohup.$$1 2>&1 &"\n
-        nohup target/start --client --ip $$1 --mip $$2 >> nohup.$$1 2>&1 & \n
-        echo "Done"
-        """)
-      bw.close()
-      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh bootstrap-clasp.sh $client_ip $ip"
-      info(s"Starting $client_ip using $command")
-      command.!!
-
-      // Remove bootstrapper
-      val file2: File = new File("~/bootstrap-clasp.sh")
-      file2.delete()
-
-    } catch {
-      case e: IOException => {
-        error("Unable to write bootstrapper, aborting.")
-        e.printStackTrace
-        return
-      }
-    }
-
-    outstanding += 1 
-  } // End bootstrap
+   outstanding += 1 
+  } 
   
   // Start in monitor mode.
   def receive = monitoring
