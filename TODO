@@ -4,20 +4,8 @@ Brandon
       us signal 15 via the kill command
 
 Hamilton
-  3 - Build central hostfile to define nodes and their respective SDK locations. 
-      Build central registry of emulators 
   4 - Implement emulator hibernation
- 19 - Update remote launching to recover from errors. For now, kill all processes
-      that might belong to clasp (java | emulator | emulator-64 | ...) and try 
-      again. Notice that just because we killed all of these processes does not mean
-      that the port is open--another user could be running clasp. In that case, we 
-      should probably back off and try a different node. Our configuration should
-      probably take a number of node IP addresses and the number of nodes you want
-      started, and if it cannot start a node it will try a different one. A good 
-      "final" solution would be to make all of the Android SDK commands run specific 
-      to one user e.g. only list the emulators for one user. Naturally then how do 
-      we handle physical devices? 
-
+      
 Noah
   2 - Pass in the hostname/ips of the server.
   3 - Pass in the hostname/ips of the clients.
@@ -102,6 +90,14 @@ Unallocated - Features
  18 - Make it so that `Clasp:get_devices` blocks until all emulators
       have a process so we only have to call it once to get
       this list.
+ 24 - Parameter --workspace that defines the local workspace for each client. This should
+      allow us to inform clients to use the /mnt/localhd workspace for things like AVDs
+      and sdcard. This will drastically speed up emulator creation/starting, but we will 
+      need to be careful to avoid over-writing the workspaces of others e.g. perhaps 
+      have keys to avoid collisions e.g. --workspace /mnt/localhd/USERNAME would be 
+      replaced by /mnt/localhd/hamiltont 
+
+
 
 Unallocated - Modules
   8 - SMS network modeling.
