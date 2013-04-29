@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 
 import scala.language.postfixOps
 
-case class Execute (f: () => Any, setBusy: Boolean) extends Serializable 
+case class Execute (f: () => Any) extends Serializable 
 
 
 class EmulatorManager extends Actor {
@@ -64,12 +64,6 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
   // Note: Only calling `wait_for_device` returns too early,
   // before the emulators can be fully interacted with.
 
-  // Keep track if the emulator is currently performing an action
-  // in which we shouldn't start another action.
-  // For flexibility, let the user entirely control this.
-  // If they want to ignore it, let them.
-  var isBusy = false
-
   override def postStop = {
     info(s"Stopping emulator ${self.path}")
     
@@ -94,23 +88,12 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
     case "is_booted" => {
       sender ! isBooted
     }
-    case "is_busy" => {
-      sender ! isBusy
-    }
-    case "set_busy" => {
-      isBusy = true
-    }
-    case "unset_busy" => {
-      isBusy = false
-    }
     // TODO: Add the option to reboot and refresh an emulator.
     // case "reboot" => {
     // }
-    case Execute(func, setBusy) => {
+    case Execute(func) => {
       info(s"Executing function.")
-      if (setBusy) isBusy = true
       func()
-      if (setBusy) isBusy = false
     }
     case _ => {
       info(s"EmulatorActor ${self.path} received unknown message")

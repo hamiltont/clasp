@@ -72,19 +72,11 @@ object ClaspRunner extends App {
       clasp.kill
     }
 
-    println("Device statuses:")
+    println("Devices:")
     for (device <- devices) {
-      println(s"serialID: ${device.serialID}, isBusy: ${device.isBusy}")
+      println(s"serialID: ${device.serialID}")
     }
-    
-    println("Setting the first device as busy.")
-    devices(0).setBusy(true)
-
-    println("Device statuses:")
-    for (device <- devices) {
-      println(s"serialID: ${device.serialID}, isBusy: ${device.isBusy}")
-    }
-
+   
     info(s"Waiting for 5 minutes before installing packages.")
     Thread.sleep(60000*5)
     for (device <- devices) {
@@ -284,21 +276,15 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
     serialID = Option(Await.result(f, 100 seconds))
   }
 
-  def setBusy(isBusy: Boolean) {
-    if (isBusy) {
-      emulatorActor ! "set_busy"
-    } else {
-      emulatorActor ! "unset_busy"
-    }
-  }
-
-  def isBusy: Boolean = {
-    val f = ask(emulatorActor, "is_busy", 60000).mapTo[Boolean]
-    return Await.result(f, 100 seconds)
-  }
-
   def installApk(path: String, setBusy: Boolean = true) {
     info(s"Installing package: $path.")
-    emulatorActor ! Execute(() => sdk.install_package(serialID.get, path), setBusy)
+    emulatorActor ! Execute(() =>
+      sdk.install_package(serialID.get, path))
+  }
+
+  def remoteShell(cmd: String) {
+    info(s"Sending command: $cmd.")
+    emulatorActor ! Execute(() =>
+      sdk.emulator_console(serialID.get, cmd))
   }
 }
