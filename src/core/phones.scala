@@ -38,9 +38,7 @@ class EmulatorManager extends Actor {
       info(s"${emulators.length} still awake: Lost ${sender.path}")
     }
     case "get_devices" => {
-      // TODO this is sending a mutable list over the wire!! Need to 
-      // copy into an immutable form
-      sender ! emulators
+      sender ! emulators.toList
     }
   }
 }

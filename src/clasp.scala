@@ -80,7 +80,7 @@ object ClaspRunner extends App {
     println("Setting the first device as busy.")
     devices(0).setBusy(true)
 
-    println("Device statuse9s:")
+    println("Device statuses:")
     for (device <- devices) {
       println(s"serialID: ${device.serialID}, isBusy: ${device.isBusy}")
     }
@@ -218,7 +218,7 @@ class ClaspMaster(val conf: ClaspConf) {
 
   def get_devices: List[Emulator] = {
     info("Getting available devices.")
-    val f = ask(emanager, "get_devices", 60000).mapTo[ListBuffer[ActorRef]]
+    val f = ask(emanager, "get_devices", 60000).mapTo[List[ActorRef]]
     val emulator_actors = Await.result(f, 5 seconds)
     //println(emulator_actors)
     for (actor <- emulator_actors) {
