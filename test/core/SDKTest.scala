@@ -1,4 +1,4 @@
-package core
+package clasp.core
 
 import org.scalatest.junit.AssertionsForJUnit
 import org.junit.Assert._
@@ -10,7 +10,7 @@ import java.io.File
 import org.apache.commons.io.FileUtils
 
 class SDKTest extends AssertionsForJUnit {
-  import core.sdktools.sdk._
+  import clasp.core.sdktools.sdk._
   
   @Before def initialize {
     start_adb

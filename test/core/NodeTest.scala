@@ -1,4 +1,4 @@
-package core
+package clasp.core
 
 import org.scalatest.junit.AssertionsForJUnit
 import org.junit.Assert._
