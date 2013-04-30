@@ -222,20 +222,76 @@ object AsynchronousCommand {
     cmd
   }
 
+  // TODO: Remove duplicated code.
+  def fromSeq(seq: Seq[String], timeout: FiniteDuration = 0 millis,
+      others: Traversable[CommandWatcher] = null): 
+      AsynchronousCommand[(Int, String)] = {
+    val cmd = new AsynchronousCommand(() => 
+      // This is done because calling command !! will throw a 
+      // RuntimeException if the command returns a non-zero exit code.
+      // Thus, we catch the error (and try to match it to the 
+      // standardized Nonzero exit value: ...) here.
+      // If we want, we can just undo this and let the exception live.
+      // That'll autofail the AsynchronousCommand. This way just lets
+      // you look at the exit code.
+      try { 
+        (0, Process(seq) !!) 
+      } catch {
+        case e: RuntimeException => 
+          val match_rgx = """Nonzero exit value: (-?[0-9]+)""".r
+          match_rgx findFirstIn e.getMessage match {
+            case Some(match_rgx(exit_str)) => 
+              val exit_code = Integer.parseInt(exit_str)
+              (exit_code, "")
+            case None => throw e
+          }
+      })
+
+    // If the user wants a timeout, attach a TimedCommandWatcher
+    if(timeout > (0 millis)) {
+      val watch = new TimedCommandWatcher(cmd, timeout)
+      cmd.add_watcher(watch)
+    }
+
+    if (others != null) {
+      for (v <- others if v != null) {
+        cmd.add_watcher(v)
+      }
+    }
+
+    cmd
+  }
+
   /** Gets the result of running the command created with 
     * AsynchronousCommand.fromString(str, timeout, others). 
     */
-  def resultOf(str: String, timeout: FiniteDuration = 0 millis, others: Traversable[CommandWatcher] = null):
-      Option[String] = {
+  def resultOf(str: String, timeout: FiniteDuration = 0 millis,
+      others: Traversable[CommandWatcher] = null): Option[String] = {
     val cmd = fromString(str, timeout, others)
+    /* TODO: Is this used?
     val convert_fn = (tup: (Int, String)) => {
       if (tup._1 == 0) Some(tup._2) else None
     };
+    */
 
     cmd.await().flatMap((tup) => 
-      if (tup._1 == 0) 
+      if (tup._1 == 0)
         Some(tup._2) 
-      else 
+      else
+        None
+    )
+    //println(s"Result of '$str' is '${result.get}'")
+    //return result
+  }
+
+  // TODO: Remove duplicated cude. 
+  def resultOfSeq(seq: Seq[String], timeout: FiniteDuration = 0 millis,
+      others: Traversable[CommandWatcher] = null): Option[String] = {
+    val cmd = fromSeq(seq, timeout, others)
+    cmd.await().flatMap((tup) => 
+      if (tup._1 == 0)
+        Some(tup._2) 
+      else
         None
     )
   }
@@ -243,8 +299,8 @@ object AsynchronousCommand {
   /** Similar effect to resultOf, except this will run a regex through the command's
     * output upon completion.
     */
-  def resultsOf(str: String, regex: Regex, timeout: FiniteDuration = 0 millis, others: Traversable[CommandWatcher] = null):
-      Option[Vector[String]] = {
+  def resultsOf(str: String, regex: Regex, timeout: FiniteDuration = 0 millis,
+      others: Traversable[CommandWatcher] = null): Option[Vector[String]] = {
     val res = resultOf(str, timeout, others)
     res.map((s: String) => { 
       val r = for (regex(name) <- regex.findAllIn(s)) yield name
