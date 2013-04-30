@@ -256,8 +256,8 @@ class ClaspMaster(val conf: ClaspConf) {
     // TODO: Options to allow users to state that they want to keep SD cards after running.
     // Look up scala for loop syntax, not sure if I can default to java code!
     val listSDs = sdDir.listFiles()
-    for {sd <- listSDs}{	
-	//How does one delete all of the files in this list?
+    for {sd <- listSDs}{
+    //How does one delete all of the files in this list?
 	sd.delete()
     }
 
