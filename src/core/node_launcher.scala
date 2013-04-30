@@ -22,6 +22,7 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
+import java.util.concurrent.atomic.AtomicInteger
 
 import com.typesafe.config.ConfigFactory
 
@@ -58,22 +59,22 @@ class NodeManger(val ip: String, val initial_workers: Int, manual_pool: Option[S
 
   val nodes = ListBuffer[ActorRef]()
   // Tracks how many nodes have been triggered but have not yet replied
-  var outstanding: Int = 0
+  var outstanding: AtomicInteger = new AtomicInteger
 
   def monitoring: Receive = {
     case NodeUp => { 
       nodes += sender
       info(s"${nodes.length}: Node ${sender.path} has registered!")
-      outstanding -= 1
+      outstanding.decrementAndGet
 
-      if (outstanding == 0)
+      if (outstanding.get == 0)
         info("All nodes requested (to this point) are awake and registered")
     }
     case NodeBusy(nodeip, nodelog) => {
       info(s"Node $nodeip has declared itself busy")
       info(s"Debug log for node $nodeip:\n$nodelog")
       info("Requesting a new node to replace $nodeip")
-      outstanding -= 1
+      outstanding.decrementAndGet
       boot_any
     } 
     case BootNode => boot_any
@@ -98,22 +99,26 @@ class NodeManger(val ip: String, val initial_workers: Int, manual_pool: Option[S
     case Terminated(ref) => {
       nodes -= ref
       info(s"Reaper: Termination received for ${ref.path}")
-      if (nodes.isEmpty && outstanding==0 ) {
+      info(s"Reaper: ${nodes.length} nodes and ${outstanding.get} outstanding")
+      if (nodes.isEmpty && outstanding.get==0 ) {
         info("No more remote nodes or outstanding boot requests, killing self.")
         self ! PoisonPill
       }
     }
     case NodeUp => {
-      outstanding -= 1
+      outstanding.decrementAndGet
       info(s"Reaper: Node registered at ${sender.path}")
+      nodes += sender
       info(s"Reaper: Replying with a PoisonPill")
+      info(s"Reaper: ${nodes.length} nodes and ${outstanding.get} outstanding")
       context.watch(sender)
       sender ! PoisonPill
     }
     case BootNode => info("Reaper: Ignoring boot request")
     case NodeBusy(id, log) => {
-      outstanding -= 1
+      outstanding.decrementAndGet
       info(s"Reaper: Ignoring busy node $id")
+      info(s"Reaper: ${nodes.length} nodes and ${outstanding.get} outstanding")
     } 
     case Shutdown => info("Reaper: Ignoring shutdown")
   }
@@ -134,16 +139,17 @@ class NodeManger(val ip: String, val initial_workers: Int, manual_pool: Option[S
   }
 
   def bootstrap(client_ip:String):Unit = {
-   val directory: String = "pwd".!!.stripLineEnd
-   val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $directory ; nohup target/start --client --ip $client_ip --mip $ip >> nohup.$client_ip 2>&1 &' "
-   info(s"Starting $client_ip using $command")
-   command.!!
+    import ExecutionContext.Implicits.global
+    val f = future {
+      val directory: String = "pwd".!!.stripLineEnd
+      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $directory ; nohup target/start --client --ip $client_ip --mip $ip >> nohup.$client_ip 2>&1 &' "
+      info(s"Starting $client_ip using $command")
+      command.!! 
+      outstanding.incrementAndGet
+    } } 
 
-   outstanding += 1 
-  } 
-  
-  // Start in monitor mode.
-  def receive = monitoring
+    // Start in monitor mode.
+    def receive = monitoring
 
 }
 sealed trait NM_Message

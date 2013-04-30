@@ -131,11 +131,12 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
         .parseString(s"""akka.remote.netty.hostname="$ip"""")
         .withFallback(ConfigFactory.parseString("akka.remote.netty.port=0"))
         .withFallback(ConfigFactory.load("application"))
-  
+ 
+      val masterip = conf.mip()
       val temp = ActorSystem("clasp-failure", failConf)
-      val manager = temp.actorFor("akka://clasp@" + masterip + ":2552/user/nodemanager")
+      val manager = temp.actorFor(s"akka://clasp@$masterip:2552/user/nodemanager")
       manager ! NodeBusy(ip, logbuffer.toString)
-      // TODO replace above with ask and terminate as soon as the Ack received
+      // TODO replace above with ask and terminate as soon as the Ack receive
 
       // 99% confidence the busy message was received
       Thread.sleep(2000)

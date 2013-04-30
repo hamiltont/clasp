@@ -2,6 +2,10 @@ Brandon
   4 - Antimalware.
  23 - Update termination conditions to catch and graceful term even if someone sends 
       us signal 15 via the kill command
+ 25 - Upon shutdown request, system waits 10 seconds then requests a non-graceful 
+      termination. However, while waiting for user input the system could successfully
+      terminate, in which case the prompt should be abandoned to allow the system to 
+      finish termination
 
 Hamilton
   4 - Implement emulator hibernation
