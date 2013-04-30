@@ -6,6 +6,7 @@ Brandon
       termination. However, while waiting for user input the system could successfully
       terminate, in which case the prompt should be abandoned to allow the system to 
       finish termination
+ 26 - Fix auto-accept ssh script.
 
 Hamilton
   4 - Implement emulator hibernation
