@@ -15,6 +15,8 @@ import com.typesafe.config.ConfigFactory
 
 import akka.actor._
 import akka.pattern.Patterns.ask
+import akka.util.Timeout
+import java.util.concurrent.TimeUnit
 
 import clasp.core._
 import clasp.core.sdktools.sdk
@@ -273,21 +275,27 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
 
   var serialID: Option[String] = _
   {
-    val f = ask(emulatorActor, "get_serialID", 60000).mapTo[String]
-    serialID = Option(Await.result(f, 100 seconds))
+    val f = ask(emulatorActor, "get_serialID",
+      Timeout(1, TimeUnit.MINUTES)).mapTo[String]
+    serialID = Option(Await.result(f, Duration.Inf))
   }
 
+  // TODO: Is there a more generic way to wrap commands so this
+  // class doesn't have to be enormous for all commands that
+  // can take a SerialID as a parameter?
   def installApk(path: String): Boolean = {
     info(s"Installing package: $path.")
     val f = ask(emulatorActor, Execute(() =>
-      sdk.install_package(serialID.get, path)), 60000).mapTo[Boolean]
-    Await.result(f, 100 seconds)
+      sdk.install_package(serialID.get, path)),
+      Timeout(1, TimeUnit.MINUTES)).mapTo[Boolean]
+    Await.result(f, Duration.Inf)
   }
 
   def remoteShell(cmd: String): Boolean = {
     info(s"Sending command: $cmd.")
     val f = ask(emulatorActor, Execute(() =>
-      sdk.remote_shell(serialID.get, cmd)), 60000).mapTo[Boolean]
+      sdk.remote_shell(serialID.get, cmd)),
+      Timeout(10, TimeUnit.MINUTES)).mapTo[Boolean]
     Await.result(f, Duration.Inf)
   }
 
@@ -295,23 +303,24 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
     info(s"Pulling '$remotePath' to '$localPath'")
     val f = ask(emulatorActor, Execute(() =>
       sdk.pull_from_device(serialID.get, remotePath, localPath)),
-      60000).mapTo[Boolean]
-    Await.result(f, 100 seconds)
+      Timeout(1, TimeUnit.MINUTES)).mapTo[Boolean]
+    Await.result(f, Duration.Inf)
   }
 
   def startActivity(mainActivity: String): Boolean = {
     info(s"Starting activity: $mainActivity.")
     val amStart = s"am start -a android.intent.action.MAIN -n $mainActivity"
     val f = ask(emulatorActor, Execute(() =>
-      sdk.remote_shell(serialID.get, amStart)), 60000).mapTo[Boolean]
-    Await.result(f, 100 seconds)
+      sdk.remote_shell(serialID.get, amStart)),
+      Timeout(1, TimeUnit.MINUTES)).mapTo[Boolean]
+    Await.result(f, Duration.Inf)
   }
 
   def stopPackage(name: String): Boolean = {
     info(s"Stopping package: $name")
     val f = ask(emulatorActor, Execute(() =>
       sdk.remote_shell(serialID.get, s"""am force-stop "$name" """)),
-      60000).mapTo[Boolean]
-    Await.result(f, 100 seconds)
+      Timeout(1, TimeUnit.MINUTES)).mapTo[Boolean]
+    Await.result(f, Duration.Inf)
   }
 }
