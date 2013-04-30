@@ -11,6 +11,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ops._
 import scala.language.postfixOps
 import scala.sys.process.Process
+import scala.sys.process.ProcessLogger
 import scala.sys.process.stringToProcess
 import scala.util.matching.Regex
 
@@ -195,7 +196,12 @@ object AsynchronousCommand {
       // That'll autofail the AsynchronousCommand. This way just lets
       // you look at the exit code.
       try { 
-        (0, str !!) 
+        val out = new StringBuilder
+        val logger = ProcessLogger(
+          (o: String) => out.append(o),
+          (e: String) => out.append(e))
+        str ! logger
+        (0, out.toString) 
       } catch {
         case e: RuntimeException => 
           val match_rgx = """Nonzero exit value: (-?[0-9]+)""".r
@@ -235,7 +241,12 @@ object AsynchronousCommand {
       // That'll autofail the AsynchronousCommand. This way just lets
       // you look at the exit code.
       try { 
-        (0, Process(seq) !!) 
+        val out = new StringBuilder
+        val logger = ProcessLogger(
+          (o: String) => out.append(o),
+          (e: String) => out.append(e))
+        Process(seq) ! logger
+        (0, out.toString) 
       } catch {
         case e: RuntimeException => 
           val match_rgx = """Nonzero exit value: (-?[0-9]+)""".r
