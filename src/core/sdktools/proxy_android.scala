@@ -4,6 +4,7 @@ import scala.language.postfixOps
 
 import scala.sys.process._
 
+import util.control.Breaks._
 import sdk_config.log.error
 import sdk_config.log.info
 
@@ -75,21 +76,33 @@ trait AndroidProxy {
   def create_avd(name: String,
                  target: String,
                  abiName: String,
-                 force: Boolean = false): Boolean = {
+                 force: Boolean): Boolean = {
     if (!force && (get_avd_names contains name)) {
       val errorMsg = s"Error: AVD '$name' already exists."
       error(errorMsg)
       return false
     }
     
-    // TODO can we verify that the eabi exists for this target before we attempt to 
-    // run this? 
+    val targetIndex = get_target_index(target)
+    println(s"index = $targetIndex")
+    val abis = get_target_ABIs(targetIndex.get)
+    
+    breakable { 
+       for (abi <- abis) {
+         if (abi.equals(abiName)){
+           break
+         }
+        }
+        error("Error: ABIname '$abiName' does not exist for specified target.")
+        return false 
+    }
+    
     var command:String = s"$android create avd -n $name -t $target -b $abiName"
     if (force) {
       command += " --force"
     }
     info(s"Building an AVD using $command")
-    
+           
     var create = Process(command)
     var output = List[String]()
 
@@ -106,32 +119,71 @@ trait AndroidProxy {
     (exit == 0)
   }
 
- /**
-   * Creates a new Android Virtual Device with no ABI
-   * only RESTRICTION : target MUST be the ID not the name.
+  /** Creates a new Android Virtual Device with no ABI specified.
+   *  If multiple ABIs are found, default creat avd with ABI Name
+   *  1) armeabi-v7a 2) armeabi 3) x86 4) first ABI listed.
    */
-  def create_avd(name1: String,
-                 target1: String)
-  {
+  def create_avd(name1: String, 
+                 target2: String, 
+                 force1: Boolean): Boolean = {
+    
+    var targetID = get_target_index(target2)
+    val abis = get_target_ABIs(targetID.get)
+
+    val armV7Reg = "\\barmeabi-v7a\\b"
+    val armReg = "\\barmeabi\\b"
+    val x86 =  "\\bx86\\b"
+    var abiName: Option[String] = None
+    
+    breakable {
+      for (abi <- abis) {
+        if (abi.matches(armV7Reg)) {
+          abiName = Option("armeabi-v7a")
+          break
+        }
+        else if (abi.matches(armReg)) {
+          abiName = Option("armeabi")
+          break
+        }
+        else if (abi.matches(x86)) {
+          abiName = Option("x86")
+          break
+        }
+      }
+    }
+    if (abiName.isEmpty) {
+      abiName = Option(abis(0))
+    }
+    return create_avd(name1, target2, abiName.get, force1)
+  }
 
   /**
-   * Determines the default ABI depending on the target number passed into the
-   * method.
-   * the case are for targets:
-   * 1-14 , 16, 17 default to armeabi
-   * 15, 18 default to x86
-   * 19 - 25 default to armeabi-v7a
+   * get_target_index returns the target index of the specified target name
+   * or ID. The index is in the list targetNames.
+   * If no index is found then an error message is returned.
    */
-    def parseTarget(arg: String): String = arg match {
-    case "1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"10"|"11"|"12"|"13"|"14"|"16"|"17" => "armeabi"
-    case "15"|"18" => "x86"
-    case "19"|"20"|"21"|"22"|"23"|"24"|"25"|"26"  => "armeabi-v7a"
+  def get_target_index(targetNameOrID: String): Option[Int] = {
+    
+    if (targetNameOrID.matches("^[0-9]+$")) {
+      return Option(targetNameOrID.toInt)
+    } else {
+      val targetNames = get_targets
+      val nameReg = "\\b" + targetNameOrID + "\\b"
+      var index = 0
+      
+      for (name <- targetNames) {
+        println(name)
+        if(name.matches(nameReg)) {
+          return Option(index)
+        }
+        index = index + 1
+      }
+    
+      error(s"Error: TargetABI '$targetNameOrID' does not exist.")
+      return None
     }
-
-    val defaultABI = parseTarget(target1)
-    create_avd(name1, target1, defaultABI)
-
   }
+
   
   /** Run a command, collecting the stdout, stderr and exit status */
   def run(cmd: String): (List[String], List[String], Int) = {
@@ -165,7 +217,7 @@ trait AndroidProxy {
    */
   def delete_avd(name: String): Boolean = {
     if (!(get_avd_names contains name)) {
-      error("Error: AVD '$name' does not exist.")
+      error(s"Error: AVD '$name' does not exist.")
       return false
     }
     

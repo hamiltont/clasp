@@ -15,7 +15,6 @@ class SDKTest extends AssertionsForJUnit {
   @Before def initialize {
     start_adb
   }
-  
   @After def tearDown {
     kill_adb
   }
@@ -29,14 +28,15 @@ class SDKTest extends AssertionsForJUnit {
     val allTargetABIs = get_target_ABIs
     // println(allTargetABIs mkString " | ")
     for (targetABIs <- allTargetABIs) {
-      assert(targetABIs contains "armeabi-v7a"
-        || targetABIs contains "armeabi")
+      assert(targetABIs.contains("armeabi-v7a")
+        || targetABIs.contains("armeabi")
+        || targetABIs.contains("x86"))
     }
     
     val avdName = "clasp-test"
     val avdNewName = avdName + "-new-name"
     assert(create_avd(avdName, "android-17", "armeabi-v7a", true))
-    assert(!create_avd(avdName, "android-17", "armeabi-v7a"))
+    assert(!create_avd(avdName, "android-17", "armeabi-v7a", false))
     val avds = get_avd_names
     assert(avds contains avdName)
     assertFalse(avds contains "not-clasp-test")
@@ -48,34 +48,43 @@ class SDKTest extends AssertionsForJUnit {
     assert(!delete_avd(avdNewName))
   }
  
- /**
-   * Creates a new Android Virtual Device with no ABI
-   * only RESTRICTION : target MUST be the ID not the name.
-   */
-  def create_avd(name1: String,
-                 target1: String)
-  {
+ @Test def testAndroidAVDCreationNoABIname { 
+    assert(get_targets contains "android-17")
+    assert(get_sdk contains
+      "Intel x86 Atom System Image, Android API 17, revision 1")
 
-  /**
-   * Determines the default ABI depending on the target number passed into the
-   * method.
-   * the case are for targets:
-   * 1-14 , 16, 17 default to armeabi
-   * 15, 18 default to x86
-   * 19 - 25 default to armeabi-v7a
-   */
-    def parseTarget(arg: String): String = arg match {
-    case "1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"10"|"11"|"12"|"13"|"14"|"16"|"17" => "armeabi"
-    case "15"|"18" => "x86"
-    case "19"|"20"|"21"|"22"|"23"|"24"|"25"|"26"  => "armeabi-v7a"
+    // Assume every target will have `armeabi-v7a`.
+    val allTargetABIs = get_target_ABIs
+    // println(allTargetABIs mkString " | ")
+    for (targetABIs <- allTargetABIs) {
+      assert(targetABIs.contains("armeabi-v7a")
+        || targetABIs.contains("armeabi") || 
+        targetABIs.contains("x86"))
     }
-
-    val defaultABI = parseTarget(target1)
-    create_avd(name1, target1, defaultABI)
-
+    
+    val avdName = "clasp-test"
+    val avdName2 = "clasp-test2"
+    val avdNewName = avdName + "-new-name"
+    val avdNewName2 = avdName2 + "-new-name"
+    assert(create_avd(avdName, "android-17", true))
+    assert(create_avd(avdName2, "1", true))
+    assert(!create_avd(avdName, "android-17", false))
+    assert(!create_avd(avdName2, "1", false))
+    val avds = get_avd_names
+    assert(avds contains avdName)
+    assert(avds contains avdName2)
+    assertFalse(avds contains "not-clasp-test")
+    
+    val home = sys.env("HOME")
+    assert(move_avd(avdName, home + "/" + avdName, avdNewName))
+    assert(move_avd(avdName2, home + "/" + avdName2, avdNewName2))
+        
+    assert(delete_avd(avdNewName))
+    assert(!delete_avd(avdNewName))
+    assert(delete_avd(avdNewName2))
+    assert(!delete_avd(avdNewName2))
   }
 
- 
   @Test def testAndroidProjectCreation {
     assert(get_targets contains "android-17")
     
@@ -114,9 +123,9 @@ class SDKTest extends AssertionsForJUnit {
     val avdName = "clasp-test"
     assert(create_avd(avdName, "android-17", "armeabi-v7a", true))
     val camList = get_webcam_list(avdName)
-    assert(camList contains "webcam0")
+    //assert(camList contains "webcam0")
     
-    var emuOpts = new core.sdktools.EmulatorOptions
+    var emuOpts = new clasp.core.sdktools.EmulatorOptions
     emuOpts.noBootAnim = true
     emuOpts.noWindow = true
     emuOpts.noSnapShotLoad = true
@@ -157,7 +166,7 @@ class SDKTest extends AssertionsForJUnit {
     val avdName = "clasp-test"
     assert(create_avd(avdName, "android-17", "armeabi-v7a", true))
     
-    var emuOpts = new core.sdktools.EmulatorOptions
+    var emuOpts = new clasp.core.sdktools.EmulatorOptions
     emuOpts.noBootAnim = true
     emuOpts.noWindow = true
     emuOpts.noSnapShotLoad = true
