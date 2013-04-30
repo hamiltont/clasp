@@ -93,7 +93,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
     // }
     case Execute(func) => {
       info(s"Executing function.")
-      func()
+      sender ! func()
     }
     case _ => {
       info(s"EmulatorActor ${self.path} received unknown message")

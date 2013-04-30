@@ -277,34 +277,41 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
     serialID = Option(Await.result(f, 100 seconds))
   }
 
-  def installApk(path: String, setBusy: Boolean = true) {
+  def installApk(path: String, setBusy: Boolean = true): Boolean = {
     info(s"Installing package: $path.")
-    emulatorActor ! Execute(() =>
-      sdk.install_package(serialID.get, path))
+    val f = ask(emulatorActor, Execute(() =>
+      sdk.install_package(serialID.get, path)), 60000).mapTo[Boolean]
+    Await.result(f, 100 seconds)
   }
 
-  def remoteShell(cmd: String) {
+  def remoteShell(cmd: String): Boolean = {
     info(s"Sending command: $cmd.")
-    emulatorActor ! Execute(() =>
-      sdk.emulator_console(serialID.get, cmd))
+    val f = ask(emulatorActor, Execute(() =>
+      sdk.emulator_console(serialID.get, cmd)), 60000).mapTo[Boolean]
+    Await.result(f, 100 seconds)
   }
 
-  def pull(remotePath: String, localPath: String) {
+  def pull(remotePath: String, localPath: String): Boolean = {
     info(s"Pulling '$remotePath' to '$localPath'")
-    emulatorActor ! Execute(() =>
-      sdk.pull_from_device(serialID.get, remotePath, localPath))
+    val f = ask(emulatorActor, Execute(() =>
+      sdk.pull_from_device(serialID.get, remotePath, localPath)),
+      60000).mapTo[Boolean]
+    Await.result(f, 100 seconds)
   }
 
-  def startActivity(mainActivity: String) {
+  def startActivity(mainActivity: String): Boolean = {
     info(s"Starting activity: $mainActivity.")
     val amStart = s"am start -a android.intent.action.MAIN -n $mainActivity"
-    emulatorActor ! Execute(() =>
-      sdk.remote_shell(serialID.get, amStart))
+    val f = ask(emulatorActor, Execute(() =>
+      sdk.remote_shell(serialID.get, amStart)), 60000).mapTo[Boolean]
+    Await.result(f, 100 seconds)
   }
 
-  def stopPackage(name: String) {
+  def stopPackage(name: String): Boolean = {
     info(s"Stopping package: $name")
-    emulatorActor ! Execute(() =>
-      sdk.remote_shell(serialID.get, s"""am force-stop "$name" """))
+    val f = ask(emulatorActor, Execute(() =>
+      sdk.remote_shell(serialID.get, s"""am force-stop "$name" """)),
+      60000).mapTo[Boolean]
+    Await.result(f, 100 seconds)
   }
 }
