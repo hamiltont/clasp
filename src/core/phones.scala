@@ -171,7 +171,7 @@ object EmulatorBuilder {
 
     // TODO update this to use some working directory
     val path:String = "pwd".!!.stripLineEnd
-    val sdcardName = s"$path/sdcard-$hostname-$port"
+    val sdcardName = s"$path/sdcards/$hostname-$port"
     info(s"Creating sdcard: '$sdcardName'")
     sdk.mksdcard("32MB", sdcardName)
     if (opts.sdCard != null) {

@@ -12,8 +12,6 @@ Hamilton
   4 - Implement emulator hibernation
       
 Noah
-  2 - Pass in the hostname/ips of the server.
-  3 - Pass in the hostname/ips of the clients.
   4 - Add the option for Clasp to create custom sdcards for emulators.
       Currently, I've hard-coded this into EmulatorBuilder to
       always build an sdcard, but this is not optimal.

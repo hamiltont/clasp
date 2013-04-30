@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 import clasp.core._
 import clasp.core.sdktools.sdk
 import clasp.core.sdktools.EmulatorOptions
-
+import java.io.File
 /*
  * Example of using Clasp. The App will be packaged and deployed to both the server and 
  * the client machines. Note that you should never be the one specifying --client on the 
@@ -202,6 +202,16 @@ class ClaspMaster(val conf: ClaspConf) {
     }
   }
   
+  //Check for presence of and make SD card directory if it does not yet exist
+  //At clasp/sdcards, since path ought to return the clasp directory by some magic?
+  val path: String = "pwd".!!.stripLineEnd
+
+  //Might need an import to get the file IO stuff.
+  val sdDir: File = new File (path + "/sdcards")
+  if (!sdDir.exists()){
+  sdDir.mkdir()
+  }
+
   val emanager = system.actorOf(Props[EmulatorManager], name="emulatormanager")
   info("Created EmulatorManager")
  
@@ -240,6 +250,15 @@ class ClaspMaster(val conf: ClaspConf) {
 
       // Second shutdown all other high-level management activities
       emanager ! PoisonPill
+    }
+
+    // Manage SD cards and delete them all.
+    // TODO: Options to allow users to state that they want to keep SD cards after running.
+    // Look up scala for loop syntax, not sure if I can default to java code!
+    val listSDs = sdDir.listFiles()
+    for {sd <- listSDs}{	
+	//How does one delete all of the files in this list?
+	sd.delete()
     }
 
     var timeSlept = 0.0d; var timeout = 10.0d
