@@ -277,7 +277,7 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
     serialID = Option(Await.result(f, 100 seconds))
   }
 
-  def installApk(path: String, setBusy: Boolean = true): Boolean = {
+  def installApk(path: String): Boolean = {
     info(s"Installing package: $path.")
     val f = ask(emulatorActor, Execute(() =>
       sdk.install_package(serialID.get, path)), 60000).mapTo[Boolean]
@@ -287,8 +287,8 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
   def remoteShell(cmd: String): Boolean = {
     info(s"Sending command: $cmd.")
     val f = ask(emulatorActor, Execute(() =>
-      sdk.emulator_console(serialID.get, cmd)), 60000).mapTo[Boolean]
-    Await.result(f, 100 seconds)
+      sdk.remote_shell(serialID.get, cmd)), 60000).mapTo[Boolean]
+    Await.result(f, Duration.Inf)
   }
 
   def pull(remotePath: String, localPath: String): Boolean = {
