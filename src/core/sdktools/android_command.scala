@@ -185,8 +185,27 @@ object AsynchronousCommand {
     * Guaranteed to return non-null.
     */
   def fromString(str: String, timeout: FiniteDuration = 0 millis, others: Traversable[CommandWatcher] = null): 
-      AsynchronousCommand[String] = {
-    val cmd = new AsynchronousCommand(() => str !!)
+      AsynchronousCommand[(Int, String)] = {
+    val cmd = new AsynchronousCommand(() => 
+      // This is done because calling command !! will throw a 
+      // RuntimeException if the command returns a non-zero exit code.
+      // Thus, we catch the error (and try to match it to the 
+      // standardized Nonzero exit value: ...) here.
+      // If we want, we can just undo this and let the exception live.
+      // That'll autofail the AsynchronousCommand. This way just lets
+      // you look at the exit code.
+      try { 
+        (0, str !!) 
+      } catch {
+        case e: RuntimeException => 
+          val match_rgx = """Nonzero exit value: (-?[0-9]+)""".r
+          match_rgx findFirstIn e.getMessage match {
+            case Some(match_rgx(exit_str)) => 
+              val exit_code = Integer.parseInt(exit_str)
+              (exit_code, "")
+            case None => throw e
+          }
+      })
 
     // If the user wants a timeout, attach a TimedCommandWatcher
     if(timeout > (0 millis)) {
@@ -209,7 +228,16 @@ object AsynchronousCommand {
   def resultOf(str: String, timeout: FiniteDuration = 0 millis, others: Traversable[CommandWatcher] = null):
       Option[String] = {
     val cmd = fromString(str, timeout, others)
-    cmd.await()
+    val convert_fn = (tup: (Int, String)) => {
+      if (tup._1 == 0) Some(tup._2) else None
+    };
+
+    cmd.await().flatMap((tup) => 
+      if (tup._1 == 0) 
+        Some(tup._2) 
+      else 
+        None
+    )
   }
 
   /** Similar effect to resultOf, except this will run a regex through the command's
