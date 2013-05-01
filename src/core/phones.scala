@@ -51,8 +51,8 @@ class EmulatorManager extends Actor {
     case QueueEmulatorTask(task, promise) => {
       // Note that this is not strictly threadsafe. Consider using twitter's snowflake library
       val id = UUID.randomUUID().toString()
-      info(s"Generated id for task: $id")
       outstandingTasks(id) = promise
+      info(s"Enqueued new task: $id")
 
       // Only works because the remote system has the same classpath loaded, 
       // so all anonymous functions exist on both systems. If we want this to 
@@ -62,22 +62,25 @@ class EmulatorManager extends Actor {
       // See http://doc.akka.io/docs/akka/snapshot/scala/serialization.html#serialization-scala
       // See http://www.scala-lang.org/node/10566
       // Alternatively, just copy all *.class files
-      info("scheduling task")
       emulators.head ! new EmulatorTask(id, task)
     }
-    case TaskComplete(id, data) => {
+    case TaskSuccess(id, data) => {
       info(s"Task $id has completed")
       val promise_option = outstandingTasks remove id
-      info("Removed the promise for the task")
       promise_option.get success data
-      info("Succeeded the promise")
+    }
+    case TaskFailure(id, err) => {
+      info(s"Task $id has failed")
+      val promise_option = outstandingTasks remove id
+      promise_option.get failure err
     }
   }
 }
 case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
 case class QueueEmulatorTask(function: Emulator => Map[String, Any], promise: Promise[Map[String,Any]])
 // TODO can I make Any require serializable? 
-case class TaskComplete(taskId: String, data: Map[String, Any])
+case class TaskSuccess(taskId: String, data: Map[String, Any])
+case class TaskFailure(taskId: String, err: Exception)
 
 // An always-on presence for a single emulator process. 
 //  - Monitors process state (STARTED, READY, etc)
@@ -133,13 +136,15 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
       sender ! func()
     }
     case EmulatorTask(id, callback) => {
-      info(s"Requested to perform task $id")
+      info(s"Performing task $id")
       val emu = new Emulator(self)
-      info("Executing callback")
       // TODO should this happen on a future so we don't block the receive loop?
-      val data = callback(emu)
-      info("Task complete, returning result")
-      emanager ! TaskComplete(id, data)
+      try {
+        val data = callback(emu)
+        emanager ! TaskSuccess(id, data)
+      } catch {
+        case e:Exception => emanager ! TaskFailure(id, e)
+      }
     }
     case _ => {
       info(s"EmulatorActor ${self.path} received unknown message")

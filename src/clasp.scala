@@ -72,10 +72,9 @@ object ClaspRunner extends App {
     import ExecutionContext.Implicits.global
 
     val f = clasp.register_on_new_emulator( (emu: Emulator) => {
-        printf("OMFG")
-        val host = "hostname".!!.stripLineEnd
-        info("==============asdf=asd=fasdf=asdf=a=sdf=a=fd")
-        info(s"Callback fired on host $host")
+        info("About to fail...")
+        throw new NullPointerException("shit")
+        info("We should not get here")
         Map("testing" -> "how well this works")
       }
     )
@@ -91,7 +90,7 @@ object ClaspRunner extends App {
     }
   }
   f onFailure {
-    case t => error("Future failed")
+    case t => error(s"Future failed due to ${t.getMessage}")
   }
 
   printf("\n\n\n=====================================\n")
