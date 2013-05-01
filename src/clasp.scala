@@ -65,34 +65,28 @@ object ClaspRunner extends App {
     // @Brandon - this is a great idea for the object-level API! Something like waitForEmulators(10)
     // that will be called when there are 10 emulators alive and ready. Or perhaps that's how we build
     // the main action loop - have a waitForEmulator(new Task() { // do something with emulator here })
-    Thread.sleep(15000)
+    Thread.sleep(30000)
 
     printf("Testing callback abilities")
   
     import ExecutionContext.Implicits.global
-
     val f = clasp.register_on_new_emulator( (emu: Emulator) => {
-        info("About to fail...")
-        throw new NullPointerException("shit")
-        info("We should not get here")
-        Map("testing" -> "how well this works")
+        info("About to install") 
+        sdk.install_package(emu.serialID,"examples/antimalware/Profiler.apk")
+        info("installed")
+        Map()
       }
     )
   f onSuccess {
     case dataMap => {
       info("Future completed successfully!!")
-      info("Examining the data map...")
-      val myval = dataMap get "testing"
-      if (myval == None)
-        info("Nothing in map")
-      else 
-        info(s"Map contained ${myval.get}")
     }
   }
   f onFailure {
     case t => error(s"Future failed due to ${t.getMessage}")
   }
 
+  /*
   printf("\n\n\n=====================================\n")
   val devices = clasp.get_devices
     if (devices isEmpty) {
@@ -116,8 +110,8 @@ object ClaspRunner extends App {
     //Thread.sleep(60000)
 
     printf("=====================================\n\n\n")
-
-    clasp.kill
+*/
+    //clasp.kill
     
   } // End of clasp master logic
 }
@@ -248,7 +242,7 @@ class ClaspMaster(val conf: ClaspConf) {
   
   sys addShutdownHook(shutdown_listener)
 
-  def get_devices: List[Emulator] = {
+  /*def get_devices: List[Emulator] = {
     info("Getting available devices.")
     val f = ask(emanager, "get_devices", 60000).mapTo[List[ActorRef]]
     val emulator_actors = Await.result(f, 5 seconds)
@@ -260,7 +254,7 @@ class ClaspMaster(val conf: ClaspConf) {
     val emulators = emulator_actors.map(new Emulator(_)).toList
     //println(emulators)
     return emulators
-  }
+  }*/
 
   // When a new emulator is ready to be used, the provided function will 
   // be transported to the node that emulator runs on and then executed
@@ -327,7 +321,7 @@ class ClaspMaster(val conf: ClaspConf) {
  * invalid if the emulator dies. We may want to avoid caching in the future and
  * just have this know how to ask the emulator for the right things
  */
-class Emulator(emulatorActor: ActorRef) extends Serializable {
+class Emulator(val serialID: String) extends Serializable {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
@@ -345,10 +339,7 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
     emulatorActor ! "restart"
   }
   
-  // TODO: Is there a more generic way to wrap commands so this
-  // class doesn't have to be enormous for all commands that
-  // can take a SerialID as a parameter?
-  def installApk(path: String): Option[String] = {
+  /*def installApk(path: String, setBusy: Boolean = true) {
     info(s"Installing package: $path.")
     val f = ask(emulatorActor, Execute(() =>
       sdk.install_package(serialID.get, path)),
@@ -384,9 +375,7 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
 
   def stopPackage(name: String): Option[String] = {
     info(s"Stopping package: $name")
-    val f = ask(emulatorActor, Execute(() =>
-      sdk.remote_shell(serialID.get, s"""am force-stop "$name" """)),
-      Timeout(1, TimeUnit.MINUTES)).mapTo[Option[String]]
-    return Await.result(f, Duration.Inf)
-  }
+   emulatorActor ! Execute(() =>
+      sdk.remote_shell(serialID.get, s"""am force-stop "$name" """))
+  }*/
 }

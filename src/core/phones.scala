@@ -24,9 +24,6 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 import scala.language.postfixOps
 
-case class Execute (f: () => Any) extends Serializable 
-
-
 class EmulatorManager extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
@@ -128,16 +125,14 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
       sender ! isBooted
     }
     case "reboot" => {
-      postStop
-      preStart
-    }
-    case Execute(func) => {
-      info(s"Executing function.")
-      sender ! func()
+      // TODO refusing to allow this currently as it's dangerous and this isn't
+      // the proper way to go about it
+      //postStop
+      //preStart
     }
     case EmulatorTask(id, callback) => {
       info(s"Performing task $id")
-      val emu = new Emulator(self)
+      val emu = new Emulator(serialID)
       // TODO should this happen on a future so we don't block the receive loop?
       try {
         val data = callback(emu)
