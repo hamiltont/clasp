@@ -66,6 +66,15 @@ object ClaspRunner extends App {
     // that will be called when there are 10 emulators alive and ready. Or perhaps that's how we build
     // the main action loop - have a waitForEmulator(new Task() { // do something with emulator here })
     Thread.sleep(15000)
+    
+    printf("Testing callback abilities")
+    clasp.register_on_new_emulator( (emu: Emulator) => {
+        printf("OMFG")
+        val host = "hostname".!!.stripLineEnd
+        info("==============asdf=asd=fasdf=asdf=a=sdf=a=fd")
+        info(s"Callback fired on host $host") 
+      }
+    )
 
     printf("\n\n\n=====================================\n")
     val devices = clasp.get_devices
@@ -73,6 +82,7 @@ object ClaspRunner extends App {
       println("Found no devices, aborting to avoid errors!")
       clasp.kill
     }
+
 
     println("Devices:")
     for (device <- devices) {
@@ -235,6 +245,12 @@ class ClaspMaster(val conf: ClaspConf) {
     return emulators
   }
 
+  // When a new emulator is ready to be used, the provided function will 
+  // be transported to the node that emulator runs on and then executed
+  def register_on_new_emulator(func: Emulator => Unit): Unit = {
+    emanager ! EmulatorReadyCallback(func)
+  }
+
   def kill {
     info("Killing Clasp and emulators.")
     shutdown_listener
@@ -292,12 +308,12 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
-  var serialID: Option[String] = _
+  /*var serialID: Option[String] = _
   {
-    val f = ask(emulatorActor, "get_serialID",
-      Timeout(1, TimeUnit.MINUTES)).mapTo[String]
-    serialID = Option(Await.result(f, Duration.Inf))
-  }
+    val f = ask(emulatorActor, "get_serialID", 60000).mapTo[String]
+    serialID = Option(Await.result(f, 100 seconds))
+  }*/
+  val serialID = Some("emulator-5554")
 
   // TODO: Should we give the user this kind of control over the emulator?
   // If so, should the emulator notify the emulator manager
@@ -305,7 +321,7 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
   def restart = {
     emulatorActor ! "restart"
   }
-
+  
   // TODO: Is there a more generic way to wrap commands so this
   // class doesn't have to be enormous for all commands that
   // can take a SerialID as a parameter?

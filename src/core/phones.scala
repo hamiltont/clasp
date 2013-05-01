@@ -6,15 +6,17 @@ package clasp.core
 
 import scala.collection.mutable.ListBuffer
 import scala.sys.process.Process
-import scala.sys.process._ // TODO: Might not need...
+import scala.sys.process._ 
 //import org.hyperic.sigar.Sigar
 //import org.hyperic.sigar.ptql.ProcessFinder
 import akka.actor._
+import akka.serialization._
 
 import scala.concurrent.duration._
 import akka.event.Logging
 //import org.hyperic.sigar.ProcTime
 import clasp.core.sdktools._
+import clasp.Emulator
 import org.slf4j.LoggerFactory
 
 import scala.language.postfixOps
@@ -40,8 +42,28 @@ class EmulatorManager extends Actor {
     case "get_devices" => {
       sender ! emulators.toList
     }
+    // Only works because the remote system has the same classpath, 
+    // so any anonymous functions exist on both systems. If we 
+    // want this to work in the future we will have to serialize the 
+    // class that's associated with the anonymous function, send that
+    // across the wire first, and then load it, all before we can 
+    // do this. See http://doc.akka.io/docs/akka/snapshot/scala/serialization.html#serialization-scala
+    // See http://www.scala-lang.org/node/10566
+    case message: EmulatorReadyCallback => {
+      info(s"Received callback, sending to ${emulators.head}")
+
+      // if emulators.size != 0
+      If there are enulators available, then we have to send the callback to an
+      emulator actor. if there are no emulators available, then we have to wait
+      on an emulator
+      Each emulator can be sent a number of callbacks back to back. Eventually a 
+      callback should have requirements, such as a clean emulator.
+
+      emulators.head ! message
+    }
   }
 }
+case class EmulatorReadyCallback(function: Emulator => Unit)
 
 // An always-on presence for a single emulator process. 
 //  - Monitors process state (STARTED, READY, etc)
@@ -96,49 +118,17 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
       info(s"Executing function.")
       sender ! func()
     }
+    case EmulatorReadyCallback(callback) => {
+      val emu = new Emulator(self)
+      info("Executing callback")
+      // TODO should this happen on a future so we don't block the receive loop?
+      callback(emu)
+    }
     case _ => {
       info(s"EmulatorActor ${self.path} received unknown message")
     }
   }
 
-  // TODO: This might not be the best way to include options within
-  // an emulator.
-  //
-  // It would be nice to have all of the SDK commands that take
-  // an option within the emulator class so the user doesn't need
-  // to obtain the serial from the emulator and then pass it to the sdk.
-  //
-  // TODO @Hamilton, thoughts?
-  // @Brandon - let's differentiate the core API from the core
-  // implementation, and have an EmulatorActor (used internally)
-  // and an Emulator object (used externally). The Emulator object
-  // is created from the EmulatorActor and knows how to complete
-  // method calls such as the ones below. It can make all calls
-  // directly on the sdk object, using the ActorRef when it needs
-  // to retrieve or permanently store data
-  /*
-  def installApk(path: String) {
-    sdk.install_package(serialID, path)
-  }
-
-  def startActivity(mainActivity: String) {
-    val amStart = s"am start -a android.intent.action.MAIN -n $mainActivity"
-    sdk.remote_shell(serialID, amStart)
-  }
-
-  def remoteShell(command: String) {
-    sdk.remote_shell(serialID, command)
-  }
-
-  def pull(remotePath: String, localPath: String) {
-    sdk.pull_from_device(serialID, remotePath, localPath)
-  }
-
-  def stopPackage(name: String) {
-    sdk.remote_shell(serialID,
-      s"""am force-stop "$name" """);
-  }
-  */
 }
 
 /* Physical hardware */
