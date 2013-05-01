@@ -6,7 +6,7 @@ import scala.collection.mutable.ListBuffer
 import scala.sys.process._
 import scala.language.postfixOps
 
-import scala.concurrent.{Future,Await}
+import scala.concurrent._
 import scala.concurrent.duration._
 
 import org.slf4j.LoggerFactory
@@ -56,7 +56,7 @@ object ClaspRunner extends App {
     new ClaspClient(conf, opts)
   else {
     var clasp = new ClaspMaster(conf)
-  
+
     // TODO should we update the system so the user extends "ClaspServer" and only writes this 
     // part of the codebase? Everything above seems like boilerplate code
     // TODO: We shouldn't have to sleep like this.
@@ -66,18 +66,32 @@ object ClaspRunner extends App {
     // that will be called when there are 10 emulators alive and ready. Or perhaps that's how we build
     // the main action loop - have a waitForEmulator(new Task() { // do something with emulator here })
     Thread.sleep(15000)
-    
+
     printf("Testing callback abilities")
-    clasp.register_on_new_emulator( (emu: Emulator) => {
+  
+    import ExecutionContext.Implicits.global
+
+    val f = clasp.register_on_new_emulator( (emu: Emulator) => {
         printf("OMFG")
         val host = "hostname".!!.stripLineEnd
         info("==============asdf=asd=fasdf=asdf=a=sdf=a=fd")
-        info(s"Callback fired on host $host") 
+        info(s"Callback fired on host $host")
+        Map("testing" -> "how well this works")
       }
     )
+  f onSuccess {
+    case dataMap => {
+      info("Future completed successfully!!")
+      info("Examining the data map...")
 
-    printf("\n\n\n=====================================\n")
-    val devices = clasp.get_devices
+    }
+  }
+  f onFailure {
+    case t => error("Future failed")
+  }
+
+  printf("\n\n\n=====================================\n")
+  val devices = clasp.get_devices
     if (devices isEmpty) {
       println("Found no devices, aborting to avoid errors!")
       clasp.kill
@@ -247,8 +261,14 @@ class ClaspMaster(val conf: ClaspConf) {
 
   // When a new emulator is ready to be used, the provided function will 
   // be transported to the node that emulator runs on and then executed
-  def register_on_new_emulator(func: Emulator => Unit): Unit = {
-    emanager ! EmulatorReadyCallback(func)
+  //
+  // Any values set on the returned Map will be delivered back to the originating
+  // caller by way of the future
+  def register_on_new_emulator(func: Emulator => Map[String, Any]): Future[Map[String, Any]] = { 
+    import ExecutionContext.Implicits.global
+    val result = promise[Map[String, Any]]
+    emanager ! RegisterOnEmulatorReady(func, result)
+    result.future
   }
 
   def kill {

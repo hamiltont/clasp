@@ -12,6 +12,7 @@ import scala.sys.process._
 import akka.actor._
 import akka.serialization._
 
+import scala.concurrent._
 import scala.concurrent.duration._
 import akka.event.Logging
 //import org.hyperic.sigar.ProcTime
@@ -52,18 +53,18 @@ class EmulatorManager extends Actor {
     case message: EmulatorReadyCallback => {
       info(s"Received callback, sending to ${emulators.head}")
 
-      // if emulators.size != 0
-      If there are enulators available, then we have to send the callback to an
-      emulator actor. if there are no emulators available, then we have to wait
-      on an emulator
-      Each emulator can be sent a number of callbacks back to back. Eventually a 
-      callback should have requirements, such as a clean emulator.
+            emulators.head ! message
+    }
+    case RegisterOnEmulatorReady(function, promise) => {
+      
+      info("Testing completion of a promise from another actor")
+      promise success Map( "foo" -> "bar")
 
-      emulators.head ! message
     }
   }
 }
 case class EmulatorReadyCallback(function: Emulator => Unit)
+case class RegisterOnEmulatorReady(function: Emulator => Map[String, Any], promise: Promise[Map[String,Any]])
 
 // An always-on presence for a single emulator process. 
 //  - Monitors process state (STARTED, READY, etc)
