@@ -84,7 +84,6 @@ trait AndroidProxy {
     }
     
     val targetIndex = get_target_index(target)
-    println(s"index = $targetIndex")
     val abis = get_target_ABIs(targetIndex.get)
     
     breakable { 
@@ -172,7 +171,6 @@ trait AndroidProxy {
       var index = 0
       
       for (name <- targetNames) {
-        println(name)
         if(name.matches(nameReg)) {
           return Option(index)
         }
