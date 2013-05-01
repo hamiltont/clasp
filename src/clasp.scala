@@ -83,7 +83,11 @@ object ClaspRunner extends App {
     case dataMap => {
       info("Future completed successfully!!")
       info("Examining the data map...")
-
+      val myval = dataMap get "testing"
+      if (myval == None)
+        info("Nothing in map")
+      else 
+        info(s"Map contained ${myval.get}")
     }
   }
   f onFailure {
@@ -267,7 +271,7 @@ class ClaspMaster(val conf: ClaspConf) {
   def register_on_new_emulator(func: Emulator => Map[String, Any]): Future[Map[String, Any]] = { 
     import ExecutionContext.Implicits.global
     val result = promise[Map[String, Any]]
-    emanager ! RegisterOnEmulatorReady(func, result)
+    emanager ! QueueEmulatorTask(func, result)
     result.future
   }
 

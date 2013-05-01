@@ -5,6 +5,7 @@
 package clasp.core
 
 import scala.collection.mutable.ListBuffer
+import scala.collection.immutable.Map
 import scala.sys.process.Process
 import scala.sys.process._ 
 //import org.hyperic.sigar.Sigar
@@ -20,6 +21,7 @@ import clasp.core.sdktools._
 import clasp.Emulator
 import org.slf4j.LoggerFactory
 
+import java.util.UUID
 import scala.language.postfixOps
 
 case class Execute (f: () => Any) extends Serializable 
@@ -30,6 +32,9 @@ class EmulatorManager extends Actor {
   import log.{error, debug, info, trace}
 
   val emulators = ListBuffer[ActorRef]()
+
+  // Mutable map containing all of the promises we have yet to complete
+  val outstandingTasks: scala.collection.mutable.Map[String, Promise[Map[String,Any]]] = scala.collection.mutable.Map() 
 
   def receive = {
     case "emulator_up" => {
@@ -43,28 +48,36 @@ class EmulatorManager extends Actor {
     case "get_devices" => {
       sender ! emulators.toList
     }
-    // Only works because the remote system has the same classpath, 
-    // so any anonymous functions exist on both systems. If we 
-    // want this to work in the future we will have to serialize the 
-    // class that's associated with the anonymous function, send that
-    // across the wire first, and then load it, all before we can 
-    // do this. See http://doc.akka.io/docs/akka/snapshot/scala/serialization.html#serialization-scala
-    // See http://www.scala-lang.org/node/10566
-    case message: EmulatorReadyCallback => {
-      info(s"Received callback, sending to ${emulators.head}")
+    case QueueEmulatorTask(task, promise) => {
+      // Note that this is not strictly threadsafe. Consider using twitter's snowflake library
+      val id = UUID.randomUUID().toString()
+      info(s"Generated id for task: $id")
+      outstandingTasks(id) = promise
 
-            emulators.head ! message
+      // Only works because the remote system has the same classpath loaded, 
+      // so all anonymous functions exist on both systems. If we want this to 
+      // work in a dynamic manner we would have to serialize the class that's 
+      // associated with the anonymous function, send that
+      // across the wire & load it.
+      // See http://doc.akka.io/docs/akka/snapshot/scala/serialization.html#serialization-scala
+      // See http://www.scala-lang.org/node/10566
+      // Alternatively, just copy all *.class files
+      info("scheduling task")
+      emulators.head ! new EmulatorTask(id, task)
     }
-    case RegisterOnEmulatorReady(function, promise) => {
-      
-      info("Testing completion of a promise from another actor")
-      promise success Map( "foo" -> "bar")
-
+    case TaskComplete(id, data) => {
+      info(s"Task $id has completed")
+      val promise_option = outstandingTasks remove id
+      info("Removed the promise for the task")
+      promise_option.get success data
+      info("Succeeded the promise")
     }
   }
 }
-case class EmulatorReadyCallback(function: Emulator => Unit)
-case class RegisterOnEmulatorReady(function: Emulator => Map[String, Any], promise: Promise[Map[String,Any]])
+case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
+case class QueueEmulatorTask(function: Emulator => Map[String, Any], promise: Promise[Map[String,Any]])
+// TODO can I make Any require serializable? 
+case class TaskComplete(taskId: String, data: Map[String, Any])
 
 // An always-on presence for a single emulator process. 
 //  - Monitors process state (STARTED, READY, etc)
@@ -86,6 +99,8 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
   // when we're certain the emulators are _entirely_ booted.
   // Note: Only calling `wait_for_device` returns too early,
   // before the emulators can be fully interacted with.
+  
+  val emanager = context.system.actorFor("akka://clasp@" + serverip + ":2552/user/emulatormanager")
 
   override def postStop = {
     info(s"Stopping emulator ${self.path}")
@@ -95,12 +110,10 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
     process.exitValue // block until destroyed
     info(s"Emulator ${self.path} stopped")
     
-    val emanager = context.system.actorFor("akka://clasp@" + serverip + ":2552/user/emulatormanager")
     emanager ! "emulator_down"
   }
   
   override def preStart() {
-    val emanager = context.system.actorFor("akka://clasp@" + serverip + ":2552/user/emulatormanager")
     emanager ! "emulator_up"
   }
 
@@ -119,11 +132,14 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
       info(s"Executing function.")
       sender ! func()
     }
-    case EmulatorReadyCallback(callback) => {
+    case EmulatorTask(id, callback) => {
+      info(s"Requested to perform task $id")
       val emu = new Emulator(self)
       info("Executing callback")
       // TODO should this happen on a future so we don't block the receive loop?
-      callback(emu)
+      val data = callback(emu)
+      info("Task complete, returning result")
+      emanager ! TaskComplete(id, data)
     }
     case _ => {
       info(s"EmulatorActor ${self.path} received unknown message")
