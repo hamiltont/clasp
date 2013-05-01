@@ -41,60 +41,60 @@ trait AdbProxy {
   /**
    * Connect to the device via TCP/IP.
    */
-  def tcpip_connect(host: String, port: String): Boolean = {
+  def tcpip_connect(host: String, port: String): Option[String] = {
     val command = s"$adb connect $host:$port"
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   // TODO: Unsure how to test this.
   /**
    * Disconnect from the device via TCP/IP.
    */
-  def tcpip_disconnect(host: String, port: String): Boolean = {
+  def tcpip_disconnect(host: String, port: String): Option[String] = {
     val command = s"$adb disconnect $host:$port"
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
    * Push a file or directory to the device.
    */
   def push_to_device(serial: String, localPath: String,
-      remotePath: String): Boolean = {
+      remotePath: String): Option[String] = {
     val command = Seq(s"$adb", "-s", s"$serial", "push", s"$localPath", s"$remotePath")
-    AsynchronousCommand.resultOfSeq(command).isDefined
+    AsynchronousCommand.resultOfSeq(command)
   }
   
   /**
    * Pull a file or directory from a device.
    */
   def pull_from_device(serial: String, remotePath: String,
-      localPath: String): Boolean = {
+      localPath: String): Option[String] = {
     val command = Seq(s"$adb", "-s", s"$serial", "pull", s"$remotePath", s"$localPath")
-    AsynchronousCommand.resultOfSeq(command).isDefined
+    AsynchronousCommand.resultOfSeq(command)
   }
   
   /**
    * Copy from host to device only if changed.
    */
-  def sync_to_device(serial: String, directory: String): Boolean = {
+  def sync_to_device(serial: String, directory: String): Option[String] = {
     val command = Seq(s"$adb", "-s", s"$serial", "sync", s"$directory")
-    AsynchronousCommand.resultOfSeq(command).isDefined
+    AsynchronousCommand.resultOfSeq(command)
   }
   
   /**
    * Run a remote shell command.
    */
-  def remote_shell(serial: String, shellCommand: String): Boolean = {
+  def remote_shell(serial: String, shellCommand: String): Option[String] = {
     val command = s"$adb -s $serial shell $shellCommand"
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
    * Run an emulator console command.
    */
-  def emulator_console(serial: String, emuCommand: String): Boolean = {
+  def emulator_console(serial: String, emuCommand: String): Option[String] = {
     val command = s"$adb -s $serial emu $emuCommand"
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   // TODO: Unsure how to test this.
@@ -102,9 +102,9 @@ trait AdbProxy {
    * Forward socket connections.
    */
   def forward_socket(serial: String, local: String,
-      remote: String): Boolean = {
+      remote: String): Option[String] = {
     val command = s"$adb -s $serial forward $local $remote"
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
 
@@ -138,20 +138,20 @@ trait AdbProxy {
   /**
    * Push a package file to the device and install it.
    */
-  def install_package(serial: String, apk_path: String): Boolean = {
+  def install_package(serial: String, apk_path: String): Option[String] = {
     val command = s"""$adb -s $serial install $apk_path"""
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
    * Remove a package from a device.
    */
   def uninstall_package(serial: String, pkg: String,
-      keepData: Boolean = false): Boolean = {
+      keepData: Boolean = false): Option[String] = {
     var command = s"""$adb -s $serial uninstall $pkg"""
     if (keepData) command += s" -k"
-    val output = AsynchronousCommand.resultOf(command)
-    return output.get.contains("Success")
+    AsynchronousCommand.resultOf(command)
+    // TODO: Return something better?
   }
   
   // TODO: It might not be necessary to include this.
@@ -181,7 +181,7 @@ trait AdbProxy {
     if (system) command += " -system"
       else command += " -nosystem"
     if (packages != null) command += s" $packages"
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
@@ -189,7 +189,7 @@ trait AdbProxy {
    */
   def restore_device(serial: String, file: String) {
     val command = s"""$adb -s $serial restore -f $file"""
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   def get_adb_version: String = {
@@ -206,7 +206,7 @@ trait AdbProxy {
    */
   def wait_for_device(serial: String) {
     val command = s"$adb -s $serial wait-for-device"
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
@@ -214,7 +214,7 @@ trait AdbProxy {
    */
   def start_adb {
     val command = s"$adb start-server"
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
@@ -222,7 +222,7 @@ trait AdbProxy {
    */
   def kill_adb {
     val command = s"$adb kill-server"
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
@@ -244,57 +244,57 @@ trait AdbProxy {
   /**
    * Remounts the `/system` partition on the device read-write.
    */
-  def remount_system(serial: String): Boolean = {
+  def remount_system(serial: String): Option[String] = {
     val command = s"""$adb $serial remount"""
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
    * Reboots the device normally.
    */
-  def reboot_normal(serial: String): Boolean = {
+  def reboot_normal(serial: String): Option[String] = {
     val command = s"""$adb $serial reboot"""
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
    * Reboots the device into the bootloader.
    */
-  def reboot_bootloader(serial: String): Boolean = {
+  def reboot_bootloader(serial: String): Option[String] = {
     val command = s"""$adb $serial reboot-bootloader"""
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
    * Reboots the device into recovery mode.
    */
-  def reboot_recovery(serial: String): Boolean = {
+  def reboot_recovery(serial: String): Option[String] = {
     val command = s"""$adb $serial reboot recovery"""
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
    * Restart the `adbd` daemon with root permissions.
    */
-  def restart_adb_root: Boolean = {
+  def restart_adb_root: Option[String] = {
     val command = s"""$adb root"""
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
    * Restart the `adbd` daemon listening on USB.
    */
-  def restart_adb_usb: Boolean = {
+  def restart_adb_usb: Option[String] = {
     val command = s"""$adb usb"""
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
    * Restart the `adbd` daemon listening on TCP on the specified port.
    */
-  def restart_adb_tcpip(port: String): Boolean = {
+  def restart_adb_tcpip(port: String): Option[String] = {
     val command = s"""$adb tcpip $port"""
-    AsynchronousCommand.resultOf(command).isDefined
+    AsynchronousCommand.resultOf(command)
   }
   
   /**
@@ -312,11 +312,12 @@ trait AdbProxy {
     result.toVector
   }
 
-  def is_adb_available: Boolean = {
-    val output: String = s"$adb version" !!
+  def is_adb_available: Option[String] = {
+    val command: String = s"$adb version"
 
-    return output.contains("Android")
+    AsynchronousCommand.resultOf(command)
     // TODO: Async
+    // return output // TODO .contains("Android")
   }
   
   /**

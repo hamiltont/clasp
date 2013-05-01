@@ -88,9 +88,10 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
     case "is_booted" => {
       sender ! isBooted
     }
-    // TODO: Add the option to reboot and refresh an emulator.
-    // case "reboot" => {
-    // }
+    case "reboot" => {
+      postStop
+      preStart
+    }
     case Execute(func) => {
       info(s"Executing function.")
       sender ! func()
@@ -167,7 +168,7 @@ object EmulatorBuilder {
     val avdName = s"$hostname-$port"
     info(s"Building unique AVD $avdName")
     // TODO we must lookup the eabi for the target or this will likely fail
-    sdk.create_avd(avdName, "1", "armeabi", true)
+    sdk.create_avd(avdName, "android-17", "armeabi-v7a", true)
 
     // TODO update this to use some working directory
     val path:String = "pwd".!!.stripLineEnd

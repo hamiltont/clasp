@@ -299,47 +299,55 @@ class Emulator(emulatorActor: ActorRef) extends Serializable {
     serialID = Option(Await.result(f, Duration.Inf))
   }
 
+  // TODO: Should we give the user this kind of control over the emulator?
+  // If so, should the emulator notify the emulator manager
+  // it's going offline and then online?
+  def restart = {
+    emulatorActor ! "restart"
+  }
+
   // TODO: Is there a more generic way to wrap commands so this
   // class doesn't have to be enormous for all commands that
   // can take a SerialID as a parameter?
-  def installApk(path: String): Boolean = {
+  def installApk(path: String): Option[String] = {
     info(s"Installing package: $path.")
     val f = ask(emulatorActor, Execute(() =>
       sdk.install_package(serialID.get, path)),
-      Timeout(1, TimeUnit.MINUTES)).mapTo[Boolean]
+      Timeout(1, TimeUnit.MINUTES)).mapTo[Option[String]]
     Await.result(f, Duration.Inf)
+    
   }
 
-  def remoteShell(cmd: String): Boolean = {
+  def remoteShell(cmd: String): Option[String] = {
     info(s"Sending command: $cmd.")
     val f = ask(emulatorActor, Execute(() =>
       sdk.remote_shell(serialID.get, cmd)),
-      Timeout(10, TimeUnit.MINUTES)).mapTo[Boolean]
-    Await.result(f, Duration.Inf)
+      Timeout(10, TimeUnit.MINUTES)).mapTo[Option[String]]
+    return Await.result(f, Duration.Inf)
   }
 
-  def pull(remotePath: String, localPath: String): Boolean = {
+  def pull(remotePath: String, localPath: String): Option[String] = {
     info(s"Pulling '$remotePath' to '$localPath'")
     val f = ask(emulatorActor, Execute(() =>
       sdk.pull_from_device(serialID.get, remotePath, localPath)),
-      Timeout(1, TimeUnit.MINUTES)).mapTo[Boolean]
-    Await.result(f, Duration.Inf)
+      Timeout(1, TimeUnit.MINUTES)).mapTo[Option[String]]
+    return Await.result(f, Duration.Inf)
   }
 
-  def startActivity(mainActivity: String): Boolean = {
+  def startActivity(mainActivity: String): Option[String] = {
     info(s"Starting activity: $mainActivity.")
     val amStart = s"am start -a android.intent.action.MAIN -n $mainActivity"
     val f = ask(emulatorActor, Execute(() =>
       sdk.remote_shell(serialID.get, amStart)),
-      Timeout(1, TimeUnit.MINUTES)).mapTo[Boolean]
-    Await.result(f, Duration.Inf)
+      Timeout(1, TimeUnit.MINUTES)).mapTo[Option[String]]
+    return Await.result(f, Duration.Inf)
   }
 
-  def stopPackage(name: String): Boolean = {
+  def stopPackage(name: String): Option[String] = {
     info(s"Stopping package: $name")
     val f = ask(emulatorActor, Execute(() =>
       sdk.remote_shell(serialID.get, s"""am force-stop "$name" """)),
-      Timeout(1, TimeUnit.MINUTES)).mapTo[Boolean]
-    Await.result(f, Duration.Inf)
+      Timeout(1, TimeUnit.MINUTES)).mapTo[Option[String]]
+    return Await.result(f, Duration.Inf)
   }
 }

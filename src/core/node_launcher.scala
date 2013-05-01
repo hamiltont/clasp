@@ -142,7 +142,7 @@ class NodeManger(val ip: String, val initial_workers: Int, manual_pool: Option[S
     import ExecutionContext.Implicits.global
     val f = future {
       val directory: String = "pwd".!!.stripLineEnd
-      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $directory ; nohup target/start --client --ip $client_ip --mip $ip >> nohup.$client_ip 2>&1 &' "
+      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'export DISPLAY=localhost:10.0; cd $directory ; nohup target/start --client --ip $client_ip --mip $ip >> nohup.$client_ip 2>&1 &' "
       info(s"Starting $client_ip using $command")
       command.!! 
       outstanding.incrementAndGet
