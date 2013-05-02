@@ -4,10 +4,22 @@
  */
 package clasp.core.sdktools
 
+import clasp.core.AsynchronousCommand
+
 import org.slf4j.LoggerFactory
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+
+import scala.sys.process._
+import scala.concurrent._
+import scala.concurrent.duration._
+import ExecutionContext.Implicits.global
+
+import akka.actor._
+import akka.actor.ActorDSL._
+import akka.actor.ActorSystem
+import akka.pattern.ask
 
 /**
  * The entire SDK tool facade!
@@ -16,7 +28,51 @@ object sdk extends AndroidProxy
               with EmulatorProxy
               with AdbProxy
               with TelnetProxy
-              with AaptProxy {}
+              with AaptProxy {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
+   
+  
+  // Blocking call, but guaranteed to return within max_wait. Will report if emulator is both booted and showing
+  // up in adb. If result is false there's no way to know what went wrong
+  def wait_for_emulator(serialID: String, max_wait: FiniteDuration = 35.second)(implicit system:ActorSystem) : Boolean = {
+
+    val a = actor(new Act {
+        // TODO create get_property method in proxy_adb, and create separate parser functions for each property
+        val command:String = s"/opt/android-sdk-linux/platform-tools/adb -s $serialID shell getprop dev.bootcomplete"
+        val command2 = s"/opt/android-sdk-linux/platform-tools/adb -s $serialID shell getprop sys.boot_completed" 
+        val command3 = s"/opt/android-sdk-linux/platform-tools/adb -s $serialID shell getprop init.svc.bootanim"
+        val timeout = system.scheduler.scheduleOnce(max_wait, self, "timeout")
+        var resultActor: ActorRef = null
+
+        def retry = {
+          val outbuffer = new StringBuilder("")
+          val logger = ProcessLogger(out => outbuffer.append(out), err => outbuffer.append(err))
+          Process(command).!(logger)
+          Process(command2).!(logger)
+          Process(command3).!(logger)
+          val out = outbuffer.toString
+
+          if (out.contains("running") || out.contains("stopped") || out.contains("1")) {
+            timeout.cancel
+            resultActor ! true
+          } else 
+            system.scheduler.scheduleOnce(1.second, self, "retry")
+        }
+
+        become {
+          case "result"  => { resultActor = sender; retry }
+          case "timeout" => resultActor ! false
+          case "retry"   => retry
+        }
+      })
+
+    val result = a.ask("result")(max_wait)
+    val realResult = Await.result(result, max_wait).asInstanceOf[Boolean]
+    realResult
+  }
+
+}
 
 object sdk_config {
   // TODO run checks to ensure that all three of these can be accessed

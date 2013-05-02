@@ -4,12 +4,11 @@
  */
 package clasp.core
 
+import scala.util.{Success, Failure}
 import scala.collection.mutable.ListBuffer
 import scala.collection.immutable.Map
 import scala.sys.process.Process
 import scala.sys.process._ 
-//import org.hyperic.sigar.Sigar
-//import org.hyperic.sigar.ptql.ProcessFinder
 import akka.actor._
 import akka.serialization._
 
@@ -30,27 +29,16 @@ class EmulatorManager extends Actor {
 
   val emulators = ListBuffer[ActorRef]()
 
-  // Mutable map containing all of the promises we have yet to complete
+  // Tasks that have been delivered but not fulfilled
   val outstandingTasks: scala.collection.mutable.Map[String, Promise[Map[String,Any]]] = scala.collection.mutable.Map() 
 
-  def receive = {
-    case "emulator_up" => {
-      emulators += sender
-      info(s"${emulators.length} emulators awake: ${sender.path}")
-    }
-    case "emulator_down" => {
-      emulators -= sender
-      info(s"${emulators.length} still awake: Lost ${sender.path}")
-    }
-    case "get_devices" => {
-      sender ! emulators.toList
-    }
-    case QueueEmulatorTask(task, promise) => {
-      // Note that this is not strictly threadsafe. Consider using twitter's snowflake library
-      val id = UUID.randomUUID().toString()
-      outstandingTasks(id) = promise
-      info(s"Enqueued new task: $id")
+  // Contains tasks that need to be delivered to workers
+  val undeliveredTasks: scala.collection.mutable.Queue[EmulatorTask] = scala.collection.mutable.Queue() 
 
+
+  def sendTask(to: ActorRef) = {
+    if (undeliveredTasks.length != 0) {
+      info(s"Dequeuing task for ${to.path}")
       // Only works because the remote system has the same classpath loaded, 
       // so all anonymous functions exist on both systems. If we want this to 
       // work in a dynamic manner we would have to serialize the class that's 
@@ -59,25 +47,50 @@ class EmulatorManager extends Actor {
       // See http://doc.akka.io/docs/akka/snapshot/scala/serialization.html#serialization-scala
       // See http://www.scala-lang.org/node/10566
       // Alternatively, just copy all *.class files
-      emulators.head ! new EmulatorTask(id, task)
+      to ! undeliveredTasks.dequeue
+    } else
+      error("Emulator came online, but no work was available. Permanently wasted!")
+  }
+
+  def receive = {
+    case EmulatorReady(emu) => {
+      emulators += emu
+      info(s"${emulators.length} emulators awake: ${emu.path}")
+      sendTask(emu)
+   }
+    case EmulatorFailed(emu) => {
+      emulators -= emu
+      info(s"Emulator failed to boot: ${emu.path}")
     }
-    case TaskSuccess(id, data) => {
+    case QueueEmulatorTask(task, promise) => {
+      // Note that this is not strictly threadsafe. Consider using twitter's snowflake library
+      val id = UUID.randomUUID().toString()
+      outstandingTasks(id) = promise
+      info(s"Enqueued new task: $id")
+
+      // TODO does not work if tasks arrive after emulator comes online. Currently there's little
+      // danger of that, but still....
+      undeliveredTasks.enqueue(new EmulatorTask(id, task))
+    }
+    case TaskSuccess(id, data, emu) => {
       info(s"Task $id has completed")
       val promise_option = outstandingTasks remove id
       promise_option.get success data
     }
-    case TaskFailure(id, err) => {
+    case TaskFailure(id, err, emu) => {
       info(s"Task $id has failed")
       val promise_option = outstandingTasks remove id
       promise_option.get failure err
     }
   }
 }
+case class EmulatorReady(emu: ActorRef)
+case class EmulatorFailed(emu: ActorRef)
 case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
 case class QueueEmulatorTask(function: Emulator => Map[String, Any], promise: Promise[Map[String,Any]])
 // TODO can I make Any require serializable? 
-case class TaskSuccess(taskId: String, data: Map[String, Any])
-case class TaskFailure(taskId: String, err: Exception)
+case class TaskSuccess(taskId: String, data: Map[String, Any], emulator: ActorRef)
+case class TaskFailure(taskId: String, err: Exception, emulator: ActorRef)
 
 // An always-on presence for a single emulator process. 
 //  - Monitors process state (STARTED, READY, etc)
@@ -91,15 +104,10 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
-  info(s"Port is: $port")
+  val buildTime = System.currentTimeMillis
+  info(s"Building emulator for port $port at $buildTime")
   val (process, serialID) = EmulatorBuilder.build(port, opts)
 
-  var isBooted = false
-  // TODO: Wait for the emulators to be booted and set an `isBooted` flag
-  // when we're certain the emulators are _entirely_ booted.
-  // Note: Only calling `wait_for_device` returns too early,
-  // before the emulators can be fully interacted with.
-  
   val emanager = context.system.actorFor("akka://clasp@" + serverip + ":2552/user/emulatormanager")
 
   override def postStop = {
@@ -110,35 +118,46 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
     process.exitValue // block until destroyed
     info(s"Emulator ${self.path} stopped")
     
-    emanager ! "emulator_down"
+    emanager ! EmulatorFailed(self)
   }
   
   override def preStart() {
-    emanager ! "emulator_up"
+    var me: ActorRef = self
+    import ExecutionContext.Implicits.global
+    val f = future {
+      implicit val system = context.system
+      info(s"Waiting for emulator $port to come online")
+      if (false == sdk.wait_for_emulator(serialID, 200.second))
+        throw new IllegalStateException("Emulator has not booted")
+    } onComplete { 
+      case Success(_) => {
+        val bootTime = System.currentTimeMillis
+        info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}");
+        emanager ! EmulatorReady(me) }
+      case Failure(_) => { 
+        val failTime = System.currentTimeMillis
+        info(s"Emulator $port failed to boot. Reported failure at $failTime, took ${failTime - buildTime}");    
+        context.stop(self)}
+    }
   }
 
   def receive = {
     case "get_serialID" => {
       sender ! serialID
     }
-    case "is_booted" => {
-      sender ! isBooted
-    }
-    case "reboot" => {
-      // TODO refusing to allow this currently as it's dangerous and this isn't
-      // the proper way to go about it
-      //postStop
-      //preStart
-    }
+    // TODO: Add the option to reboot and refresh an emulator. It's not 
+    // correct to ask the EmulatorActor to do this for us
+    // case "reboot" => {
+    // }
     case EmulatorTask(id, callback) => {
       info(s"Performing task $id")
       val emu = new Emulator(serialID)
       // TODO should this happen on a future so we don't block the receive loop?
       try {
         val data = callback(emu)
-        emanager ! TaskSuccess(id, data)
+        emanager ! TaskSuccess(id, data, self)
       } catch {
-        case e:Exception => emanager ! TaskFailure(id, e)
+        case e:Exception => emanager ! TaskFailure(id, e, self)
       }
     }
     case _ => {
@@ -192,22 +211,4 @@ object EmulatorBuilder {
   }
 }
 
-/*case class Load_Tick()
-class EmulatorLoadMonitor(pid: Long) extends Actor {
-  val log = Logging(context.system, this)
-  import log.{info, debug, error}
 
-  override def preStart {
-    // someService | Register(self)
-  }
-
-  def receive = {
-    case "test" => info("received test")
-    case Load_Tick => {
-      info("Load Tick")
-      //pt.gather(s, pid)
-      //info("Emulator: " + pt)
-    }
-
-  }
-}*/

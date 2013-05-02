@@ -65,53 +65,34 @@ object ClaspRunner extends App {
     // @Brandon - this is a great idea for the object-level API! Something like waitForEmulators(10)
     // that will be called when there are 10 emulators alive and ready. Or perhaps that's how we build
     // the main action loop - have a waitForEmulator(new Task() { // do something with emulator here })
-    Thread.sleep(30000)
+    //Thread.sleep(100000)
 
     printf("Testing callback abilities")
   
     import ExecutionContext.Implicits.global
+    // Any logging done inside the callbcak will show up in the remote host nohup file
+    // Any exceptions thrown will be delivered to onFailure handler
     val f = clasp.register_on_new_emulator( (emu: Emulator) => {
-        info("About to install") 
+        var result = scala.collection.mutable.Map[String, Any]()
+        info("About to install")
+        result("serialID") = emu.serialID
+        result("node") = "hostname".!!.stripLineEnd
+        
         sdk.install_package(emu.serialID,"examples/antimalware/Profiler.apk")
         info("installed")
-        Map()
+        result.toMap
       }
     )
   f onSuccess {
-    case dataMap => {
-      info("Future completed successfully!!")
-    }
+    case data => info(s"""Emulator Task completed successfully on Node ${data("node")}, emulator ${data("serialID")}""")
   }
   f onFailure {
     case t => error(s"Future failed due to ${t.getMessage}")
   }
 
-  /*
-  printf("\n\n\n=====================================\n")
-  val devices = clasp.get_devices
-    if (devices isEmpty) {
-      println("Found no devices, aborting to avoid errors!")
-      clasp.kill
-    }
 
-
-    println("Devices:")
-    for (device <- devices) {
-      println(s"serialID: ${device.serialID}")
-    }
-   
-    info(s"Waiting for 5 minutes before installing packages.")
-    Thread.sleep(60000*5)
-    for (device <- devices) {
-      device.installApk("examples/antimalware/Profiler.apk")
-    }
-
-    //println("Let's wait for 1 minute and hope the emulators load! :D")
-    //Thread.sleep(60000)
-
-    printf("=====================================\n\n\n")
-*/
-    //clasp.kill
+  //Thread.sleep(20000)
+  //clasp.kill
     
   } // End of clasp master logic
 }
