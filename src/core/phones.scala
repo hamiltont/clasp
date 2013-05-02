@@ -197,8 +197,8 @@ object EmulatorBuilder {
     sdk.create_avd(avdName, "android-17", "armeabi-v7a", true)
 
     // TODO update this to use some working directory
-    val path:String = "pwd".!!.stripLineEnd
-    val sdcardName = s"$path/sdcards/$hostname-$port"
+    val logname:String = "logname".!!.stripLineEnd
+    val sdcardName = "/tmp/sdcards/" + logname + "/" + s"$hostname-$port"
     info(s"Creating sdcard: '$sdcardName'")
     sdk.mksdcard("32MB", sdcardName)
     if (opts.sdCard != null) {

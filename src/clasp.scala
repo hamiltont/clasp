@@ -204,12 +204,10 @@ class ClaspMaster(val conf: ClaspConf) {
     }
   }
   
-  //Check for presence of and make SD card directory if it does not yet exist
-  //At clasp/sdcards, since path ought to return the clasp directory by some magic?
-  val path: String = "pwd".!!.stripLineEnd
-
-  //Might need an import to get the file IO stuff.
-  val sdDir: File = new File (path + "/sdcards")
+  //Check for presence of and make a temporary SD card directory if it does not yet exist
+  val logname: String = "logname".!!.stripLineEnd
+  
+  val sdDir: File = new File ("/tmp/sdcards" + logname)
   if (!sdDir.exists()){
   sdDir.mkdir()
   }
@@ -266,14 +264,14 @@ class ClaspMaster(val conf: ClaspConf) {
       emanager ! PoisonPill
     }
 
-    // Manage SD cards and delete them all.
+    // Manage SD cards and delete them all at/before the end of clasp's lifetime.
     // TODO: Options to allow users to state that they want to keep SD cards after running.
-    // Look up scala for loop syntax, not sure if I can default to java code!
     val listSDs = sdDir.listFiles()
     for {sd <- listSDs}{
     //How does one delete all of the files in this list?
 	sd.delete()
     }
+    //Next question, do we delete the directory as well at the end? Or are we happy with the temp directory continuing to exist?
 
     var timeSlept = 0.0d; var timeout = 10.0d
     while (manager != null && !manager.isTerminated) {
