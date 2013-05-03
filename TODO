@@ -7,6 +7,7 @@ Brandon
       terminate, in which case the prompt should be abandoned to allow the system to 
       finish termination
  26 - Fix auto-accept ssh script.
+ 27 - Make script to start a virtual X11 server and VNC on any node.
 
 Hamilton
   4 - Implement emulator hibernation
@@ -21,8 +22,15 @@ Noah
   5 - Create and use a directory for sdcard images so they aren't
       all in the Clasp root direcotry.
   6 - Delete all sdcard images on shutdown.
+ 24 - Parameter --workspace that defines the local workspace for each client. This should
+      allow us to inform clients to use the /mnt/localhd workspace for things like AVDs
+      and sdcard. This will drastically speed up emulator creation/starting, but we will 
+      need to be careful to avoid over-writing the workspaces of others e.g. perhaps 
+      have keys to avoid collisions e.g. --workspace /mnt/localhd/USERNAME would be 
+      replaced by /mnt/localhd/hamiltont 
 
 Tanner
+  1 - URGENT: Clasp and Antimalware poster.
   6 - Obtain a list of abi's and add tests for it.
  14 - Make an avd default to an available abi (preferably armeabi-v7a)
       if none is specified.
@@ -40,25 +48,14 @@ Tanner
  16 - Once we have rebooting, add a flag to wipe the device when
       rebooting, and test this thoroughly.
       I've had issues wiping an entire device before.
+ 12 - (Similar to 16 -- Not sure why I didn't copy this here earlier.)
+      Make sure the wipeData emulator option is actually wiping
+      the data from emulators.
+      If I want to wipe data from an emulator, I have to restart it
+      with this option.
+      A `cleanAndRestart` method could be helpful.
 
 George
-  7 - Error checking.
-      Currently, we're able to timeout a command.
-      Can we now try to integrate re-running commands
-      and error-recovery into the framework?
-
-      Also, give some thought to where this error recovery should go.
-      If I want to install an APK to an emulator,
-      should I give you error recovery options to say:
-        "Keep restarting this emulator if you can't install the APK."
-      
-      At what point should a command return to the code using the
-      SDK that it failed to execute, and how should this be handled?
-
-      I like how you're using Options within AsynchronousCommand,
-      would it be feasible for the SDK commands to pass along Options
-      to help with error recovery?
-
  13 - Block for calling `run_emulator` from the node.
       Modification: Inside of EmulatorActor, I've added an `isBooted`
       flag, which should be set to false until the emulator has completely
@@ -76,30 +73,10 @@ Jos�
       automatically deploy clasp to ataack
 
 
-
 Unallocated - Features
-  9 - Manage sdcards, specifically for multiple emulators.
-      The problem is that an sdcard image can't be shared between
-      emulators, and new cards need to be created for multiple emulators.
- 12 - Make sure the wipeData emulator option is actually wiping
-      the data from emulators.
-      If I want to wipe data from an emulator, I have to restart it
-      with this option.
-      A `cleanAndRestart` method could be helpful.
  15 - Add `sigar` libraries when building with `sbt`.
       Reference: http://stackoverflow.com/questions/14966414/including-hyperic-sigar-library-within-jar-while-using-sbt-assembly-for-scala-pr
  16 - Provide an AVD manager class for utility functions.
- 17 - Wrapper objects so the interface doesn't reveal we're using actors.
- 18 - Make it so that `Clasp:get_devices` blocks until all emulators
-      have a process so we only have to call it once to get
-      this list.
- 24 - Parameter --workspace that defines the local workspace for each client. This should
-      allow us to inform clients to use the /mnt/localhd workspace for things like AVDs
-      and sdcard. This will drastically speed up emulator creation/starting, but we will 
-      need to be careful to avoid over-writing the workspaces of others e.g. perhaps 
-      have keys to avoid collisions e.g. --workspace /mnt/localhd/USERNAME would be 
-      replaced by /mnt/localhd/hamiltont 
-
 
 
 Unallocated - Modules
@@ -115,9 +92,5 @@ Unallocated - Modules
       When the framework starts a Node, that Node should cache the available targets
       and something should predict from the EmulatorConfig that the emulator boot
       will fail. More importantly, we can likely auto-fix the issue by calling
-      'android update sdk --no-gui' on the command line
-  2 - Create test cases for nodes once development on this is more
-      complete.
- 22 - Update autodetect-config.sh to automate the process of ssh-ing into each node
-      and then answering 'yses' to the "do you trust this node" question. This will
-      help ensure that all of the nodes can ssh into all of the other nodes
+      'android update sdk --no-gui' on the command line.
+  2 - Create test cases once development once development has stabilized.
