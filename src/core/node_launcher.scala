@@ -142,7 +142,9 @@ class NodeManger(val ip: String, val initial_workers: Int, manual_pool: Option[S
     import ExecutionContext.Implicits.global
     val f = future {
       val directory: String = "pwd".!!.stripLineEnd
-      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'export DISPLAY=localhost:10.0; cd $directory ; nohup target/start --client --ip $client_ip --mip $ip >> nohup.$client_ip 2>&1 &' "
+      val username = "logname".!!.stripLineEnd
+      val workspaceDir = s"/tmp/clasp/$username"
+      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'export DISPLAY=localhost:10.0; cd $directory ; mkdir -p $workspaceDir ; nohup target/start --client --ip $client_ip --mip $ip >> /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
       info(s"Starting $client_ip using $command")
       command.!! 
       outstanding.incrementAndGet
@@ -199,10 +201,10 @@ class Node(val ip: String, val serverip: String,
   context.actorOf(Props(new EmulatorActor(base_emulator_port,
     opts)), s"emulator-${base_emulator_port}")
   */
-  //for (i <- 0 to 2) {
-    devices += context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*0,
-      emuOpts, serverip)), s"emulator-${base_emulator_port+2*0}")
-  //}
+  for (i <- 0 to 1) { // 2
+    devices += context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*i,
+      emuOpts, serverip)), s"emulator-${base_emulator_port+2*i}")
+  }
 
   override def preStart() = {
     info(s"Node online: ${self.path}")

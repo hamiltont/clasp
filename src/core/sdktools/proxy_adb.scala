@@ -92,7 +92,8 @@ trait AdbProxy {
   /**
    * Run an emulator console command.
    */
-  def emulator_console(serial: String, emuCommand: String): Option[String] = {
+  def remote_emulator_console(serial: String, emuCommand: String):
+      Option[String] = {
     val command = s"$adb -s $serial emu $emuCommand"
     AsynchronousCommand.resultOf(command)
   }
@@ -138,8 +139,11 @@ trait AdbProxy {
   /**
    * Push a package file to the device and install it.
    */
-  def install_package(serial: String, apk_path: String): Option[String] = {
-    val command = s"""$adb -s $serial install $apk_path"""
+  def install_package(serial: String, apk_path: String,
+      reinstall: Boolean = false): Option[String] = {
+    var reinstallStr = ""
+    if (reinstall) reinstallStr = "-r"
+    val command = s"""$adb -s $serial install $reinstallStr $apk_path"""
     AsynchronousCommand.resultOf(command)
   }
   
@@ -324,6 +328,6 @@ trait AdbProxy {
    * Kill an emulator's process.
    */
   def kill_emulator(serial: String) {
-    emulator_console(serial, "kill")
+    remote_emulator_console(serial, "kill")
   }
 }

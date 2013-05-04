@@ -285,14 +285,14 @@ object AsynchronousCommand {
     };
     */
 
-    cmd.await().flatMap((tup) => 
+    val result = cmd.await().flatMap((tup) => 
       if (tup._1 == 0)
         Some(tup._2) 
       else
         None
     )
-    //println(s"Result of '$str' is '${result.get}'")
-    //return result
+    println(s"Result of '$str' is '${result.get}'")
+    return result
   }
 
   // TODO: Remove duplicated cude. 

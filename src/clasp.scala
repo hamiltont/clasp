@@ -22,6 +22,7 @@ import clasp.core._
 import clasp.core.sdktools.sdk
 import clasp.core.sdktools.EmulatorOptions
 import java.io.File
+
 /*
  * Example of using Clasp. The App will be packaged and deployed to both the server and 
  * the client machines. Note that you should never be the one specifying --client on the 
@@ -83,23 +84,24 @@ object ClaspRunner extends App {
         result.toMap
       }
     )
-  f onSuccess {
-    case data => info(s"""Emulator Task completed successfully on Node ${data("node")}, emulator ${data("serialID")}""")
-  }
-  f onFailure {
-    case t => error(s"Future failed due to ${t.getMessage}")
-  }
+    f onSuccess {
+      case data => info(s"""Emulator Task completed successfully on Node ${data("node")}, emulator ${data("serialID")}""")
+    }
+    f onFailure {
+      case t => error(s"Future failed due to ${t.getMessage}")
+    }
+    f onComplete {
+      case _ => println("Done.")
+    }
 
-
-  //Thread.sleep(20000)
-  //clasp.kill
-    
+    //Thread.sleep(20000)
+    //clasp.kill
   } // End of clasp master logic
 }
  
 
-/* TODO make it possible to support sending EmulatorOptions across the network and starting emulators
- * with different options
+/* TODO make it possible to support sending EmulatorOptions across the
+ * network and starting emulators with different options
  */
 class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
   val ip = conf.ip()
@@ -269,7 +271,7 @@ class ClaspMaster(val conf: ClaspConf) {
     val listSDs = sdDir.listFiles()
     for {sd <- listSDs}{
     //How does one delete all of the files in this list?
-	sd.delete()
+      sd.delete()
     }
     //Next question, do we delete the directory as well at the end? Or are we happy with the temp directory continuing to exist?
 
@@ -309,16 +311,17 @@ class Emulator(val serialID: String) extends Serializable {
     val f = ask(emulatorActor, "get_serialID", 60000).mapTo[String]
     serialID = Option(Await.result(f, 100 seconds))
   }*/
-  val serialID = Some("emulator-5554")
+  //val serialID = Some("emulator-5554")
 
   // TODO: Should we give the user this kind of control over the emulator?
   // If so, should the emulator notify the emulator manager
   // it's going offline and then online?
+  /*
   def restart = {
     emulatorActor ! "restart"
   }
   
-  /*def installApk(path: String, setBusy: Boolean = true) {
+  def installApk(path: String, setBusy: Boolean = true) {
     info(s"Installing package: $path.")
     val f = ask(emulatorActor, Execute(() =>
       sdk.install_package(serialID.get, path)),

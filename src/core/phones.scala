@@ -63,7 +63,8 @@ class EmulatorManager extends Actor {
       info(s"Emulator failed to boot: ${emu.path}")
     }
     case QueueEmulatorTask(task, promise) => {
-      // Note that this is not strictly threadsafe. Consider using twitter's snowflake library
+      // Note that this is not strictly threadsafe.
+      // Consider using twitter's snowflake library
       val id = UUID.randomUUID().toString()
       outstandingTasks(id) = promise
       info(s"Enqueued new task: $id")
@@ -76,11 +77,13 @@ class EmulatorManager extends Actor {
       info(s"Task $id has completed")
       val promise_option = outstandingTasks remove id
       promise_option.get success data
+      sendTask(emu)
     }
     case TaskFailure(id, err, emu) => {
       info(s"Task $id has failed")
       val promise_option = outstandingTasks remove id
       promise_option.get failure err
+      sendTask(emu)
     }
   }
 }
@@ -133,6 +136,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
       case Success(_) => {
         val bootTime = System.currentTimeMillis
         info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}");
+        Thread.sleep(5000)
         emanager ! EmulatorReady(me) }
       case Failure(_) => { 
         val failTime = System.currentTimeMillis
@@ -181,6 +185,7 @@ object EmulatorBuilder {
   import log.{error, debug, info, trace}
   
   def build(port: Int, opts: EmulatorOptions): (Process, String) = {
+    info("Building and starting emulator.")
 
     val avds = sdk.get_avd_names
       
@@ -188,8 +193,7 @@ object EmulatorBuilder {
     // TODO: Where should this be put?
     //       Putting it here seemed logical (and easy) to me.
     // TODO: Make this work for multiple nodes.
-    var hostname = "hostname" !!;
-    hostname = hostname.trim
+    var hostname = "hostname".!!.stripLineEnd;
 
     val avdName = s"$hostname-$port"
     info(s"Building unique AVD $avdName")
@@ -197,10 +201,14 @@ object EmulatorBuilder {
     sdk.create_avd(avdName, "android-17", "armeabi-v7a", true)
 
     // TODO update this to use some working directory
-    val logname:String = "logname".!!.stripLineEnd
-    val sdcardName = "/tmp/sdcards/" + logname + "/" + s"$hostname-$port"
+    val username: String = "logname".!!.stripLineEnd
+    val workspaceDir = s"/tmp/clasp/$username"
+    s"mkdir -p $workspaceDir" !!
+
+    val sdcardName = workspaceDir + "/sdcard-" + hostname + "-" +
+      port + ".img"
     info(s"Creating sdcard: '$sdcardName'")
-    sdk.mksdcard("32MB", sdcardName)
+    sdk.mksdcard("9MB", sdcardName)
     if (opts.sdCard != null) {
       // TODO: What should be done in this case?
       info("Warning: Overriding default sdcard option.")
