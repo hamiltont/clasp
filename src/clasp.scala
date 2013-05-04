@@ -90,9 +90,6 @@ object ClaspRunner extends App {
     f onFailure {
       case t => error(s"Future failed due to ${t.getMessage}")
     }
-    f onComplete {
-      case _ => println("Done.")
-    }
 
     //Thread.sleep(20000)
     //clasp.kill
