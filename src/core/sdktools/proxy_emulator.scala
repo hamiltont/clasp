@@ -27,7 +27,7 @@ trait EmulatorProxy {
    * Start an emulator with the given options.
    */
   def start_emulator(avd_name: String, port: Int, opts: EmulatorOptions = null): (Process, String) = {
-    var command = s"$emulator -ports $port,${port+1} @$avd_name"
+    var command = s"$emulator-arm -ports $port,${port+1} @$avd_name"
     if (opts != null) {
 		if (opts.sysdir != null) command += s" -sysdir ${opts.sysdir}"
 		if (opts.system != null) command += s" -system ${opts.system}"
@@ -97,7 +97,7 @@ trait EmulatorProxy {
 		if(opts.verbose) command += s" -verbose"
   }
     
-    info(command)
+    info(s"emulator_start command: $command")
     val builder = Process(command)
     val serial = "emulator-" + port
     val logger = ProcessLogger ( line => info(serial + ":out: " + line), 
@@ -160,7 +160,5 @@ class EmulatorOptions {
   var noCache, noSnapStorage, noSnapShot, noSnapShotSave,
       noSnapShotLoad, noSnapShotUpdateTime, wipeData, noSkin,
       dynamicSkin, netFast, showKernel, shell, noJni, noAudio,
-      rawKeys, noBootAnim, noWindow, force32Bit = false
-  
-  var verbose = true 
+      rawKeys, noBootAnim, noWindow, force32Bit, verbose = false
 }

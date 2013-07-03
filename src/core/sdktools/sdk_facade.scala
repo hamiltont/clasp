@@ -31,7 +31,8 @@ object sdk extends AndroidProxy
               with AaptProxy {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
-   
+
+  //val adb:String = sdk_config.config.getString(sdk_config.adb_config)
   
   // Blocking call, but guaranteed to return within max_wait. Will report if emulator is both booted and showing
   // up in adb. If result is false there's no way to know what went wrong
@@ -39,9 +40,9 @@ object sdk extends AndroidProxy
 
     val a = actor(new Act {
         // TODO create get_property method in proxy_adb, and create separate parser functions for each property
-        val command:String = s"/opt/android-sdk-linux/platform-tools/adb -s $serialID shell getprop dev.bootcomplete"
-        val command2 = s"/opt/android-sdk-linux/platform-tools/adb -s $serialID shell getprop sys.boot_completed" 
-        //val command3 = s"/opt/android-sdk-linux/platform-tools/adb -s $serialID shell getprop init.svc.bootanim"
+        val command:String = s"$adb -s $serialID shell getprop dev.bootcomplete"
+        val command2 = s"$adb -s $serialID shell getprop sys.boot_completed" 
+        //val command3 = s"$adb -s $serialID shell getprop init.svc.bootanim"
         val timeout = system.scheduler.scheduleOnce(max_wait, self, "timeout")
         var resultActor: ActorRef = null
 
