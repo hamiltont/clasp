@@ -280,7 +280,7 @@ class ClaspMaster(val conf: ClaspConf) {
         val input = readLine(
           s"""|Waited for $timeSlept seconds, and all nodes have not responded.
               |Continue waiting (y)/n? """.stripMargin)
-        if (input.size > 0 && input.toLowerCase.charAt(0) == 'n') {
+        if (input && input.size > 0 && input.toLowerCase.charAt(0) == 'n') {
           println("Exiting.")
           println("Warning: Nodes may still have emulators running on them!")
           return;
