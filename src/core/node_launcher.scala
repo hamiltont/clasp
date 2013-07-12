@@ -201,7 +201,7 @@ class Node(val ip: String, val serverip: String,
   context.actorOf(Props(new EmulatorActor(base_emulator_port,
     opts)), s"emulator-${base_emulator_port}")
   */
-  for (i <- 0 to 1) { // 2
+  for (i <- 0 to 0) { // 2
     devices += context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*i,
       emuOpts, serverip)), s"emulator-${base_emulator_port+2*i}")
   }
