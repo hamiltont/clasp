@@ -175,7 +175,7 @@ class Node(val ip: String, val serverip: String,
   sdk.kill_adb
   sdk.start_adb
 
-  for (i <- 0 to 0) { // 2
+  for (i <- 0 to 0) { // TODO: Add number of emulators as an option.
     devices += context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*i,
       emuOpts, serverip)), s"emulator-${base_emulator_port+2*i}")
   }
