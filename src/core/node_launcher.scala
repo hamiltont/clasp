@@ -144,7 +144,7 @@ class NodeManger(val ip: String, val initial_workers: Int, manual_pool: Option[S
       val directory: String = "pwd".!!.stripLineEnd
       val username = "logname".!!.stripLineEnd
       val workspaceDir = s"/tmp/clasp/$username"
-      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'export DISPLAY=localhost:10.0; cd $directory ; mkdir -p $workspaceDir ; nohup target/start --client --ip $client_ip --mip $ip >> /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
+      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'export DISPLAY=localhost:10.0; cd $directory ; mkdir -p $workspaceDir ; nohup target/start --client --ip $client_ip --mip $ip > /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
       info(s"Starting $client_ip using $command")
       command.!! 
       outstanding.incrementAndGet
