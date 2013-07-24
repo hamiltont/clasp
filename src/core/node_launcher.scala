@@ -171,36 +171,10 @@ class Node(val ip: String, val serverip: String,
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
   var base_emulator_port = 5555
 
-  // Moved outside of Node so the options can be set with the API.
-  // val opts = new EmulatorOptions
-  // opts.noWindow = true
-
-  // TODO: Better ways to ensure device appear online?
+  // TODO: Better ways to ensure devices appear online?
   sdk.kill_adb
   sdk.start_adb
 
-  // TODO: This way causes all emulators to be started with port=5561!
-  //       I have to idea why, but using the loop below causes the
-  //       emulators to be started on the right port.
-  //       I am so confused! Would love to know why the commented
-  //       way isn't working.
-  /*
-  var current_emulator_port = 5555
-  context.actorOf(Props(new EmulatorActor(5555, opts)),
-    s"emulator-$current_emulator_port")
-  current_emulator_port += 2
-  context.actorOf(Props(new EmulatorActor(5557, opts)),
-    s"emulator-$current_emulator_port")
-  current_emulator_port += 2
-  context.actorOf(Props(new EmulatorActor(5559, opts)),
-    s"emulator-$current_emulator_port")
-  current_emulator_port += 2
-  */
-
-  /*
-  context.actorOf(Props(new EmulatorActor(base_emulator_port,
-    opts)), s"emulator-${base_emulator_port}")
-  */
   for (i <- 0 to 0) { // 2
     devices += context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*i,
       emuOpts, serverip)), s"emulator-${base_emulator_port+2*i}")
