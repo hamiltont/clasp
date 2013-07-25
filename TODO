@@ -6,7 +6,6 @@ Brandon
       termination. However, while waiting for user input the system could successfully
       terminate, in which case the prompt should be abandoned to allow the system to 
       finish termination
- 26 - Fix auto-accept ssh script.
  27 - Make script to start a virtual X11 server and VNC on any node.
 
 Hamilton
