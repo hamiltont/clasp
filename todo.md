@@ -7,10 +7,13 @@
   non-graceful termination. However, while waiting for user input the system
   could successfully terminate, in which case the prompt should be abandoned to
   allow the system to finish termination
++ logstash
++ Look at process management library.
 
 ## Medium priority.
 + Implement emulator hibernation.
 + Delete all sdcard images on shutdown.
+  Make this an option.
 
 ## Low priority.
 + Make script to start a virtual X11 server and VNC on any node.
@@ -42,8 +45,6 @@
 + Resource consumption
   + Memory of scala - Single node vs emulators.
   + Network latency - Heartbeat/1s
-+ Look at process management library.
-+ logstash
 
 # Noah
 + Rebooting
@@ -51,3 +52,4 @@
   + Once we have rebooting, add a flag to wipe the device when
     rebooting, and test this thoroughly.
     I've had issues wiping an entire device before.
+    Reset system and user information.
