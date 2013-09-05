@@ -7,6 +7,7 @@ import argparse
 import copy
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import os.path
 import pickle
 import psutil
 import signal
@@ -59,7 +60,7 @@ def collectData(names):
 
   return resources
 
-def plot(resources):
+def plot(resources, name):
   print('Creating plots.')
   plt.figure()
   plt.title("Clasp's memory overhead")
@@ -80,7 +81,7 @@ def plot(resources):
   ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
   plt.legend(legend, loc='center left', bbox_to_anchor=(1,0.5), fancybox=True,
       prop={'size':10})
-  plt.savefig('memoryLoad.eps')
+  plt.savefig(name + '.eps')
 
 if __name__=='__main__':
   parser = argparse.ArgumentParser(description="Analyze memory usage.")
@@ -89,6 +90,8 @@ if __name__=='__main__':
   parser.add_argument('-ps', '--pickleSave', type=str, metavar='file',
       default='resources.pickle', 
       help="The location of the resource pickle to save.")
+  parser.add_argument('-p', '--processes', type=str, nargs='+',
+      metavar='process', help='A list of process names to watch.')
   args = parser.parse_args()
 
   if args.pickleLoad:
@@ -96,7 +99,10 @@ if __name__=='__main__':
     resources = pickle.load(f)
   else:
     f = open(args.pickleSave, 'wb')
-    resources = collectData(['java', 'emulator-arm'])
+    if args.processes:
+      resources = collectData(args.processes)
+    else:
+      resources = collectData(['java'])
     pickle.dump(resources, f)
   f.close()
-  plot(resources)
+  plot(resources, os.path.splitext(args.pickleSave)[0])
