@@ -1,12 +1,14 @@
 # Todo.
 
 ## High priority.
-+ Update termination conditions to catch and graceful term even if someone
++ Shutting down.
+  + Update termination conditions to catch and graceful term even if someone
   sends us signal 15 via the kill command
-+ Upon shutdown request, system waits 10 seconds then requests a
-  non-graceful termination. However, while waiting for user input the system
-  could successfully terminate, in which case the prompt should be abandoned to
-  allow the system to finish termination
+  + Upon shutdown request, system waits 10 seconds then requests a non-graceful
+  termination. However, while waiting for user input the system could
+  successfully terminate, in which case the prompt should be abandoned to allow
+  the system to finish termination
+  + When a node has a java process running on it, Clasp won't fully terminate.
 + logstash
 + Look at process management library.
 
@@ -14,6 +16,7 @@
 + Implement emulator hibernation.
 + Delete all sdcard images on shutdown.
   Make this an option.
++ Add an option to block until all tasks are complete.
 
 ## Low priority.
 + Make script to start a virtual X11 server and VNC on any node.
@@ -26,6 +29,20 @@
 + Add `sigar` libraries when building with `sbt`.
   Reference: `http://stackoverflow.com/questions/14966414`
 + Provide an AVD manager class for utility functions - ?
++ If you use netcat to listen on an arbitrary socket, and then direct Android's
+  radio socket (an emulator command line parameter) to talk on that socket, you
+  start getting some protocol for communication. There are a number of
+  recognizable messages if you do something like send an SMS message from the
+  device. 
+
+  I'm wondering if that protocol is the one defined in this document:
+  http://m10.home.xs4all.nl/mac/downloads/3GPP-27007-630.pdf
+
+  A lot of the commands in that document look familiar, I may have seen them when
+  I was playing with this radio thing. If this is the right protocol, perhaps we
+  can find a library or create one that allows us to read/write to this protocol
+  and interface with the radio chip on Android devices in a more comprehensive
+  manner. 
 
 ## Issues.
 + If "android list targets" is empty, then creation of an emulator will 
