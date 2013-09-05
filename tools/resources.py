@@ -1,9 +1,10 @@
-#!/usr/bin/env python3.3
+#!/usr/bin/env python2.6
 #
 # resources.py
 # Monitor Clasp's resource consumption.
 
 import argparse
+import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pickle
 import psutil
