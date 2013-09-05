@@ -50,29 +50,18 @@ object ClaspRunner extends App {
   val opts = new EmulatorOptions
   opts.noWindow = true
   
-  // Create a new instance of the framework. There should be at least one instance of Clasp
-  // started per computer in your cluster, although you should probably let the master handle
-  // starting all of the workers
+  // Create a new instance of the framework. There should be at least one
+  // instance of Clasp started per computer in your cluster, although you
+  // should probably let the master handle starting all of the workers.
   if (conf.client()) 
     new ClaspClient(conf, opts)
   else {
     var clasp = new ClaspMaster(conf)
-
-    // TODO should we update the system so the user extends "ClaspServer" and only writes this 
-    // part of the codebase? Everything above seems like boilerplate code
-    // TODO: We shouldn't have to sleep like this.
-    //       Add an option to wait until all emulators are alive,
-    //       but not necessarily entirely booted.
-    // @Brandon - this is a great idea for the object-level API! Something like waitForEmulators(10)
-    // that will be called when there are 10 emulators alive and ready. Or perhaps that's how we build
-    // the main action loop - have a waitForEmulator(new Task() { // do something with emulator here })
-    //Thread.sleep(100000)
-
     printf("Testing callback abilities")
   
     import ExecutionContext.Implicits.global
-    // Any logging done inside the callbcak will show up in the remote host nohup file
-    // Any exceptions thrown will be delivered to onFailure handler
+    // Any logging done inside the callback will show up in the remote host
+    // nohup file Any exceptions thrown will be delivered to onFailure handler.
     val f = clasp.register_on_new_emulator( (emu: Emulator) => {
         var result = scala.collection.mutable.Map[String, Any]()
         info("About to install")
@@ -90,9 +79,8 @@ object ClaspRunner extends App {
     f onFailure {
       case t => error(s"Future failed due to ${t.getMessage}")
     }
-
-    //Thread.sleep(20000)
-    //clasp.kill
+    Thread.sleep(25000)
+    clasp.kill
   } // End of clasp master logic
 }
  
