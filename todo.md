@@ -21,6 +21,7 @@
   as specified as parameters to the Clasp system.
   This can involve asking Clasp, for example, to
   run tasks across a full factorial or LHS of configuration options.
++ Add the option to return logcat output of emulators.
 
 ## Low priority.
 + Make script to start a virtual X11 server and VNC on any node.
