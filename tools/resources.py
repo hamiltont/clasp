@@ -4,6 +4,7 @@
 # Monitor Clasp's resource consumption.
 
 import argparse
+import copy
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pickle
@@ -30,10 +31,10 @@ def frange(x, y, jump):
   return l
 
 class Resource:
-  def __init__(self, name):
+  def __init__(self, name, padding):
     self.name = name
-    self.vms = []
-    self.rss = []
+    self.vms = copy.copy(padding)
+    self.rss = copy.copy(padding)
   def __repr__(self):
     return "{{{0}: vms = {1}, rss = {2}}}".format(
         self.name, self.vms, self.rss)
@@ -41,15 +42,17 @@ class Resource:
 def collectData(names):
   print("Collecting data.")
   resources = {}
+  padding = []
   while not sigCaught:
     for ps in psutil.process_iter():
       if ps.name in names:
         pid = ps.pid
         if not pid in resources:
-          resources[pid] = Resource(ps.name)
+          resources[pid] = Resource(ps.name, padding)
         mem = ps.get_memory_info()
         resources[pid].vms.append(mem.vms)
         resources[pid].rss.append(mem.rss)
+    padding.append(0.0)
     sleep(delay)
 
   return resources
