@@ -17,6 +17,10 @@
 + Delete all sdcard images on shutdown.
   Make this an option.
 + Add an option to block until all tasks are complete.
++ Add the ability to obtain many different device configurations,
+  as specified as parameters to the Clasp system.
+  This can involve asking Clasp, for example, to
+  run tasks across a full factorial or LHS of configuration options.
 
 ## Low priority.
 + Make script to start a virtual X11 server and VNC on any node.
