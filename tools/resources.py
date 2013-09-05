@@ -45,13 +45,15 @@ def collectData(names):
   padding = []
   while not sigCaught:
     for ps in psutil.process_iter():
-      if ps.name in names:
-        pid = ps.pid
-        if not pid in resources:
-          resources[pid] = Resource(ps.name, padding)
-        mem = ps.get_memory_info()
-        resources[pid].vms.append(mem.vms)
-        resources[pid].rss.append(mem.rss)
+      try:
+        if ps.name in names:
+          pid = ps.pid
+          if not pid in resources:
+            resources[pid] = Resource(ps.name, padding)
+          mem = ps.get_memory_info()
+          resources[pid].vms.append(mem.vms)
+          resources[pid].rss.append(mem.rss)
+      except: pass
     padding.append(0.0)
     sleep(delay)
 
@@ -68,10 +70,12 @@ def plot(resources):
   for pid in resources:
     resource = resources[pid]
     length = len(resource.vms)
-    ax.plot(frange(0.0,length*delay,delay), resource.vms)
-    ax.plot(frange(0.0,length*delay,delay), resource.rss)
-    legend.append("{0} ({1}) - vms".format(resource.name, pid))
-    legend.append("{0} ({1}) - rss".format(resource.name, pid))
+    # When emulators start, they create a lot of small java processes.
+    if length > 200:
+      ax.plot(frange(0.0,length*delay,delay), resource.vms)
+      ax.plot(frange(0.0,length*delay,delay), resource.rss)
+      legend.append("{0} ({1}) - vms".format(resource.name, pid))
+      legend.append("{0} ({1}) - rss".format(resource.name, pid))
   box = ax.get_position()
   ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
   plt.legend(legend, loc='center left', bbox_to_anchor=(1,0.5), fancybox=True,
@@ -80,16 +84,19 @@ def plot(resources):
 
 if __name__=='__main__':
   parser = argparse.ArgumentParser(description="Analyze memory usage.")
-  parser.add_argument('-p', '--pickle', type=str, metavar='file',
+  parser.add_argument('-pl', '--pickleLoad', type=str, metavar='file',
       help="The location of the resource pickle to load.")
+  parser.add_argument('-ps', '--pickleSave', type=str, metavar='file',
+      default='resources.pickle', 
+      help="The location of the resource pickle to save.")
   args = parser.parse_args()
 
-  if args.pickle:
-    f = open('resources.pickle', 'rb')
+  if args.pickleLoad:
+    f = open(args.pickleLoad, 'rb')
     resources = pickle.load(f)
   else:
-    f = open('resources.pickle', 'wb')
-    resources = collectData(['java'])
+    f = open(args.pickleSave, 'wb')
+    resources = collectData(['java', 'emulator-arm'])
     pickle.dump(resources, f)
   f.close()
   plot(resources)
