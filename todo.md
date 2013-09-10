@@ -22,6 +22,7 @@
   This can involve asking Clasp, for example, to
   run tasks across a full factorial or LHS of configuration options.
 + Add the option to return logcat output of emulators.
++ Network traffic redirection through tor.
 
 ## Low priority.
 + Make script to start a virtual X11 server and VNC on any node.
@@ -67,6 +68,7 @@
 + Resource consumption
   + Memory of scala - Single node vs emulators.
   + Network latency - Heartbeat/1s
++ Limit Java heap size with sbt stage.
 
 # Noah
 + Rebooting
