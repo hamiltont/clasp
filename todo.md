@@ -50,6 +50,15 @@
   and interface with the radio chip on Android devices in a more comprehensive
   manner. 
 + Fix command watcher...
++ (Hamilton) Create logic to automatically inject root CA into emulator cacerts file, 
+  add options for redirecting traffic to a proxy that now has the ability to MITM the 
+  emulator. See http://intrepidusgroup.com/insight/2011/08/setting-up-a-persistent-trusted-ca-in-an-android-emulator/
+  and http://www.floyd.ch/?p=244 and http://www.portswigger.net/burp/downloadfree.html
+  and https://github.com/wuntee/androidAuditTools
++ (Hamilton) Create 'main' script that allows directly launching the development
+  attack code on local computer. Potentially allow direct launching of unmanaged 
+  emulators and then use attack command to control these emulators after they have 
+  been created (e.g. a scripting tool) 
 
 ## Issues.
 + If "android list targets" is empty, then creation of an emulator will 
