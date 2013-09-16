@@ -38,7 +38,7 @@ import System.currentTimeMillis
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
 class NodeManger(val ip: String, val initial_workers: Int,
-    manual_pool: Option[String] = None) extends Actor {
+    manual_pool: Option[String] = None, val numEmulators: Int) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
@@ -145,7 +145,13 @@ class NodeManger(val ip: String, val initial_workers: Int,
       val directory: String = "pwd".!!.stripLineEnd
       val username = "logname".!!.stripLineEnd
       val workspaceDir = s"/tmp/clasp/$username"
-      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'export DISPLAY=localhost:10.0; cd $directory ; mkdir -p $workspaceDir ; nohup target/start --client --ip $client_ip --mip $ip > /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
+      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip " +
+        "sh -c 'export DISPLAY=localhost:10.0; " +
+        s"cd $directory; " +
+        s"mkdir -p $workspaceDir ; " +
+        s"nohup target/start --client --ip $client_ip --mip $ip " +
+        s"--num-emulators $numEmulators " +
+        s"> /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
       info(s"Starting $client_ip using $command")
       command.!! 
       outstanding.incrementAndGet
@@ -163,7 +169,7 @@ case class NodeBusy(nodeid: String, debuglog: String) extends NM_Message
 // Manages the running of the framework on a single node,
 // including ?startup?, shutdown, etc.
 class Node(val ip: String, val serverip: String,
-    val emuOpts: EmulatorOptions) extends Actor {
+    val emuOpts: EmulatorOptions, val numEmulators: Int) extends Actor {
   val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
   
@@ -175,7 +181,7 @@ class Node(val ip: String, val serverip: String,
   sdk.kill_adb
   sdk.start_adb
 
-  for (i <- 0 to 0) { // TODO: Add number of emulators as an option.
+  for (i <- 0 to numEmulators-1) {
     devices += context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*i,
       emuOpts, serverip)), s"emulator-${base_emulator_port+2*i}")
   }

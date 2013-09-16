@@ -24,21 +24,24 @@ import clasp.core.sdktools.EmulatorOptions
 import java.io.File
 
 /*
- * Example of using Clasp. The App will be packaged and deployed to both the server and 
- * the client machines. Note that you should never be the one specifying --client on the 
- * command line. Starting the server will, with proper configuration parameters, start all
- * of the worker machines. The corollary is that stopping the server is a graceful operation
- * and all of the worker machines will be properly shutdown as soon as they are done processing
- * their current message. If your messages are huge this might take a while, but this is 
- * much better than logging into each machine and force killing all of the processes associated
- * with running clasp. If you manually shutdown instead of using the graceful operation then 
- * you had better know how to clean up the proper processes, because the system may refuse to 
+ * Example of using Clasp. The App will be packaged and deployed to both the
+ * server and the client machines. Note that you should never be the one
+ * specifying --client on the command line. Starting the server will, with
+ * proper configuration parameters, start all of the worker machines. The
+ * corollary is that stopping the server is a graceful operation and all of the
+ * worker machines will be properly shutdown as soon as they are done
+ * processing their current message. If your messages are huge this might take
+ * a while, but this is much better than logging into each machine and force
+ * killing all of the processes associated with running clasp. If you manually
+ * shutdown instead of using the graceful operation then you had better know
+ * how to clean up the proper processes, because the system may refuse to
  * restart on any computers that have an incorrect start state!
  */
 object ClaspRunner extends App {
-  // If you would like logging on remote machines(all workers), then use these logging methods
-  // in your codebase. The logs will (eventually) be pulled back to the master, so that you don't
-  // need to manually aggregrate your logs
+  // If you would like logging on remote machines(all workers), then use these
+  // logging methods in your codebase. The logs will (eventually) be pulled
+  // back to the master, so that you don't need to manually aggregrate your
+  // logs
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
@@ -80,7 +83,7 @@ object ClaspRunner extends App {
     f onFailure {
       case t => error(s"Future failed due to ${t.getMessage}")
     }
-    Thread.sleep(600000)
+    Thread.sleep(25000)
     clasp.kill
   } // End of clasp master logic
 }
@@ -150,7 +153,8 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
   }
   val masterip = conf.mip().stripLineEnd
 
-  var n = system.actorOf(Props(new Node(ip, masterip, emuOpts)), name=s"node-$ip")
+  var n = system.actorOf(Props(new Node(ip, masterip, emuOpts,
+    conf.numEmulators.apply)), name=s"node-$ip")
   info(s"Created Node for $ip")
 }
 
@@ -197,37 +201,24 @@ class ClaspMaster(val conf: ClaspConf) {
   
   val sdDir: File = new File ("/tmp/sdcards" + logname)
   if (!sdDir.exists()){
-  sdDir.mkdir()
+    sdDir.mkdir()
   }
 
   val emanager = system.actorOf(Props[EmulatorManager], name="emulatormanager")
   info("Created EmulatorManager")
  
   var manager = system.actorOf(Props(
-    new NodeManger(ip, conf.workers(), conf.pool.get)), name="nodemanager")
+    new NodeManger(ip, conf.workers(), conf.pool.get,
+      conf.numEmulators.apply)), name="nodemanager")
   info("Created NodeManger")
   
   sys addShutdownHook(shutdown_listener)
 
-  /*def get_devices: List[Emulator] = {
-    info("Getting available devices.")
-    val f = ask(emanager, "get_devices", 60000).mapTo[List[ActorRef]]
-    val emulator_actors = Await.result(f, 5 seconds)
-    //println(emulator_actors)
-    for (actor <- emulator_actors) {
-      val f = ask(actor, "get_serialID", 60000).mapTo[String]
-      val serialID = Await.result(f, 100 seconds)
-    }
-    val emulators = emulator_actors.map(new Emulator(_)).toList
-    //println(emulators)
-    return emulators
-  }*/
-
   // When a new emulator is ready to be used, the provided function will 
   // be transported to the node that emulator runs on and then executed
   //
-  // Any values set on the returned Map will be delivered back to the originating
-  // caller by way of the future
+  // Any values set on the returned Map will be delivered back to the
+  // originating caller by way of the future
   def register_on_new_emulator(func: Emulator => Map[String, Any]): Future[Map[String, Any]] = { 
     import ExecutionContext.Implicits.global
     val result = promise[Map[String, Any]]
@@ -242,7 +233,6 @@ class ClaspMaster(val conf: ClaspConf) {
 
   private def shutdown_listener() {
     // TODO: Context.system.shutdown somewhere?
-
 
     if (manager != null && !manager.isTerminated) {
       // First shutdown everything from Node down the hierarchy
