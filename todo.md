@@ -49,6 +49,7 @@
   can find a library or create one that allows us to read/write to this protocol
   and interface with the radio chip on Android devices in a more comprehensive
   manner. 
++ Fix command watcher...
 
 ## Issues.
 + If "android list targets" is empty, then creation of an emulator will 

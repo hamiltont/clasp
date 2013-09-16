@@ -10,19 +10,6 @@ import scala.concurrent.Future._
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-trait Verifiable[T] {
-  var verification_function: Option[(T => Boolean)] = None
-
-  def command_result: T
-
-  def command_success: Boolean = verification_function match {
-    case Some(ver) => ver(command_result)
-    case None => command_result != null
-  }
-
-  def command_failure = !command_success
-}
-
 /**
  * CommandWatchers are entities that "watch" different parts of a command. They can
  * watch the execution time of a command, CPU graphs, whatever. What's important is
@@ -59,11 +46,14 @@ abstract class CommandWatcher(val watching: AndroidCommand[_]) {
   }
 }
 
-class TimedCommandWatcher(watching: AsynchronousCommand[_], val time_limit: FiniteDuration) extends CommandWatcher(watching) {
+class TimedCommandWatcher(watching: AsynchronousCommand[_],
+    val time_limit: FiniteDuration)
+    (implicit system: ActorSystem)
+    extends CommandWatcher(watching) {
   require(time_limit != null)
   thread_monitor_for_me = false
 
-  val system = ActorSystem("system")
+  //val system = ActorSystem("system")
 
   override def do_monitor() {
     system.scheduler.scheduleOnce(time_limit) {

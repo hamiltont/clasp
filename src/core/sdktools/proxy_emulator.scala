@@ -1,5 +1,6 @@
 package clasp.core.sdktools
 
+import akka.actor.ActorSystem
 import scala.language.postfixOps
 
 import scala.sys.process.Process
@@ -7,8 +8,6 @@ import scala.sys.process.stringToProcess
 import scala.sys.process.ProcessLogger
 
 import sdk_config.log.info
-
-import clasp.core.AsynchronousCommand
 
 /**
  * Provides an interface to the
@@ -26,7 +25,8 @@ trait EmulatorProxy {
   /**
    * Start an emulator with the given options.
    */
-  def start_emulator(avd_name: String, port: Int, opts: EmulatorOptions = null): (Process, String) = {
+  def start_emulator(avd_name: String, port: Int, opts: EmulatorOptions = null)
+    : (Process, String) = {
     var command = s"$emulator-arm -ports $port,${port+1} @$avd_name"
     if (opts != null) {
 		if (opts.sysdir != null) command += s" -sysdir ${opts.sysdir}"
@@ -114,30 +114,32 @@ trait EmulatorProxy {
   /**
    * Return a list of available snapshots.
    */
-  def get_snapshot_list(avd_name: String): Vector[String] = {
+  def get_snapshot_list(avd_name: String):
+      Vector[String] = {
     val command = s"$emulator @$avd_name -snapshot-list"
     val regex = """\[[0-9]+\][ ]*(.*)""".r
-    AsynchronousCommand.resultsOf(command, regex) getOrElse Vector()
+    Command.runAndParse(command, regex) getOrElse Vector()
   }
   
   /**
    * Return a list of web cameras available for emulation.
    */
-  def get_webcam_list(avd_name: String): Vector[String] = {
+  def get_webcam_list(avd_name: String):
+      Vector[String] = {
     val command = s"$emulator @$avd_name -webcam-list"
     val regex = """Camera '([^']*)'""".r
-    AsynchronousCommand.resultsOf(command, regex) getOrElse Vector()
+    Command.runAndParse(command, regex) getOrElse Vector()
   }
   
   def get_emulator_version: String = {
     val command = s"$emulator -version"
     val regex = """Android emulator version ([0-9.]*)""".r
-    AsynchronousCommand.resultsOf(command, regex).map(_.last) getOrElse ""
+    Command.runAndParse(command, regex).map(_.last) getOrElse ""
   }
 
   def mksdcard(size: String, path: String) {
     val command = s"$mksdcard $size $path"
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
 }
 

@@ -1,5 +1,7 @@
 package clasp.core.sdktools
 
+import scala.concurrent.duration._
+
 import scala.language.postfixOps
 
 import scala.sys.process.stringToProcess
@@ -9,7 +11,7 @@ import sdk_config.log.debug
 import sdk_config.log.error
 import sdk_config.log.info
 
-import clasp.core.AsynchronousCommand
+import akka.actor.ActorSystem
 
 /**
  * Provides an interface to the
@@ -41,61 +43,70 @@ trait AdbProxy {
   /**
    * Connect to the device via TCP/IP.
    */
-  def tcpip_connect(host: String, port: String): Option[String] = {
+  def tcpip_connect(host: String, port: String)
+      : Option[String] = {
     val command = s"$adb connect $host:$port"
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   // TODO: Unsure how to test this.
   /**
    * Disconnect from the device via TCP/IP.
    */
-  def tcpip_disconnect(host: String, port: String): Option[String] = {
+  def tcpip_disconnect(host: String, port: String)
+      : Option[String] = {
     val command = s"$adb disconnect $host:$port"
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
    * Push a file or directory to the device.
    */
   def push_to_device(serial: String, localPath: String,
-      remotePath: String): Option[String] = {
-    val command = Seq(s"$adb", "-s", s"$serial", "push", s"$localPath", s"$remotePath")
-    AsynchronousCommand.resultOfSeq(command)
+      remotePath: String)
+      : Option[String] = {
+    val command = Seq(s"$adb", "-s", s"$serial", "push", s"$localPath",
+      s"$remotePath")
+    Command.runSeq(command)
   }
   
   /**
    * Pull a file or directory from a device.
    */
   def pull_from_device(serial: String, remotePath: String,
-      localPath: String): Option[String] = {
-    val command = Seq(s"$adb", "-s", s"$serial", "pull", s"$remotePath", s"$localPath")
-    AsynchronousCommand.resultOfSeq(command)
+      localPath: String)
+      : Option[String] = {
+    val command = Seq(s"$adb", "-s", s"$serial", "pull", s"$remotePath",
+      s"$localPath")
+    Command.runSeq(command)
   }
   
   /**
    * Copy from host to device only if changed.
    */
-  def sync_to_device(serial: String, directory: String): Option[String] = {
+  def sync_to_device(serial: String, directory: String)
+      : Option[String] = {
     val command = Seq(s"$adb", "-s", s"$serial", "sync", s"$directory")
-    AsynchronousCommand.resultOfSeq(command)
+    Command.runSeq(command)
   }
   
   /**
    * Run a remote shell command.
    */
-  def remote_shell(serial: String, shellCommand: String): Option[String] = {
+  def remote_shell(serial: String, shellCommand: String,
+      timeout: FiniteDuration = 0 millis )
+      : Option[String] = {
     val command = s"$adb -s $serial shell $shellCommand"
-    AsynchronousCommand.resultOf(command)
+    Command.run(command, timeout)
   }
   
   /**
    * Run an emulator console command.
    */
-  def remote_emulator_console(serial: String, emuCommand: String):
-      Option[String] = {
+  def remote_emulator_console(serial: String, emuCommand: String)
+    : Option[String] = {
     val command = s"$adb -s $serial emu $emuCommand"
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   // TODO: Unsure how to test this.
@@ -103,9 +114,10 @@ trait AdbProxy {
    * Forward socket connections.
    */
   def forward_socket(serial: String, local: String,
-      remote: String): Option[String] = {
+      remote: String)
+      : Option[String] = {
     val command = s"$adb -s $serial forward $local $remote"
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
 
@@ -127,7 +139,8 @@ trait AdbProxy {
   /**
    * List PIDs of processes hosting a JDWP transport.
    */
-  def get_jdwp(serial:String): Vector[String] = {
+  def get_jdwp(serial:String)
+      : Vector[String] = {
     val command = s"$adb devices"
     val output: String = command !!;
     val regex = """([0-9]*.*""".r
@@ -140,21 +153,23 @@ trait AdbProxy {
    * Push a package file to the device and install it.
    */
   def install_package(serial: String, apk_path: String,
-      reinstall: Boolean = false): Option[String] = {
+      reinstall: Boolean = false)
+      : Option[String] = {
     var reinstallStr = ""
     if (reinstall) reinstallStr = "-r"
     val command = s"""$adb -s $serial install $reinstallStr $apk_path"""
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
    * Remove a package from a device.
    */
   def uninstall_package(serial: String, pkg: String,
-      keepData: Boolean = false): Option[String] = {
+      keepData: Boolean = false)
+      : Option[String] = {
     var command = s"""$adb -s $serial uninstall $pkg"""
     if (keepData) command += s" -k"
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
     // TODO: Return something better?
   }
   
@@ -170,7 +185,7 @@ trait AdbProxy {
 	                apk: Boolean = false,
 	                sharedStorage: Boolean = false,
 	                all: Boolean = false,
-	                system: Boolean = true,
+	                incSystem: Boolean = true,
 	                packages: String = null) {
     if ( !(all || sharedStorage) && packages == null) {
       error("Error: Iff the -all or -shared flags are passed, "+
@@ -182,21 +197,22 @@ trait AdbProxy {
     if (sharedStorage) command += " -shared"
       else command += " -noshared"
     if (all) command += " -all"
-    if (system) command += " -system"
+    if (incSystem) command += " -system"
       else command += " -nosystem"
     if (packages != null) command += s" $packages"
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
    * Restore device contents from the backup archive.
    */
-  def restore_device(serial: String, file: String) {
+  def restore_device(serial: String, file: String)
+     {
     val command = s"""$adb -s $serial restore -f $file"""
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
-  def get_adb_version: String = {
+  def get_adb_version : String = {
     val command = s"$adb -version"
     val output: String = command !!;
     val regex = """Android Debug Bridge version ([0-9.]*)""".r
@@ -210,7 +226,7 @@ trait AdbProxy {
    */
   def wait_for_device(serial: String) {
     val command = s"$adb -s $serial wait-for-device"
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
@@ -218,7 +234,7 @@ trait AdbProxy {
    */
   def start_adb {
     val command = s"$adb start-server"
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
@@ -226,55 +242,61 @@ trait AdbProxy {
    */
   def kill_adb {
     val command = s"$adb kill-server"
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
    * Return the state of the device.
    */
-  def get_state(serial: String): String = {
+  def get_state(serial: String)
+      : String = {
     val command = s"$adb $serial get-state"
-    AsynchronousCommand.resultOf(command).get
+    Command.run(command).get
   }
   
   /**
    * Return the device path of the device.
    */
-  def get_devpath(serial: String): String = {
+  def get_devpath(serial: String)
+      : String = {
     val command = s"$adb $serial get-devpath"
-    AsynchronousCommand.resultOf(command).get
+    Command.run(command).get
   }
   
   /**
    * Remounts the `/system` partition on the device read-write.
    */
-  def remount_system(serial: String): Option[String] = {
+  def remount_system(serial: String)
+      : Option[String] = {
     val command = s"""$adb $serial remount"""
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
    * Reboots the device normally.
    */
-  def reboot_normal(serial: String): Option[String] = {
+  def reboot_normal(serial: String)
+      : Option[String] = {
     val command = s"""$adb $serial reboot"""
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
    * Reboots the device into the bootloader.
    */
-  def reboot_bootloader(serial: String): Option[String] = {
+  def reboot_bootloader(serial: String)
+      : Option[String] = {
     val command = s"""$adb $serial reboot-bootloader"""
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
    * Reboots the device into recovery mode.
    */
-  def reboot_recovery(serial: String): Option[String] = {
+  def reboot_recovery(serial: String)
+      : Option[String] = {
     val command = s"""$adb $serial reboot recovery"""
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
@@ -282,7 +304,7 @@ trait AdbProxy {
    */
   def restart_adb_root: Option[String] = {
     val command = s"""$adb root"""
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
@@ -290,21 +312,23 @@ trait AdbProxy {
    */
   def restart_adb_usb: Option[String] = {
     val command = s"""$adb usb"""
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
    * Restart the `adbd` daemon listening on TCP on the specified port.
    */
-  def restart_adb_tcpip(port: String): Option[String] = {
+  def restart_adb_tcpip(port: String)
+      : Option[String] = {
     val command = s"""$adb tcpip $port"""
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
   }
   
   /**
    * Return the installed packages.
    */
-  def get_installed_packages(serial: String) : Vector[String] = {
+  def get_installed_packages(serial: String):
+      Vector[String] = {
     val command = s"$adb -s $serial shell pm list packages"
     println(command)
     var output: String = command !!
@@ -319,7 +343,7 @@ trait AdbProxy {
   def is_adb_available: Option[String] = {
     val command: String = s"$adb version"
 
-    AsynchronousCommand.resultOf(command)
+    Command.run(command)
     // TODO: Async
     // return output // TODO .contains("Android")
   }

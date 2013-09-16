@@ -21,7 +21,10 @@ import clasp.Emulator
 import org.slf4j.LoggerFactory
 
 import java.util.UUID
+import java.util.concurrent.TimeUnit;
 import scala.language.postfixOps
+
+import ExecutionContext.Implicits.global
 
 class EmulatorManager extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
@@ -69,8 +72,8 @@ class EmulatorManager extends Actor {
       outstandingTasks(id) = promise
       info(s"Enqueued new task: $id")
 
-      // TODO does not work if tasks arrive after emulator comes online. Currently there's little
-      // danger of that, but still....
+      // TODO does not work if tasks arrive after emulator comes online.
+      // Currently there's little danger of that, but still....
       undeliveredTasks.enqueue(new EmulatorTask(id, task))
     }
     case TaskSuccess(id, data, emu) => {
@@ -102,7 +105,8 @@ case class TaskFailure(taskId: String, err: Exception, emulator: ActorRef)
 // Eventually we will have an Emulator object, which will be a proxy that allows 
 // others to interface with the EmulatorActor without having to understand its 
 // interface
-class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) extends Actor {
+class EmulatorActor(val port: Int, val opts: EmulatorOptions,
+    serverip: String) extends Actor {
 
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
@@ -111,11 +115,12 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
   info(s"Building emulator for port $port at $buildTime")
   val (process, serialID) = EmulatorBuilder.build(port, opts)
 
-  val emanager = context.system.actorFor("akka://clasp@" + serverip + ":2552/user/emulatormanager")
+  val emanager = context.system.actorFor(
+    "akka://clasp@" + serverip + ":2552/user/emulatormanager")
 
   override def postStop = {
     info(s"Stopping emulator ${self.path}")
-    
+
     // TODO can we stop politely by sending a command to the emulator? 
     process.destroy
     process.exitValue // block until destroyed
@@ -126,9 +131,8 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
   
   override def preStart() {
     var me: ActorRef = self
-    import ExecutionContext.Implicits.global
+    implicit val system = context.system
     val f = future {
-      implicit val system = context.system
       info(s"Waiting for emulator $port to come online")
       if (false == sdk.wait_for_emulator(serialID, 200.second))
         throw new IllegalStateException("Emulator has not booted")
@@ -136,6 +140,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
       case Success(_) => {
         val bootTime = System.currentTimeMillis
         info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}");
+        system.scheduler.schedule(0 seconds, 1 seconds, self, "heartbeat");
         Thread.sleep(5000)
         emanager ! EmulatorReady(me) }
       case Failure(_) => { 
@@ -149,26 +154,39 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions, serverip: String) 
     case "get_serialID" => {
       sender ! serialID
     }
-    // TODO: Add the option to reboot and refresh an emulator. It's not 
-    // correct to ask the EmulatorActor to do this for us
-    // case "reboot" => {
-    // }
+    case "heartbeat" => {
+      // This heartbeat is sent every second and is initiated
+      // once the emulator has booted.
+      //
+      // Executing a command on the emulator shell provides a better
+      // mechanism to determine if the device is online
+      // than just making sure the process is alive.
+      val ret = future{ sdk.remote_shell(serialID, "echo", 5 seconds) }
+      ret onFailure {
+        case e => {
+          error(s"Emulator $serialID heartbeat failed. Destroying.")
+          // TODO: What if we're in the middle of a task?
+          context.stop(self)
+        }
+      }
+    }
     case EmulatorTask(id, callback) => {
       info(s"Performing task $id")
       val emu = new Emulator(serialID)
-      // TODO should this happen on a future so we don't block the receive loop?
-      try {
-        val data = callback(emu)
-        emanager ! TaskSuccess(id, data, self)
-      } catch {
-        case e:Exception => emanager ! TaskFailure(id, e, self)
+
+      val data = future{ callback(emu) }
+      data onSuccess {
+        case map => emanager ! TaskSuccess(id, map, self)
+      }
+      data onFailure {
+        case e: Exception => TaskFailure(id, e, self)
+        case t => error("Obtained a Throwable.")
       }
     }
     case _ => {
       info(s"EmulatorActor ${self.path} received unknown message")
     }
   }
-
 }
 
 /* Physical hardware */
@@ -219,4 +237,19 @@ object EmulatorBuilder {
   }
 }
 
+/*
+class EmulatorHeartbeat(serial: String, emu: ActorRef) extends Actor {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
 
+  def receive = {
+    case "ping" => {
+      info("Checking status.")
+      sender ! "pingFailure"
+    }
+    case _ => {
+      error("Heartbeat received unknown message.")
+    }
+  }
+}
+*/

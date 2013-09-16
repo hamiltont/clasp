@@ -1,16 +1,15 @@
-import com.typesafe.sbt.SbtStartScript             // Imports xsbt
-import AssemblyKeys._                              // Imports sbt-assembly keys
+import com.typesafe.sbt.SbtStartScript // Imports xsbt
+import AssemblyKeys._ // Imports sbt-assembly keys
 
-assemblySettings       // Appends sbt-assembly settings to build settings
+assemblySettings // Appends sbt-assembly settings to build settings
 
 seq(SbtStartScript.startScriptForClassesSettings: _*)
 
-name := "Clasp"        // Project name
+name := "Clasp" // Project name
 
-jarName in assembly := "Clasp-Assembly.jar"    // Name of fat jar built by sbt-assembly
+jarName in assembly := "Clasp-Assembly.jar" // Name of fat jar built by sbt-assembly
 
-test in assembly := {}                         // Informs sbt-assembly to not run tests 
-                                               // creating the fat jar
+test in assembly := {} // Don't run tests when creating the fat jar
 
 version := "1.0"
 
@@ -56,6 +55,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.1.2",
   "com.typesafe.akka" %% "akka-remote" % "2.1.2",
   "com.typesafe.akka" %% "akka-slf4j" % "2.1.2",
-  "ch.qos.logback" % "logback-classic" % "1.0.9",
-  "com.typesafe" % "config" % "1.0.0"
+  "com.typesafe.akka" %% "akka-testkit" % "2.1.2",
+  "ch.qos.logback" % "logback-classic" % "1.0.9"
 )

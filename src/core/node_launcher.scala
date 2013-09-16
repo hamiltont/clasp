@@ -37,7 +37,8 @@ import System.currentTimeMillis
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
-class NodeManger(val ip: String, val initial_workers: Int, manual_pool: Option[String] = None) extends Actor {
+class NodeManger(val ip: String, val initial_workers: Int,
+    manual_pool: Option[String] = None) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
@@ -62,7 +63,7 @@ class NodeManger(val ip: String, val initial_workers: Int, manual_pool: Option[S
   var outstanding: AtomicInteger = new AtomicInteger
 
   def monitoring: Receive = {
-    case NodeUp => { 
+    case NodeUp => {
       nodes += sender
       info(s"${nodes.length}: Node ${sender.path} has registered!")
       outstanding.decrementAndGet
@@ -148,11 +149,10 @@ class NodeManger(val ip: String, val initial_workers: Int, manual_pool: Option[S
       info(s"Starting $client_ip using $command")
       command.!! 
       outstanding.incrementAndGet
-    } } 
+    } }
 
     // Start in monitor mode.
     def receive = monitoring
-
 }
 sealed trait NM_Message
 case class Shutdown() extends NM_Message

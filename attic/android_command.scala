@@ -20,7 +20,7 @@ class AndroidCommand[T](val function: (() => T)) {
 
   private var _command_result: Option[T] = None
   private var _command_success: Option[Boolean] = None
-  private var _attached_watchers: List[CommandWatcher] = List()
+  //private var _attached_watchers: List[CommandWatcher] = List()
 
   def result =
     if (_command_success.getOrElse(false))
@@ -49,11 +49,13 @@ class AndroidCommand[T](val function: (() => T)) {
   }
 }
 
-class AsynchronousCommand[T](function: (() => T), val max_wait: Duration = Duration.Inf, val notify_targ: Option[ActorRef] = None)
+class AsynchronousCommand[T](function: (() => T),
+  val max_wait: Duration = Duration.Inf,
+  val notify_targ: Option[ActorRef] = None)
   extends AndroidCommand[T](function) {
   require(max_wait != null && notify_targ != null)
 
-  private var _watchers = List[CommandWatcher]()
+  //private var _watchers = List[CommandWatcher]()
   private val _started = new AtomicBoolean(false)
   private val _awoken = new AtomicBoolean(false)
   // Locks/condition variables are used so external events can fail
@@ -64,7 +66,7 @@ class AsynchronousCommand[T](function: (() => T), val max_wait: Duration = Durat
   private val _cond = _lock.newCondition()
 
   override def run() = synchronized {
-    var watchers_snapshot = _watchers
+    //var watchers_snapshot = _watchers
     var was_running = false
 
     // Wow, this looks awkward. We need to reset watchers_snapshot
@@ -75,7 +77,7 @@ class AsynchronousCommand[T](function: (() => T), val max_wait: Duration = Durat
     // them inside of the synchronized block. If I'm just derping really
     // hard and there's a better way to do this, *please* feel free to fix it.
     synchronized {
-      watchers_snapshot = _watchers
+      //watchers_snapshot = _watchers
       was_running = _started.getAndSet(true)
     }
 
@@ -99,12 +101,15 @@ class AsynchronousCommand[T](function: (() => T), val max_wait: Duration = Durat
       }
 
       // Fire off all monitors
+      /*
       for (w <- watchers_snapshot) {
         w.start_monitoring()
       }
+      */
     }
   }
 
+  /*
   def add_watcher(cmd_watcher: CommandWatcher, retroactive: Boolean = false) {
     var started_after_add = false
 
@@ -125,6 +130,7 @@ class AsynchronousCommand[T](function: (() => T), val max_wait: Duration = Durat
       cmd_watcher.start_monitoring()
     }
   }
+  */
 
   private def wake_up() {
     val was_awoken = _awoken.getAndSet(true)
@@ -185,7 +191,7 @@ object AsynchronousCommand {
     *  others - Other watchers to attach.
     * Guaranteed to return non-null.
     */
-  def fromString(str: String, timeout: FiniteDuration = 0 millis, others: Traversable[CommandWatcher] = null): 
+  def fromString(str: String, timeout: FiniteDuration = 0 millis):
       AsynchronousCommand[(Int, String)] = {
     val cmd = new AsynchronousCommand(() => 
       // This is done because calling command !! will throw a 
@@ -201,19 +207,18 @@ object AsynchronousCommand {
           (o: String) => out.append(o),
           (e: String) => out.append(e))
         str ! logger
-        (0, out.toString) 
+        (0, out.toString)
       } catch {
         case e: RuntimeException => 
           val match_rgx = """Nonzero exit value: (-?[0-9]+)""".r
           match_rgx findFirstIn e.getMessage match {
-            case Some(match_rgx(exit_str)) => 
-              val exit_code = Integer.parseInt(exit_str)
-              (exit_code, "")
+            case Some(match_rgx(exit_str)) => (Integer.parseInt(exit_str), "")
             case None => throw e
           }
       })
 
     // If the user wants a timeout, attach a TimedCommandWatcher
+    /*
     if(timeout > (0 millis)) {
       val watch = new TimedCommandWatcher(cmd, timeout)
       cmd.add_watcher(watch)
@@ -224,13 +229,14 @@ object AsynchronousCommand {
         cmd.add_watcher(v)
       }
     }
+    */
 
     cmd
   }
 
   // TODO: Remove duplicated code.
   def fromSeq(seq: Seq[String], timeout: FiniteDuration = 0 millis,
-      others: Traversable[CommandWatcher] = null): 
+      others: Traversable[CommandWatcher] = null):
       AsynchronousCommand[(Int, String)] = {
     val cmd = new AsynchronousCommand(() => 
       // This is done because calling command !! will throw a 
@@ -277,13 +283,9 @@ object AsynchronousCommand {
     * AsynchronousCommand.fromString(str, timeout, others). 
     */
   def resultOf(str: String, timeout: FiniteDuration = 0 millis,
-      others: Traversable[CommandWatcher] = null): Option[String] = {
+      others: Traversable[CommandWatcher] = null):
+      Option[String] = {
     val cmd = fromString(str, timeout, others)
-    /* TODO: Is this used?
-    val convert_fn = (tup: (Int, String)) => {
-      if (tup._1 == 0) Some(tup._2) else None
-    };
-    */
 
     val result = cmd.await().flatMap((tup) => 
       if (tup._1 == 0)
@@ -297,7 +299,8 @@ object AsynchronousCommand {
 
   // TODO: Remove duplicated cude. 
   def resultOfSeq(seq: Seq[String], timeout: FiniteDuration = 0 millis,
-      others: Traversable[CommandWatcher] = null): Option[String] = {
+      others: Traversable[CommandWatcher] = null):
+      Option[String] = {
     val cmd = fromSeq(seq, timeout, others)
     cmd.await().flatMap((tup) => 
       if (tup._1 == 0)
@@ -311,7 +314,8 @@ object AsynchronousCommand {
     * output upon completion.
     */
   def resultsOf(str: String, regex: Regex, timeout: FiniteDuration = 0 millis,
-      others: Traversable[CommandWatcher] = null): Option[Vector[String]] = {
+      others: Traversable[CommandWatcher] = null):
+      Option[Vector[String]] = {
     val res = resultOf(str, timeout, others)
     res.map((s: String) => { 
       val r = for (regex(name) <- regex.findAllIn(s)) yield name

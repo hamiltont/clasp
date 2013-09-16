@@ -49,7 +49,7 @@ object ClaspRunner extends App {
   // Setup some options for the emulator
   val opts = new EmulatorOptions
   opts.noWindow = true
-  
+
   // Create a new instance of the framework. There should be at least one
   // instance of Clasp started per computer in your cluster, although you
   // should probably let the master handle starting all of the workers.
@@ -69,7 +69,8 @@ object ClaspRunner extends App {
         result("node") = "hostname".!!.stripLineEnd
         
         sdk.install_package(emu.serialID,"examples/antimalware/Profiler.apk")
-        info("installed")
+        info("Installed.")
+
         result.toMap
       }
     )
@@ -79,7 +80,7 @@ object ClaspRunner extends App {
     f onFailure {
       case t => error(s"Future failed due to ${t.getMessage}")
     }
-    Thread.sleep(25000)
+    Thread.sleep(600000)
     clasp.kill
   } // End of clasp master logic
 }
@@ -283,67 +284,13 @@ class ClaspMaster(val conf: ClaspConf) {
 }
 
 /*
- * An object-oriented way to interface with an Actor. This caches multiple items 
- * from the emulator process underneath the actor, and therefore may become 
- * invalid if the emulator dies. We may want to avoid caching in the future and
- * just have this know how to ask the emulator for the right things
+ * An object-oriented way to interface with an Actor.
+ * This caches multiple items from the emulator process underneath the actor,
+ * and therefore may become invalid if the emulator dies.
+ * We may want to avoid caching in the future and just have this know how
+ * to ask the emulator for the right things
  */
 class Emulator(val serialID: String) extends Serializable {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
-
-  /*var serialID: Option[String] = _
-  {
-    val f = ask(emulatorActor, "get_serialID", 60000).mapTo[String]
-    serialID = Option(Await.result(f, 100 seconds))
-  }*/
-  //val serialID = Some("emulator-5554")
-
-  // TODO: Should we give the user this kind of control over the emulator?
-  // If so, should the emulator notify the emulator manager
-  // it's going offline and then online?
-  /*
-  def restart = {
-    emulatorActor ! "restart"
-  }
-  
-  def installApk(path: String, setBusy: Boolean = true) {
-    info(s"Installing package: $path.")
-    val f = ask(emulatorActor, Execute(() =>
-      sdk.install_package(serialID.get, path)),
-      Timeout(1, TimeUnit.MINUTES)).mapTo[Option[String]]
-    Await.result(f, Duration.Inf)
-    
-  }
-
-  def remoteShell(cmd: String): Option[String] = {
-    info(s"Sending command: $cmd.")
-    val f = ask(emulatorActor, Execute(() =>
-      sdk.remote_shell(serialID.get, cmd)),
-      Timeout(10, TimeUnit.MINUTES)).mapTo[Option[String]]
-    return Await.result(f, Duration.Inf)
-  }
-
-  def pull(remotePath: String, localPath: String): Option[String] = {
-    info(s"Pulling '$remotePath' to '$localPath'")
-    val f = ask(emulatorActor, Execute(() =>
-      sdk.pull_from_device(serialID.get, remotePath, localPath)),
-      Timeout(1, TimeUnit.MINUTES)).mapTo[Option[String]]
-    return Await.result(f, Duration.Inf)
-  }
-
-  def startActivity(mainActivity: String): Option[String] = {
-    info(s"Starting activity: $mainActivity.")
-    val amStart = s"am start -a android.intent.action.MAIN -n $mainActivity"
-    val f = ask(emulatorActor, Execute(() =>
-      sdk.remote_shell(serialID.get, amStart)),
-      Timeout(1, TimeUnit.MINUTES)).mapTo[Option[String]]
-    return Await.result(f, Duration.Inf)
-  }
-
-  def stopPackage(name: String): Option[String] = {
-    info(s"Stopping package: $name")
-   emulatorActor ! Execute(() =>
-      sdk.remote_shell(serialID.get, s"""am force-stop "$name" """))
-  }*/
 }
