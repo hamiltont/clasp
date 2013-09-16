@@ -65,6 +65,10 @@ class EmulatorManager extends Actor {
       emulators -= emu
       info(s"Emulator failed to boot: ${emu.path}")
     }
+    case EmulatorCrashed(emu) => {
+      emulators -= emu
+      info(s"Emulator crashed: ${emu.path}")
+    }
     case QueueEmulatorTask(task, promise) => {
       // Note that this is not strictly threadsafe.
       // Consider using twitter's snowflake library
@@ -92,6 +96,7 @@ class EmulatorManager extends Actor {
 }
 case class EmulatorReady(emu: ActorRef)
 case class EmulatorFailed(emu: ActorRef)
+case class EmulatorCrashed(emu: ActorRef)
 case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
 case class QueueEmulatorTask(function: Emulator => Map[String, Any], promise: Promise[Map[String,Any]])
 // TODO can I make Any require serializable? 
@@ -125,8 +130,6 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
     process.destroy
     process.exitValue // block until destroyed
     info(s"Emulator ${self.path} stopped")
-    
-    emanager ! EmulatorFailed(self)
   }
   
   override def preStart() {
@@ -146,6 +149,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
       case Failure(_) => { 
         val failTime = System.currentTimeMillis
         info(s"Emulator $port failed to boot. Reported failure at $failTime, took ${failTime - buildTime}");    
+        emanager ! EmulatorFailed(self)
         context.stop(self)}
     }
   }
@@ -163,8 +167,16 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
       // than just making sure the process is alive.
       info(s"Sending heartbeat to $serialID.")
       val ret = future{ sdk.remote_shell(serialID, "echo", 5 seconds) }
-      ret onFailure {
-        case e => {
+      ret onComplete {
+        case Success(out) => {
+          if (out.isEmpty) {
+            // TODO: What if we're in the middle of a task?
+            error(s"Emulator $serialID heartbeat failed. Destroying.")
+            emanager ! EmulatorCrashed(self)
+            context.stop(self)
+          }
+        }
+        case Failure(e) => {
           error(s"Emulator $serialID heartbeat failed. Destroying.")
           // TODO: What if we're in the middle of a task?
           context.stop(self)
@@ -180,7 +192,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
         case map => emanager ! TaskSuccess(id, map, self)
       }
       data onFailure {
-        case e: Exception => TaskFailure(id, e, self)
+        case e: Exception => emanager ! TaskFailure(id, e, self)
         case t => error("Obtained a Throwable.")
       }
     }
@@ -237,20 +249,3 @@ object EmulatorBuilder {
     return sdk.start_emulator(avdName, port, opts);
   }
 }
-
-/*
-class EmulatorHeartbeat(serial: String, emu: ActorRef) extends Actor {
-  lazy val log = LoggerFactory.getLogger(getClass())
-  import log.{error, debug, info, trace}
-
-  def receive = {
-    case "ping" => {
-      info("Checking status.")
-      sender ! "pingFailure"
-    }
-    case _ => {
-      error("Heartbeat received unknown message.")
-    }
-  }
-}
-*/

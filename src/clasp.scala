@@ -83,7 +83,7 @@ object ClaspRunner extends App {
     f onFailure {
       case t => error(s"Future failed due to ${t.getMessage}")
     }
-    Thread.sleep(25000)
+    Thread.sleep(600000)
     clasp.kill
   } // End of clasp master logic
 }
