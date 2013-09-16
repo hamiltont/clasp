@@ -18,5 +18,6 @@ mkdir -p $LOG_DIR
 
 while read LINE; do
   echo "Syncing $LINE."
-  rsync -zvr --exclude '*.img' $LINE:/tmp/clasp $LOG_DIR/$LINE
+  rsync -zvr --exclude '*.img' --exclude '*.lock' \
+    $LINE:/tmp/clasp $LOG_DIR/$LINE
 done < $IPS
