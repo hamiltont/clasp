@@ -42,7 +42,7 @@ object sdk extends AndroidProxy
         // TODO create get_property method in proxy_adb, and create separate parser functions for each property
         val command:String = s"$adb -s $serialID shell getprop dev.bootcomplete"
         val command2 = s"$adb -s $serialID shell getprop sys.boot_completed" 
-        val command3 = s"$adb -s $serialID shell getprop init.svc.bootanim"
+        //val command3 = s"$adb -s $serialID shell getprop init.svc.bootanim"
         val timeout = system.scheduler.scheduleOnce(max_wait, self,
           "timeout")
         var resultActor: ActorRef = null
@@ -53,10 +53,10 @@ object sdk extends AndroidProxy
             err => outbuffer.append(err))
           Process(command).!(logger)
           Process(command2).!(logger)
-          Process(command3).!(logger)
+          //Process(command3).!(logger)
           val out = outbuffer.toString
 
-          if (out.contains("1") || out.contains("running")) {
+          if (out.contains("1")) {
             timeout.cancel
             resultActor ! true
           } else 
