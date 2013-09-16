@@ -161,6 +161,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
       // Executing a command on the emulator shell provides a better
       // mechanism to determine if the device is online
       // than just making sure the process is alive.
+      info(s"Sending heartbeat to $serialID.")
       val ret = future{ sdk.remote_shell(serialID, "echo", 5 seconds) }
       ret onFailure {
         case e => {

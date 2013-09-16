@@ -5,9 +5,15 @@ import scala.concurrent.duration._
 import scala.sys.process._
 import scala.util.matching.Regex
 
+import org.slf4j.LoggerFactory
+
 object Command {
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{error, debug, info, trace}
+
   def run(command: String, timeout: FiniteDuration = 0 seconds,
       killSignal: Int = 9): Option[String] = {
+    info(s"Executing '$command'")
     val out = new StringBuilder
     val logger = ProcessLogger(
       (o: String) => out.append(o),
@@ -17,6 +23,7 @@ object Command {
       } else {
         command ! logger
       }
+    info(s"Finished executing'$command'")
     if (ret != 0) {
       return None
     } else {
