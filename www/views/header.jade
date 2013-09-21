@@ -1,0 +1,26 @@
+div.navbar.navbar-inverse.navbar-fixed-top
+  div.navbar-inner
+    div.container
+      a.btn.btn-navbar(data-toggle="collapse",
+          data-target=".nav-collapse")
+        span.icon-bar
+        span.icon-bar
+        span.icon-bar
+      a.brand(href="#") Clasp
+      div.nav-collapse.collapse
+        ul.nav
+          li.active: a(href="#") Home
+          li: a(href="#aboutModal",data-toggle="modal") About
+
+div(id="aboutModal",class="modal hide fade")
+  div(class="modal-header")
+    butten(type="button",class="close",data-dismiss="modal",
+      aria-hidden="true") &times
+    h3 About Clasp
+  div(class="modal-body")
+    :markdown
+      Clasp is developed by the
+      [Magnum Research Group](http://www.magnum.io)
+      at [Virginia Tech](http://vt.edu).
+  div(class="modal-footer")
+    button(class="btn",data-dismiss="modal") Close

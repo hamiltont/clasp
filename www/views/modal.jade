@@ -1,0 +1,8 @@
+mixin modal(id)
+  div(id=${id},class="modal hide fade")
+    div(class="modal-header")
+      butten(type="button",class="close",data-dismiss="modal",
+        aria-hidden="true") &times
+      h3 Modal header
+    div(class="modal-body"): p Body.
+    div(class="modal-footer"): a(href="#") Close
