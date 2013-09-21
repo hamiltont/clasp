@@ -23,6 +23,8 @@
   run tasks across a full factorial or LHS of configuration options.
 + Add the option to return logcat output of emulators.
 + Network traffic redirection through tor.
++ A script to bundle files for distribution.
++ Create obfuscated jar with sbt-proguard.
 
 ## Low priority.
 + Make script to start a virtual X11 server and VNC on any node.
@@ -78,12 +80,12 @@
 + Resource consumption
   + Memory of scala - Single node vs emulators.
   + Network latency - Heartbeat/1s
-+ Limit Java heap size with sbt stage.
-
-# Noah
 + Rebooting
   + Add the functionality within EmulatorActor to restart an emulator.
   + Once we have rebooting, add a flag to wipe the device when
     rebooting, and test this thoroughly.
     I've had issues wiping an entire device before.
     Reset system and user information.
+
+# Completed
+
