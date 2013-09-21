@@ -1,0 +1,42 @@
+// 1) Set SDK root to equal your root (include the final backslash in the path)
+// 2) Rename this file as application.conf
+
+// Methods that do not work
+//   "${sdk.root}tools/emulator" => The substitution will not be evaluated
+//   ${sdk.root} "tools/emulator" => The space between substitution and value will be included
+//   ${sdk.root} + "tools/emulator" => The '+' operator is not understood
+
+sdk {
+  root      = ##ANDROID_ROOT##
+  aapt      = ${sdk.root}platform-tools/aapt
+  adb       = ${sdk.root}platform-tools/adb
+  android   = ${sdk.root}tools/android
+  emulator  = ${sdk.root}tools/emulator
+  mksdcard  = ${sdk.root}tools/mksdcard
+}
+
+akka {
+  actor {
+    provider = "akka.remote.RemoteActorRefProvider"
+  }
+
+  log-config-on-start = off
+
+  remote {
+    log-received-messages = on
+
+    log-sent-messages = on
+
+    command-ack-timeout = 3 s
+
+    connection-timeout = 12 s
+
+    remote-daemon-ack-timeout = 5s
+
+    transport = "akka.remote.netty.NettyRemoteTransport"
+
+    netty {
+      port = 2552
+    }
+  }
+}

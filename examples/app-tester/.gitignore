@@ -1,0 +1,4 @@
+target/
+project/target
+src/main/resources/application.conf
+output/

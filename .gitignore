@@ -1,6 +1,7 @@
 .settings/
 .cache
 
+*.classp
 *.swp
 target/*
 .nfs*
