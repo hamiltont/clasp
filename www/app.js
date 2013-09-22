@@ -1,19 +1,17 @@
-var express = require('express'),
-    routes = require('./routes'),
-    http = require('http'),
-    path = require('path'),
-    auth = require('http-auth');
+var port = 9090;
+var express = require('express'), app = express(), http = require('http'),
+    path = require('path'), auth = require('http-auth'),
+    server = http.createServer(app), io = require('socket.io').listen(server);
+var config = require('./config'), routes = require('./routes'),
+    claspDash = require('./dashboard');
 
-var basicAuth = auth.basic({
+app.use(auth.connect(auth.basic({
   realm: "Clasp",
   file: __dirname + "/users.htpasswd",
-});
-
-var app = express();
-app.use(auth.connect(basicAuth));
+})));
 
 app.configure(function(){
-  app.set('port', process.env.PORT || 9090);
+  app.set('port', port);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.logger('dev'));
@@ -31,7 +29,12 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 app.get('/doc', routes.doc);
+app.get('/dashboard', routes.dashboard);
 
-http.createServer(app).listen(app.get('port'), function(){
+server.listen(port, function(){
   console.log("Express server listening on port " + app.get('port'));
+});
+
+io.sockets.on('connection', function(socket) {
+  socket.emit('server', claspDash.getStatus(config['servers']));
 });
