@@ -1,0 +1,377 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>core - Clasp - clasp.core</title>
+          <meta name="description" content="core - Clasp - clasp.core" />
+          <meta name="keywords" content="core Clasp clasp.core" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      <script type="text/javascript" src="../../lib/modernizr.custom.js"></script><script type="text/javascript" src="../../lib/diagrams.js" id="diagrams-js"></script>
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'clasp.core.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../lib/package_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="clasp">clasp</a></p>
+        <h1>core</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">core</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Provides abstractions for a device, emulator, and node.
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="clasp.core"><span>core</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="clasp.core.BootNode" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BootNodeextendsNM_MessagewithProductwithSerializable"></a>
+      <a id="BootNode:BootNode"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BootNode.html"><span class="name">BootNode</span></a><span class="params">()</span><span class="result"> extends <a href="NM_Message.html" class="extype" name="clasp.core.NM_Message">NM_Message</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.Device" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DeviceextendsAnyRef"></a>
+      <a id="Device:Device"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Device.html"><span class="name">Device</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.EmulatorActor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmulatorActorextendsActor"></a>
+      <a id="EmulatorActor:EmulatorActor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="EmulatorActor.html"><span class="name">EmulatorActor</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.EmulatorCrashed" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmulatorCrashedextendsProductwithSerializable"></a>
+      <a id="EmulatorCrashed:EmulatorCrashed"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="EmulatorCrashed.html"><span class="name">EmulatorCrashed</span></a><span class="params">(<span name="emu">emu: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.EmulatorFailed" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmulatorFailedextendsProductwithSerializable"></a>
+      <a id="EmulatorFailed:EmulatorFailed"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="EmulatorFailed.html"><span class="name">EmulatorFailed</span></a><span class="params">(<span name="emu">emu: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.EmulatorManager" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmulatorManagerextendsActor"></a>
+      <a id="EmulatorManager:EmulatorManager"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="EmulatorManager.html"><span class="name">EmulatorManager</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.EmulatorReady" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmulatorReadyextendsProductwithSerializable"></a>
+      <a id="EmulatorReady:EmulatorReady"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="EmulatorReady.html"><span class="name">EmulatorReady</span></a><span class="params">(<span name="emu">emu: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.EmulatorTask" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmulatorTaskextendsProductwithSerializable"></a>
+      <a id="EmulatorTask:EmulatorTask"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="EmulatorTask.html"><span class="name">EmulatorTask</span></a><span class="params">(<span name="taskid">taskid: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="task">task: (&lt;error&gt;) ⇒ <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.NM_Message" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NM_MessageextendsAnyRef"></a>
+      <a id="NM_Message:NM_Message"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="NM_Message.html"><span class="name">NM_Message</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.Node" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NodeextendsActor"></a>
+      <a id="Node:Node"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Node.html"><span class="name">Node</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.NodeBusy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NodeBusyextendsNM_MessagewithProductwithSerializable"></a>
+      <a id="NodeBusy:NodeBusy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="NodeBusy.html"><span class="name">NodeBusy</span></a><span class="params">(<span name="nodeid">nodeid: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="debuglog">debuglog: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="NM_Message.html" class="extype" name="clasp.core.NM_Message">NM_Message</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.NodeManger" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NodeMangerextendsActor"></a>
+      <a id="NodeManger:NodeManger"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NodeManger.html"><span class="name">NodeManger</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.NodeUp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NodeUpextendsNM_MessagewithProductwithSerializable"></a>
+      <a id="NodeUp:NodeUp"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="NodeUp.html"><span class="name">NodeUp</span></a><span class="params">()</span><span class="result"> extends <a href="NM_Message.html" class="extype" name="clasp.core.NM_Message">NM_Message</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.QueueEmulatorTask" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="QueueEmulatorTaskextendsProductwithSerializable"></a>
+      <a id="QueueEmulatorTask:QueueEmulatorTask"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="QueueEmulatorTask.html"><span class="name">QueueEmulatorTask</span></a><span class="params">(<span name="function">function: (&lt;error&gt;) ⇒ <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>, <span name="promise">promise: <span class="extype" name="scala.concurrent.Promise">Promise</span>[<span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.Shutdown" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ShutdownextendsNM_MessagewithProductwithSerializable"></a>
+      <a id="Shutdown:Shutdown"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Shutdown.html"><span class="name">Shutdown</span></a><span class="params">()</span><span class="result"> extends <a href="NM_Message.html" class="extype" name="clasp.core.NM_Message">NM_Message</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.TaskFailure" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TaskFailureextendsProductwithSerializable"></a>
+      <a id="TaskFailure:TaskFailure"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="TaskFailure.html"><span class="name">TaskFailure</span></a><span class="params">(<span name="taskId">taskId: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="err">err: <span class="extype" name="scala.Exception">Exception</span></span>, <span name="emulator">emulator: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.TaskSuccess" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TaskSuccessextendsProductwithSerializable"></a>
+      <a id="TaskSuccess:TaskSuccess"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="TaskSuccess.html"><span class="name">TaskSuccess</span></a><span class="params">(<span name="taskId">taskId: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="data">data: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>, <span name="emulator">emulator: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="clasp.core.EmulatorBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmulatorBuilder"></a>
+      <a id="EmulatorBuilder:EmulatorBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EmulatorBuilder$.html"><span class="name">EmulatorBuilder</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.sdktools" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sdktools"></a>
+      <a id="sdktools:sdktools"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="sdktools/package.html"><span class="name">sdktools</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Provides an interface to the
+<a href="http://developer.android.com/tools/sdk/tools-notes.html" target="_blank">Android SDK Tools</a>.</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

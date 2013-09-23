@@ -1,0 +1,2082 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>sdk - Clasp - clasp.core.sdktools.sdk</title>
+          <meta name="description" content="sdk - Clasp - clasp.core.sdktools.sdk" />
+          <meta name="keywords" content="sdk Clasp clasp.core.sdktools.sdk" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      <script type="text/javascript" src="../../../lib/modernizr.custom.js"></script><script type="text/javascript" src="../../../lib/diagrams.js" id="diagrams-js"></script>
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'clasp.core.sdktools.sdk$';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../lib/object_big.png" />
+        <p id="owner"><a href="../../package.html" class="extype" name="clasp">clasp</a>.<a href="../package.html" class="extype" name="clasp.core">core</a>.<a href="package.html" class="extype" name="clasp.core.sdktools">sdktools</a></p>
+        <h1>sdk</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sdk</span><span class="result"> extends <a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a> with <a href="EmulatorProxy.html" class="extype" name="clasp.core.sdktools.EmulatorProxy">EmulatorProxy</a> with <a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a> with <a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a> with <a href="AaptProxy.html" class="extype" name="clasp.core.sdktools.AaptProxy">AaptProxy</a></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>The entire SDK tool facade!
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><a href="AaptProxy.html" class="extype" name="clasp.core.sdktools.AaptProxy">AaptProxy</a>, <a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a>, <a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a>, <a href="EmulatorProxy.html" class="extype" name="clasp.core.sdktools.EmulatorProxy">EmulatorProxy</a>, <a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="clasp.core.sdktools.sdk"><span>sdk</span></li><li class="in" name="clasp.core.sdktools.AaptProxy"><span>AaptProxy</span></li><li class="in" name="clasp.core.sdktools.TelnetProxy"><span>TelnetProxy</span></li><li class="in" name="clasp.core.sdktools.AdbProxy"><span>AdbProxy</span></li><li class="in" name="clasp.core.sdktools.EmulatorProxy"><span>EmulatorProxy</span></li><li class="in" name="clasp.core.sdktools.AndroidProxy"><span>AndroidProxy</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:AnyRef):Boolean"></a>
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:AnyRef):Boolean"></a>
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="clasp.core.sdktools.AaptProxy#aapt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="aapt:String"></a>
+      <a id="aapt:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">aapt</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AaptProxy.html" class="extype" name="clasp.core.sdktools.AaptProxy">AaptProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AaptProxy#aapt_dump" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="aapt_dump(flag:String,apk:String):String"></a>
+      <a id="aapt_dump(String,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">aapt_dump</span><span class="params">(<span name="flag">flag: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="apk">apk: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AaptProxy.html" class="extype" name="clasp.core.sdktools.AaptProxy">AaptProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#adb" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="adb:String"></a>
+      <a id="adb:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">adb</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#android" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="android:String"></a>
+      <a id="android:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">android</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#avd_start" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="avd_start(port:Int):Unit"></a>
+      <a id="avd_start(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">avd_start</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Start/restart the virtual device.</p><div class="fullcomment"><div class="comment cmt"><p>Start/restart the virtual device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#avd_stop" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="avd_stop(port:Int):Unit"></a>
+      <a id="avd_stop(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">avd_stop</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Stop the virtual device.</p><div class="fullcomment"><div class="comment cmt"><p>Stop the virtual device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#backup_device" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="backup_device(serial:String,file:String,apk:Boolean,sharedStorage:Boolean,all:Boolean,incSystem:Boolean,packages:String):Unit"></a>
+      <a id="backup_device(String,String,Boolean,Boolean,Boolean,Boolean,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">backup_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="apk">apk: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="sharedStorage">sharedStorage: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="all">all: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="incSystem">incSystem: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="packages">packages: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Write an archive of the device's data to disk.</p><div class="fullcomment"><div class="comment cmt"><p>Write an archive of the device's data to disk.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#cdma_capture_start" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cdma_capture_start(port:Int,file:String):Unit"></a>
+      <a id="cdma_capture_start(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cdma_capture_start</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Dump network packets to file.</p><div class="fullcomment"><div class="comment cmt"><p>Dump network packets to file.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#cdma_capture_stop" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cdma_capture_stop(port:Int):Unit"></a>
+      <a id="cdma_capture_stop(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cdma_capture_stop</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Stop dumping network packets.</p><div class="fullcomment"><div class="comment cmt"><p>Stop dumping network packets.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#cdma_ssource" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cdma_ssource(port:Int,ssource:String):Unit"></a>
+      <a id="cdma_ssource(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cdma_ssource</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="ssource">ssource: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">'cdma ssource &lt;ssource&gt;' allows you to specify where to read the subscription from</p><div class="fullcomment"><div class="comment cmt"><p>'cdma ssource &lt;ssource&gt;' allows you to specify where to read the subscription from</p><p>	nv: Read subscription from non-volatile RAM
+   ruim: Read subscription from RUIM
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#create_avd" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="create_avd(name1:String,target2:String,force1:Boolean):Boolean"></a>
+      <a id="create_avd(String,String,Boolean):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">create_avd</span><span class="params">(<span name="name1">name1: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="target2">target2: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="force1">force1: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a new Android Virtual Device with no ABI specified.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new Android Virtual Device with no ABI specified.
+ If multiple ABIs are found, default creat avd with ABI Name
+ 1) armeabi-v7a 2) armeabi 3) x86 4) first ABI listed.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#create_avd" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="create_avd(name:String,target:String,abiName:String,force:Boolean):Boolean"></a>
+      <a id="create_avd(String,String,String,Boolean):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">create_avd</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="abiName">abiName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="force">force: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a new Android Virtual Device.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new Android Virtual Device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#create_lib_project" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="create_lib_project(name:String,target:String,pkg:String,path:String):Unit"></a>
+      <a id="create_lib_project(String,String,String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">create_lib_project</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pkg">pkg: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a new Android library project.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new Android library project.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#create_project" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="create_project(name:String,target:String,path:String,pkg:String,activity:String):Unit"></a>
+      <a id="create_project(String,String,String,String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">create_project</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pkg">pkg: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="activity">activity: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a new Android project.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new Android project.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#create_test_project" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="create_test_project(path:String,name:String,main:String):Unit"></a>
+      <a id="create_test_project(String,String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">create_test_project</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="main">main: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a new Android project for a test package.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new Android project for a test package.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#create_uitest_project" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="create_uitest_project(name:String,path:String,target:String):Unit"></a>
+      <a id="create_uitest_project(String,String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">create_uitest_project</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Creates a new UI test project.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new UI test project.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#delete_avd" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="delete_avd(name:String):Boolean"></a>
+      <a id="delete_avd(String):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">delete_avd</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Deletes an Android Virtual Device.</p><div class="fullcomment"><div class="comment cmt"><p>Deletes an Android Virtual Device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#delete_snapshot" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="delete_snapshot(port:Int,name:String):Unit"></a>
+      <a id="delete_snapshot(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">delete_snapshot</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Delete snapshot state.</p><div class="fullcomment"><div class="comment cmt"><p>Delete snapshot state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.EmulatorProxy#emulator" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="emulator:String"></a>
+      <a id="emulator:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">emulator</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="EmulatorProxy.html" class="extype" name="clasp.core.sdktools.EmulatorProxy">EmulatorProxy</a></dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#forward_socket" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="forward_socket(serial:String,local:String,remote:String):Option[String]"></a>
+      <a id="forward_socket(String,String,String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">forward_socket</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="local">local: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="remote">remote: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Forward socket connections.</p><div class="fullcomment"><div class="comment cmt"><p>Forward socket connections.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#get_adb_version" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_adb_version:String"></a>
+      <a id="get_adb_version:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_adb_version</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_avd_name" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_avd_name(port:Int):String"></a>
+      <a id="get_avd_name(Int):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_avd_name</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Query virtual device name.</p><div class="fullcomment"><div class="comment cmt"><p>Query virtual device name.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#get_avd_names" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_avd_names:Vector[String]"></a>
+      <a id="get_avd_names:Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_avd_names</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Return the available Android Virtual Devices.</p><div class="fullcomment"><div class="comment cmt"><p>Return the available Android Virtual Devices.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_avd_snapshots" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_avd_snapshots(port:Int):Vector[String]"></a>
+      <a id="get_avd_snapshots(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_avd_snapshots</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List available state snapshots.</p><div class="fullcomment"><div class="comment cmt"><p>List available state snapshots.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_avd_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_avd_status(port:Int):String"></a>
+      <a id="get_avd_status(Int):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_avd_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Query virtual device status.</p><div class="fullcomment"><div class="comment cmt"><p>Query virtual device status.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_cdma_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_cdma_status(port:Int):Vector[String]"></a>
+      <a id="get_cdma_status(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_cdma_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Dump network status.</p><div class="fullcomment"><div class="comment cmt"><p>Dump network status.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A vector with the download speed and upload speed (in bits/s),
+        and the minimum and maximum latency (in ms).
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#get_device_list" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_device_list:Vector[String]"></a>
+      <a id="get_device_list:Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_device_list</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Return the current devices.</p><div class="fullcomment"><div class="comment cmt"><p>Return the current devices.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#get_devpath" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_devpath(serial:String):String"></a>
+      <a id="get_devpath(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_devpath</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Return the device path of the device.</p><div class="fullcomment"><div class="comment cmt"><p>Return the device path of the device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.EmulatorProxy#get_emulator_version" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_emulator_version:String"></a>
+      <a id="get_emulator_version:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_emulator_version</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="EmulatorProxy.html" class="extype" name="clasp.core.sdktools.EmulatorProxy">EmulatorProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_event_codes" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_event_codes(port:Int,typeStr:String):Vector[String]"></a>
+      <a id="get_event_codes(Int,String):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_event_codes</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="typeStr">typeStr: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List all code aliases for a given type.</p><div class="fullcomment"><div class="comment cmt"><p>List all code aliases for a given type.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_event_types" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_event_types(port:Int):Vector[String]"></a>
+      <a id="get_event_types(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_event_types</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List all type aliases.</p><div class="fullcomment"><div class="comment cmt"><p>List all type aliases.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_gsm_list" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_gsm_list(port:Int):Vector[String]"></a>
+      <a id="get_gsm_list(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_gsm_list</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List current phone calls.</p><div class="fullcomment"><div class="comment cmt"><p>List current phone calls.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#get_installed_packages" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_installed_packages(serial:String):Vector[String]"></a>
+      <a id="get_installed_packages(String):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_installed_packages</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Return the installed packages.</p><div class="fullcomment"><div class="comment cmt"><p>Return the installed packages.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#get_jdwp" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_jdwp(serial:String):Vector[String]"></a>
+      <a id="get_jdwp(String):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_jdwp</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List PIDs of processes hosting a JDWP transport.</p><div class="fullcomment"><div class="comment cmt"><p>List PIDs of processes hosting a JDWP transport.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_network_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_network_status(port:Int):Vector[String]"></a>
+      <a id="get_network_status(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_network_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Dump network status.</p><div class="fullcomment"><div class="comment cmt"><p>Dump network status.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A vector with the download speed and upload speed (in bits/s),
+        and the minimum and maximum latency (in ms).
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_power_state" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_power_state(port:Int):Vector[String]"></a>
+      <a id="get_power_state(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_power_state</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Display battery and charger state.</p><div class="fullcomment"><div class="comment cmt"><p>Display battery and charger state.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A vector with AC, status, health, present, and capacity
+        in indices 0-4.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_redir_list" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_redir_list(port:Int):Vector[String]"></a>
+      <a id="get_redir_list(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_redir_list</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List current redirections.</p><div class="fullcomment"><div class="comment cmt"><p>List current redirections.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#get_sdk" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_sdk:Vector[String]"></a>
+      <a id="get_sdk:Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_sdk</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Lists remote SDK repository.</p><div class="fullcomment"><div class="comment cmt"><p>Lists remote SDK repository.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_sensor_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_sensor_status(port:Int):Vector[String]"></a>
+      <a id="get_sensor_status(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_sensor_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List all sensors and their status.</p><div class="fullcomment"><div class="comment cmt"><p>List all sensors and their status.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A vector with the elements 'acceleration, magnetic-field,
+        orientation, temperature, proximity
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#get_sensor_val" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_sensor_val(port:Int,sensorName:String):String"></a>
+      <a id="get_sensor_val(Int,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_sensor_val</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="sensorName">sensorName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get sensor value.</p><div class="fullcomment"><div class="comment cmt"><p>Get sensor value.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.EmulatorProxy#get_snapshot_list" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_snapshot_list(avd_name:String):Vector[String]"></a>
+      <a id="get_snapshot_list(String):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_snapshot_list</span><span class="params">(<span name="avd_name">avd_name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Return a list of available snapshots.</p><div class="fullcomment"><div class="comment cmt"><p>Return a list of available snapshots.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="EmulatorProxy.html" class="extype" name="clasp.core.sdktools.EmulatorProxy">EmulatorProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#get_state" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_state(serial:String):String"></a>
+      <a id="get_state(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_state</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Return the state of the device.</p><div class="fullcomment"><div class="comment cmt"><p>Return the state of the device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#get_target_ABIs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_target_ABIs:Vector[Vector[String]]"></a>
+      <a id="get_target_ABIs:Vector[Vector[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_target_ABIs</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">List ABIs corresponding with each entry from the existing
+targets Vector.</p><div class="fullcomment"><div class="comment cmt"><p>List ABIs corresponding with each entry from the existing
+targets Vector.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#get_target_index" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_target_index(targetNameOrID:String):Option[Int]"></a>
+      <a id="get_target_index(String):Option[Int]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_target_index</span><span class="params">(<span name="targetNameOrID">targetNameOrID: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">get_target_index returns the target index of the specified target name
+or ID.</p><div class="fullcomment"><div class="comment cmt"><p>get_target_index returns the target index of the specified target name
+or ID. The index is in the list targetNames.
+If no index is found then an error message is returned.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#get_targets" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_targets:Vector[String]"></a>
+      <a id="get_targets:Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_targets</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Lists existing targets.</p><div class="fullcomment"><div class="comment cmt"><p>Lists existing targets.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.EmulatorProxy#get_webcam_list" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get_webcam_list(avd_name:String):Vector[String]"></a>
+      <a id="get_webcam_list(String):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get_webcam_list</span><span class="params">(<span name="avd_name">avd_name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Return a list of web cameras available for emulation.</p><div class="fullcomment"><div class="comment cmt"><p>Return a list of web cameras available for emulation.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="EmulatorProxy.html" class="extype" name="clasp.core.sdktools.EmulatorProxy">EmulatorProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#gsm_accept" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_accept(port:Int,number:String):Unit"></a>
+      <a id="gsm_accept(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_accept</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change the state of an outbound call to 'active'.</p><div class="fullcomment"><div class="comment cmt"><p>Change the state of an outbound call to 'active'.
+</p></div><dl class="paramcmts block"><dt class="param">number</dt><dd class="cmt"><p>The phone number format with only digits, '#', and '+'.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#gsm_busy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_busy(port:Int,number:String):Unit"></a>
+      <a id="gsm_busy(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_busy</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Close waiting outbound call as busy.</p><div class="fullcomment"><div class="comment cmt"><p>Close waiting outbound call as busy.
+</p></div><dl class="paramcmts block"><dt class="param">number</dt><dd class="cmt"><p>The phone number format with only digits, '#', and '+'.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#gsm_call" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_call(port:Int,number:String):Unit"></a>
+      <a id="gsm_call(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_call</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create inbound phone call.</p><div class="fullcomment"><div class="comment cmt"><p>Create inbound phone call.
+</p></div><dl class="paramcmts block"><dt class="param">number</dt><dd class="cmt"><p>The phone number format with only digits, '#', and '+'.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#gsm_cancel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_cancel(port:Int,number:String):Unit"></a>
+      <a id="gsm_cancel(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_cancel</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Disconnect an inbound or outbound phone call.</p><div class="fullcomment"><div class="comment cmt"><p>Disconnect an inbound or outbound phone call.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#gsm_data" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_data(port:Int,state:String):Unit"></a>
+      <a id="gsm_data(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_data</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="state">state: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Modify data connection state.</p><div class="fullcomment"><div class="comment cmt"><p>Modify data connection state.</p><p>Valid values for &lt;state&gt; are the following:</p><p>  unregistered    no network available
+  home            on local network, non-roaming
+  roaming         on roaming network
+  searching       searching networks
+  denied          emergency calls only
+  off             same as 'unregistered'
+  on              same as 'home'
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#gsm_hold" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_hold(port:Int,number:String):Unit"></a>
+      <a id="gsm_hold(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_hold</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change the state of an outbound call to 'held'
+</p><div class="fullcomment"><div class="comment cmt"><p>Change the state of an outbound call to 'held'
+</p></div><dl class="paramcmts block"><dt class="param">number</dt><dd class="cmt"><p>The phone number format with only digits, '#', and '+'.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#gsm_signal" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_signal(port:Int,rssi:Int,ber:Int):Unit"></a>
+      <a id="gsm_signal(Int,Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_signal</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="rssi">rssi: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">99</span></span>, <span name="ber">ber: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">99</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets the rssi and ber.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the rssi and ber.
+</p></div><dl class="paramcmts block"><dt class="param">rssi</dt><dd class="cmt"><p>range is 0..31 and 99 for unknown</p></dd><dt class="param">ber</dt><dd class="cmt"><p>range is 0..7 percent and 99 for unknown
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#gsm_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_status(port:Int):Vector[String]"></a>
+      <a id="gsm_status(Int):Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Return GSM status.</p><div class="fullcomment"><div class="comment cmt"><p>Return GSM status.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A Vector with the first element being the voice
+        status and the second being the data status.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#gsm_voice" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gsm_voice(port:Int,state:String):Unit"></a>
+      <a id="gsm_voice(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gsm_voice</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="state">state: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Modify voice connection state.</p><div class="fullcomment"><div class="comment cmt"><p>Modify voice connection state.</p><p>Valid values for &lt;state&gt; are the following:</p><p>  unregistered    no network available
+  home            on local network, non-roaming
+  roaming         on roaming network
+  searching       searching networks
+  denied          emergency calls only
+  off             same as 'unregistered'
+  on              same as 'home'
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#install_package" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="install_package(serial:String,apk_path:String,reinstall:Boolean):Option[String]"></a>
+      <a id="install_package(String,String,Boolean):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">install_package</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="apk_path">apk_path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="reinstall">reinstall: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Push a package file to the device and install it.</p><div class="fullcomment"><div class="comment cmt"><p>Push a package file to the device and install it.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#is_adb_available" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="is_adb_available:Option[String]"></a>
+      <a id="is_adb_available:Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">is_adb_available</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#kill_adb" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="kill_adb:Unit"></a>
+      <a id="kill_adb:Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">kill_adb</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Kill the <code>adb</code> server if it is running.</p><div class="fullcomment"><div class="comment cmt"><p>Kill the <code>adb</code> server if it is running.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#kill_emulator" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="kill_emulator(serial:String):Unit"></a>
+      <a id="kill_emulator(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">kill_emulator</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Kill an emulator's process.</p><div class="fullcomment"><div class="comment cmt"><p>Kill an emulator's process.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#load_snapshot" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="load_snapshot(port:Int,name:String):Unit"></a>
+      <a id="load_snapshot(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">load_snapshot</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Load snapshot state.</p><div class="fullcomment"><div class="comment cmt"><p>Load snapshot state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.sdk#log" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="log:&lt;error&gt;"></a>
+      <a id="log:&lt;error&gt;"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">log</span><span class="result">: &lt;error&gt;</span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.sdktools.AdbProxy#logcat_regex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logcat_regex(serial:String,regex:String):Unit"></a>
+      <a id="logcat_regex(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logcat_regex</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="regex">regex: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Blocks until a pattern is matched in logcat.</p><div class="fullcomment"><div class="comment cmt"><p>Blocks until a pattern is matched in logcat.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.EmulatorProxy#mksdcard" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="mksdcard(size:String,path:String):Unit"></a>
+      <a id="mksdcard(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mksdcard</span><span class="params">(<span name="size">size: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="EmulatorProxy.html" class="extype" name="clasp.core.sdktools.EmulatorProxy">EmulatorProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.EmulatorProxy#mksdcard" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="mksdcard:String"></a>
+      <a id="mksdcard:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mksdcard</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="EmulatorProxy.html" class="extype" name="clasp.core.sdktools.EmulatorProxy">EmulatorProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#move_avd" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="move_avd(name:String,path:String,newName:String):Boolean"></a>
+      <a id="move_avd(String,String,String):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">move_avd</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="newName">newName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Moves or renames an Android Virtual Device.</p><div class="fullcomment"><div class="comment cmt"><p>Moves or renames an Android Virtual Device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#network_capture_start" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="network_capture_start(port:Int,file:String):Unit"></a>
+      <a id="network_capture_start(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">network_capture_start</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Dump network packets to file.</p><div class="fullcomment"><div class="comment cmt"><p>Dump network packets to file.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#network_capture_stop" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="network_capture_stop(port:Int):Unit"></a>
+      <a id="network_capture_stop(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">network_capture_stop</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Stop dumping network packets.</p><div class="fullcomment"><div class="comment cmt"><p>Stop dumping network packets.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#power_ac_state" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="power_ac_state(port:Int,isOn:Boolean):Unit"></a>
+      <a id="power_ac_state(Int,Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">power_ac_state</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="isOn">isOn: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set AC charging state.</p><div class="fullcomment"><div class="comment cmt"><p>Set AC charging state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#power_capacity" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="power_capacity(port:Int,percentage:Int):Unit"></a>
+      <a id="power_capacity(Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">power_capacity</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="percentage">percentage: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set battery capacity state.</p><div class="fullcomment"><div class="comment cmt"><p>Set battery capacity state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#power_health" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="power_health(port:Int,status:String):Unit"></a>
+      <a id="power_health(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">power_health</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="status">status: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set battery health state.</p><div class="fullcomment"><div class="comment cmt"><p>Set battery health state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#power_present" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="power_present(port:Int,isPresent:Boolean):Unit"></a>
+      <a id="power_present(Int,Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">power_present</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="isPresent">isPresent: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set battery present state.</p><div class="fullcomment"><div class="comment cmt"><p>Set battery present state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#power_status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="power_status(port:Int,status:String):Unit"></a>
+      <a id="power_status(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">power_status</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="status">status: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set battery status.</p><div class="fullcomment"><div class="comment cmt"><p>Set battery status.
+</p></div><dl class="paramcmts block"><dt class="param">status</dt><dd class="cmt"><p>unknown|charging|discharging|not-charging|full&quot;
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#pull_from_device" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pull_from_device(serial:String,remotePath:String,localPath:String):Option[String]"></a>
+      <a id="pull_from_device(String,String,String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pull_from_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="remotePath">remotePath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="localPath">localPath: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Pull a file or directory from a device.</p><div class="fullcomment"><div class="comment cmt"><p>Pull a file or directory from a device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#push_to_device" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="push_to_device(serial:String,localPath:String,remotePath:String):Option[String]"></a>
+      <a id="push_to_device(String,String,String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">push_to_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="localPath">localPath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="remotePath">remotePath: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Push a file or directory to the device.</p><div class="fullcomment"><div class="comment cmt"><p>Push a file or directory to the device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#reboot_bootloader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="reboot_bootloader(serial:String):Option[String]"></a>
+      <a id="reboot_bootloader(String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reboot_bootloader</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Reboots the device into the bootloader.</p><div class="fullcomment"><div class="comment cmt"><p>Reboots the device into the bootloader.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#reboot_normal" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="reboot_normal(serial:String):Option[String]"></a>
+      <a id="reboot_normal(String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reboot_normal</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Reboots the device normally.</p><div class="fullcomment"><div class="comment cmt"><p>Reboots the device normally.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#reboot_recovery" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="reboot_recovery(serial:String):Option[String]"></a>
+      <a id="reboot_recovery(String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reboot_recovery</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Reboots the device into recovery mode.</p><div class="fullcomment"><div class="comment cmt"><p>Reboots the device into recovery mode.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#redir_add" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="redir_add(port:Int,protocol:String,hostPort:Int,devicePort:Int):Unit"></a>
+      <a id="redir_add(Int,String,Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">redir_add</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="protocol">protocol: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="hostPort">hostPort: <span class="extype" name="scala.Int">Int</span></span>, <span name="devicePort">devicePort: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Add new redirection.</p><div class="fullcomment"><div class="comment cmt"><p>Add new redirection.
+</p></div><dl class="paramcmts block"><dt class="param">protocol</dt><dd class="cmt"><p>tcp|udp
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#redir_del" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="redir_del(port:Int,protocol:String,hostPort:Int):Unit"></a>
+      <a id="redir_del(Int,String,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">redir_del</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="protocol">protocol: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="hostPort">hostPort: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Remove existing redirection.</p><div class="fullcomment"><div class="comment cmt"><p>Remove existing redirection.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#remote_emulator_console" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="remote_emulator_console(serial:String,emuCommand:String):Option[String]"></a>
+      <a id="remote_emulator_console(String,String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">remote_emulator_console</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="emuCommand">emuCommand: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Run an emulator console command.</p><div class="fullcomment"><div class="comment cmt"><p>Run an emulator console command.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#remote_shell" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="remote_shell(serial:String,shellCommand:String,timeout:scala.concurrent.duration.FiniteDuration):Option[String]"></a>
+      <a id="remote_shell(String,String,FiniteDuration):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">remote_shell</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="shellCommand">shellCommand: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="timeout">timeout: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span> = <span class="symbol">0 millis</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Run a remote shell command.</p><div class="fullcomment"><div class="comment cmt"><p>Run a remote shell command.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#remount_system" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="remount_system(serial:String):Option[String]"></a>
+      <a id="remount_system(String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">remount_system</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Remounts the <code>/system</code> partition on the device read-write.</p><div class="fullcomment"><div class="comment cmt"><p>Remounts the <code>/system</code> partition on the device read-write.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#restart_adb_root" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="restart_adb_root:Option[String]"></a>
+      <a id="restart_adb_root:Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">restart_adb_root</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Restart the <code>adbd</code> daemon with root permissions.</p><div class="fullcomment"><div class="comment cmt"><p>Restart the <code>adbd</code> daemon with root permissions.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#restart_adb_tcpip" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="restart_adb_tcpip(port:String):Option[String]"></a>
+      <a id="restart_adb_tcpip(String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">restart_adb_tcpip</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Restart the <code>adbd</code> daemon listening on TCP on the specified port.</p><div class="fullcomment"><div class="comment cmt"><p>Restart the <code>adbd</code> daemon listening on TCP on the specified port.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#restart_adb_usb" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="restart_adb_usb:Option[String]"></a>
+      <a id="restart_adb_usb:Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">restart_adb_usb</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Restart the <code>adbd</code> daemon listening on USB.</p><div class="fullcomment"><div class="comment cmt"><p>Restart the <code>adbd</code> daemon listening on USB.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#restore_device" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="restore_device(serial:String,file:String):Unit"></a>
+      <a id="restore_device(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">restore_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Restore device contents from the backup archive.</p><div class="fullcomment"><div class="comment cmt"><p>Restore device contents from the backup archive.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#run" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="run(cmd:String):(List[String],List[String],Int)"></a>
+      <a id="run(String):(List[String],List[String],Int)"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">run</span><span class="params">(<span name="cmd">cmd: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: (<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.Int">Int</span>)</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Run a command, collecting the stdout, stderr and exit status</p><div class="fullcomment"><div class="comment cmt"><p>Run a command, collecting the stdout, stderr and exit status</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#save_snapshot" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="save_snapshot(port:Int,name:String):Unit"></a>
+      <a id="save_snapshot(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">save_snapshot</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Save snapshot state.</p><div class="fullcomment"><div class="comment cmt"><p>Save snapshot state.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#send_event_text" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="send_event_text(port:Int,text:String):String"></a>
+      <a id="send_event_text(Int,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">send_event_text</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="text">text: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Simulate keystrokes from a given text.</p><div class="fullcomment"><div class="comment cmt"><p>Simulate keystrokes from a given text.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#send_geo_fix" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="send_geo_fix(port:Int,longitude:String,latitude:String,altitude:String,satellites:String):Unit"></a>
+      <a id="send_geo_fix(Int,String,String,String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">send_geo_fix</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="longitude">longitude: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="latitude">latitude: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="altitude">altitude: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="satellites">satellites: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send a simple GPS fix.</p><div class="fullcomment"><div class="comment cmt"><p>Send a simple GPS fix.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#send_geo_nmea" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="send_geo_nmea(port:Int,sentence:String):Unit"></a>
+      <a id="send_geo_nmea(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">send_geo_nmea</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="sentence">sentence: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send a GPS NMEA sentence.</p><div class="fullcomment"><div class="comment cmt"><p>Send a GPS NMEA sentence.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#send_hardware_event" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="send_hardware_event(port:Int,typeStr:String,code:String,value:String):String"></a>
+      <a id="send_hardware_event(Int,String,String,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">send_hardware_event</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="typeStr">typeStr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="code">code: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send a series of events to the kernel.</p><div class="fullcomment"><div class="comment cmt"><p>Send a series of events to the kernel.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#send_telnet_command" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="send_telnet_command(port:Int,command:String):String"></a>
+      <a id="send_telnet_command(Int,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">send_telnet_command</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="command">command: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send a telnet command to an Android device and return the output.</p><div class="fullcomment"><div class="comment cmt"><p>Send a telnet command to an Android device and return the output.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#set_cdma_delay" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set_cdma_delay(port:Int,value:String):Unit"></a>
+      <a id="set_cdma_delay(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set_cdma_delay</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change network latency.</p><div class="fullcomment"><div class="comment cmt"><p>Change network latency.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#set_cdma_speed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set_cdma_speed(port:Int,value:String):Unit"></a>
+      <a id="set_cdma_speed(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set_cdma_speed</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change network speed.</p><div class="fullcomment"><div class="comment cmt"><p>Change network speed.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#set_network_delay" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set_network_delay(port:Int,value:String):Unit"></a>
+      <a id="set_network_delay(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set_network_delay</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change network latency.</p><div class="fullcomment"><div class="comment cmt"><p>Change network latency.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#set_network_speed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set_network_speed(port:Int,value:String):Unit"></a>
+      <a id="set_network_speed(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set_network_speed</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change network speed.</p><div class="fullcomment"><div class="comment cmt"><p>Change network speed.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#set_sensor_val" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set_sensor_val(port:Int,sensorName:String,value:String):Unit"></a>
+      <a id="set_sensor_val(Int,String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set_sensor_val</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="sensorName">sensorName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set sensor value.</p><div class="fullcomment"><div class="comment cmt"><p>Set sensor value.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#sms_pdu" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sms_pdu(port:Int,hex:String):Unit"></a>
+      <a id="sms_pdu(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sms_pdu</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="hex">hex: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">'sms pdu &lt;hexstring&gt;' allows you to simulate a new inbound sms PDU
+(used internally when one emulator sends SMS messages to another instance).</p><div class="fullcomment"><div class="comment cmt"><p>'sms pdu &lt;hexstring&gt;' allows you to simulate a new inbound sms PDU
+(used internally when one emulator sends SMS messages to another instance).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#sms_send" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sms_send(port:Int,number:String,message:String):Unit"></a>
+      <a id="sms_send(Int,String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sms_send</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="number">number: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">'sms send &lt;phonenumber&gt; &lt;message&gt;' allows you to simulate a new
+inbound sms message.</p><div class="fullcomment"><div class="comment cmt"><p>'sms send &lt;phonenumber&gt; &lt;message&gt;' allows you to simulate a new
+inbound sms message.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#start_adb" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="start_adb:Unit"></a>
+      <a id="start_adb:Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">start_adb</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Ensure the <code>adb</code> server is running.</p><div class="fullcomment"><div class="comment cmt"><p>Ensure the <code>adb</code> server is running.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.EmulatorProxy#start_emulator" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="start_emulator(avd_name:String,port:Int,opts:clasp.core.sdktools.EmulatorOptions):(scala.sys.process.Process,String)"></a>
+      <a id="start_emulator(String,Int,EmulatorOptions):(Process,String)"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">start_emulator</span><span class="params">(<span name="avd_name">avd_name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="opts">opts: <a href="EmulatorOptions.html" class="extype" name="clasp.core.sdktools.EmulatorOptions">EmulatorOptions</a> = <span class="symbol">null</span></span>)</span><span class="result">: (<span class="extype" name="scala.sys.process.Process">Process</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Start an emulator with the given options.</p><div class="fullcomment"><div class="comment cmt"><p>Start an emulator with the given options.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="EmulatorProxy.html" class="extype" name="clasp.core.sdktools.EmulatorProxy">EmulatorProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#sync_to_device" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sync_to_device(serial:String,directory:String):Option[String]"></a>
+      <a id="sync_to_device(String,String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sync_to_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="directory">directory: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Copy from host to device only if changed.</p><div class="fullcomment"><div class="comment cmt"><p>Copy from host to device only if changed.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#tcpip_connect" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tcpip_connect(host:String,port:String):Option[String]"></a>
+      <a id="tcpip_connect(String,String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tcpip_connect</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Connect to the device via TCP/IP.</p><div class="fullcomment"><div class="comment cmt"><p>Connect to the device via TCP/IP.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#tcpip_disconnect" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tcpip_disconnect(host:String,port:String):Option[String]"></a>
+      <a id="tcpip_disconnect(String,String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tcpip_disconnect</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Disconnect from the device via TCP/IP.</p><div class="fullcomment"><div class="comment cmt"><p>Disconnect from the device via TCP/IP.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.TelnetProxy#telnet_kill" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="telnet_kill(port:Int):Unit"></a>
+      <a id="telnet_kill(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">telnet_kill</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Kill the emulator instance.</p><div class="fullcomment"><div class="comment cmt"><p>Kill the emulator instance.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#uninstall_package" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="uninstall_package(serial:String,pkg:String,keepData:Boolean):Option[String]"></a>
+      <a id="uninstall_package(String,String,Boolean):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">uninstall_package</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pkg">pkg: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="keepData">keepData: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Remove a package from a device.</p><div class="fullcomment"><div class="comment cmt"><p>Remove a package from a device.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#update_adb" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="update_adb:Unit"></a>
+      <a id="update_adb:Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update_adb</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Updates <code>adb</code> to support the USB devices declared in the SDK add-ons.</p><div class="fullcomment"><div class="comment cmt"><p>Updates <code>adb</code> to support the USB devices declared in the SDK add-ons.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#update_avd" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="update_avd(name:String):Unit"></a>
+      <a id="update_avd(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update_avd</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Updates an Android Virtual Device to match the folders
+of a new SDK.</p><div class="fullcomment"><div class="comment cmt"><p>Updates an Android Virtual Device to match the folders
+of a new SDK.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#update_lib_project" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="update_lib_project(path:String,target:String):Unit"></a>
+      <a id="update_lib_project(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update_lib_project</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Updates an Android library project.</p><div class="fullcomment"><div class="comment cmt"><p>Updates an Android library project. Must already have an
+<code>AndroidManifest.xml</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#update_project" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="update_project(path:String,library:String,name:String,target:String,subprojects:Boolean):Unit"></a>
+      <a id="update_project(String,String,String,String,Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update_project</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="library">library: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="target">target: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="subprojects">subprojects: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Updates an Android project.</p><div class="fullcomment"><div class="comment cmt"><p>Updates an Android project. Must already have
+an <code>AndroidManifest.xml</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#update_sdk" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="update_sdk(filter:String,noHttps:Boolean,all:Boolean,force:Boolean):Unit"></a>
+      <a id="update_sdk(String,Boolean,Boolean,Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update_sdk</span><span class="params">(<span name="filter">filter: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="noHttps">noHttps: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="all">all: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="force">force: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Updates the SDK by suggesting new platforms to install if available.</p><div class="fullcomment"><div class="comment cmt"><p>Updates the SDK by suggesting new platforms to install if available.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.AndroidProxy#update_test_project" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="update_test_project(main:String,path:String):Unit"></a>
+      <a id="update_test_project(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update_test_project</span><span class="params">(<span name="main">main: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Updates the Android project for a test package.</p><div class="fullcomment"><div class="comment cmt"><p>Updates the Android project for a test package. Must already
+have an <code>AndroidManifest.xml</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="clasp.core.sdktools.AdbProxy#wait_for_device" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait_for_device(serial:String):Unit"></a>
+      <a id="wait_for_device(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait_for_device</span><span class="params">(<span name="serial">serial: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Block until device is online.</p><div class="fullcomment"><div class="comment cmt"><p>Block until device is online.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></dd></dl></div>
+    </li><li name="clasp.core.sdktools.sdk#wait_for_emulator" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="wait_for_emulator(serialID:String,max_wait:scala.concurrent.duration.FiniteDuration)(implicitsystem:akka.actor.ActorSystem):Boolean"></a>
+      <a id="wait_for_emulator(String,FiniteDuration)(ActorSystem):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait_for_emulator</span><span class="params">(<span name="serialID">serialID: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="max_wait">max_wait: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span> = <span class="symbol">35.second</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="system">system: <span class="extype" name="akka.actor.ActorSystem">ActorSystem</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="clasp.core.sdktools.TelnetProxy#window_scale" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="window_scale(port:Int,scale:String):Unit"></a>
+      <a id="window_scale(Int,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">window_scale</span><span class="params">(<span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="scale">scale: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change the window scale.</p><div class="fullcomment"><div class="comment cmt"><p>Change the window scale.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="clasp.core.sdktools.AaptProxy">
+              <h3>Inherited from <a href="AaptProxy.html" class="extype" name="clasp.core.sdktools.AaptProxy">AaptProxy</a></h3>
+            </div><div class="parent" name="clasp.core.sdktools.TelnetProxy">
+              <h3>Inherited from <a href="TelnetProxy.html" class="extype" name="clasp.core.sdktools.TelnetProxy">TelnetProxy</a></h3>
+            </div><div class="parent" name="clasp.core.sdktools.AdbProxy">
+              <h3>Inherited from <a href="AdbProxy.html" class="extype" name="clasp.core.sdktools.AdbProxy">AdbProxy</a></h3>
+            </div><div class="parent" name="clasp.core.sdktools.EmulatorProxy">
+              <h3>Inherited from <a href="EmulatorProxy.html" class="extype" name="clasp.core.sdktools.EmulatorProxy">EmulatorProxy</a></h3>
+            </div><div class="parent" name="clasp.core.sdktools.AndroidProxy">
+              <h3>Inherited from <a href="AndroidProxy.html" class="extype" name="clasp.core.sdktools.AndroidProxy">AndroidProxy</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

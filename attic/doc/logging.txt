@@ -60,6 +60,3 @@ class MyClass {
 
 Log messages look like this: 
 23:57:30.148 [main] ERROR core.sdk_config$ - test
-
-    
- 

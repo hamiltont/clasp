@@ -9,7 +9,14 @@ block content
     div(id='toc')
     hr
     div(id='contents')
-      include doc-contents
+      :markdown
+      include doc/getting-started.md
+      include doc/cluster-setup.md
+      include doc/sbt.md
+      include doc/scaladoc-ref.md
+
+      include doc/webapp-config.md
+      include doc/logging.md
 
     // http://stackoverflow.com/questions/16152641   
     script(type='text/javascript').
@@ -37,8 +44,11 @@ block content
                 toc += "<li><a href=\"#" + anchor + "\">" + titleText
                   + "</a></li>";
 
-                return "<h" + openLevel + "><a name=\"" + anchor + "\">"
-                  + titleText + "</a></h" + closeLevel + ">";
+                return "<h" + openLevel + ">"+
+                  "<a name=\"" + anchor + 
+                  "\" style='color:inherit;text-decoration: none;" +
+                  "padding-top: 50px; margin-top: -50px'>" +
+                  titleText + "</a></h" + closeLevel + ">";
               }
             );
 
