@@ -51,7 +51,7 @@ object Driver {
     //       Even ctrl+C was blocked. I'm not sure what happened.
     var previousNumTested = 0; var count = 0;
     var minutesToTimeout = 10;
-    println("Waiting for applications to finish profiling.")
+    println("Waiting for applications to finish testing.")
     println("If nothing changes in " + minutesToTimeout + " minute(s), " +
       "assume we timed out and exit.")
     while (numTested.get < totalToTest) {
