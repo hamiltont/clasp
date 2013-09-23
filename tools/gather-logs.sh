@@ -27,3 +27,5 @@ while read IP; do
     done
     rm -rf $LOG_DIR/$IP
 done < $IPS
+
+rm -rf $LOG_DIR/\*
