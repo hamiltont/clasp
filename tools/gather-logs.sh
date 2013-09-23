@@ -16,8 +16,14 @@ IPS=$1
 
 mkdir -p $LOG_DIR
 
-while read LINE; do
-  echo "Syncing $LINE."
+while read IP; do
+  echo "Syncing $IP."
   rsync -zvr --exclude '*.img' --exclude '*.lock' \
-    $LINE:/tmp/clasp $LOG_DIR/$LINE
+    $IP:/tmp/clasp $LOG_DIR/$IP
+    for USER_PATH in $LOG_DIR/$IP/clasp/*; do
+      USER=$(basename $USER_PATH)
+      mkdir -p $LOG_DIR/$USER
+      mv "$LOG_DIR/$IP/clasp/$USER/nohup.$IP" "$LOG_DIR/$USER/"
+    done
+    rm -rf $LOG_DIR/$IP
 done < $IPS
