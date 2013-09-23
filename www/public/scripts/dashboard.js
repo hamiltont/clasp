@@ -14,7 +14,7 @@ function refresh() {
 
 window.setInterval(function() {
   refresh()
-}, 30000);
+}, 10000);
 
 socket.on('serverRegister', function(serverName) {
   servers[serverName] = {'name': serverName};
@@ -41,6 +41,11 @@ socket.on('serverClasp', function(data) {
   redraw();
 });
 
+socket.on('serverEmu', function(data) {
+  servers[data['server']]['emu'] = data['emu'];
+  redraw();
+});
+
 socket.on('killClasp', function(data) {
   console.log(data);
 });
@@ -53,6 +58,7 @@ function redraw() {
       "<td><b>Pingable</b></td>" +
       "<td><b>ssh-able</b></td>" +
       "<td><b>Clasp running?</b></td>" +
+      "<td><b>Emulators</b></td>" +
     "</tr>";
   var serversLength = servers.length;
   for (var i in servers) {
@@ -62,8 +68,23 @@ function redraw() {
   $('#server-table').html(newHtml);
 }
 
+function killAllClasp() {
+  for (var i in servers) {
+    if (servers[i]['clasp'] === "Yes")  {
+      console.log("Killing " + i);
+      killClasp(i);
+    }
+  }
+}
+
 function killClasp(server) {
   socket.emit("killClasp", server);
+}
+
+function killAllEmu() {
+  for (var i in servers) {
+    socket.emit("killEmu", i);
+  }
 }
 
 $(function() {

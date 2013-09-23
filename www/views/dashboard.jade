@@ -14,16 +14,22 @@ block content
       td: {{ clasp }} 
         | {{#ifOn clasp }}
         font(size='-2') (
-          a(onclick="killClasp('{{ name }}')",href="#") Kill?
+          a(onclick="killClasp('{{ name }}'); return false;",href="#") Kill?
           | )
         | {{/ifOn}}
+      td: {{ emu }} 
   script(type='text/javascript')
     serverTmpl = Handlebars.compile($('#server-item').html())
   div.container
     h1 Clasp Dashboard
     ul
       li Start Clasp by clicking on a row.
-      li: a(onclick='refresh()',href='#') Refresh
+      li
+        a(onclick='refresh(); return false;',href='#') Refresh
+        | | 
+        a(onclick='killAllClasp(); return false;',href='#') Kill all Clasp
+        | | 
+        a(onclick='killAllEmu(); return false;',href='#') Kill all Emulators
     div(id='server-table')
   script(src='/socket.io/socket.io.js')
   script(src='/scripts/dashboard.js')

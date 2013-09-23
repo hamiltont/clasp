@@ -54,5 +54,9 @@ io.sockets.on('connection', function(socket) {
   socket.on('killClasp', function(server) {
     claspDash.killClasp(socket, server, servers);
   });
+
+  socket.on('killEmu', function(server) {
+    claspDash.killEmu(socket, server, servers);
+  });
 });
 

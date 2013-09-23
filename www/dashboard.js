@@ -8,27 +8,39 @@
   }
 
   module.exports.refresh = function(socket, server) {
-    exec("ping -c 1 " + server,
-      function(err, stdout, stderr) {
-        if (err == null) {
-          socket.emit('serverPing', {'server': server, 'ping': 'Online'});
-        } else {
-          socket.emit('serverPing', {'server': server, 'ping': 'Offline'});
-        }
-    });
-    exec("timeout -s 9 15s ssh " + server + " jps",
-      function(err, stdout, stderr) {
-        if (err != null) {
-          socket.emit('serverSsh', {'server': server, 'ssh': 'Offline'});
-        } else {
-          socket.emit('serverSsh', {'server': server, 'ssh': 'Online'});
-          if (stdout.match(pidRegex) != null) {
-            socket.emit('serverClasp', {'server': server, 'clasp': 'Yes'});
+    try {
+      exec("ping -c 1 " + server,
+        function(err, stdout, stderr) {
+          if (err == null) {
+            socket.emit('serverPing', {'server': server, 'ping': 'Online'});
           } else {
-            socket.emit('serverClasp', {'server': server, 'clasp': 'No'});
+            socket.emit('serverPing', {'server': server, 'ping': 'Offline'});
           }
-        }
-    });
+      });
+      exec("timeout -s 9 15s ssh " + server + " jps",
+        function(err, stdout, stderr) {
+          if (err != null) {
+            socket.emit('serverSsh', {'server': server, 'ssh': 'Offline'});
+          } else {
+            socket.emit('serverSsh', {'server': server, 'ssh': 'Online'});
+            if (stdout.match(pidRegex) != null) {
+              socket.emit('serverClasp', {'server': server, 'clasp': 'Yes'});
+            } else {
+              socket.emit('serverClasp', {'server': server, 'clasp': 'No'});
+            }
+          }
+      });
+      exec("timeout -s 9 15s ssh " + server + " pgrep emulator",
+        function(err, stdout, stderr) {
+          // Don't check `stderr`.
+          // pgrep returns nonzero when no processes are detected.
+          var numEmus = stdout.split("\n").length - 1;
+          socket.emit('serverEmu', {'server': server, 'emu': numEmus});
+      });
+    } catch (err) {
+      console.log("Error caught.");
+      console.log(err);
+    }
   }
 
   module.exports.refreshAll = function(socket, servers) {
@@ -68,6 +80,18 @@
             match = pidRegex.exec(stdout);
           }
         }
+    });
+  }
+
+  module.exports.killEmu = function(socket, server, servers) {
+    console.log("Killing emulators on " + server);
+    exec("timeout -s 9 15s ssh " + server + " pkill emulator",
+      function(err, stdout, stderr) {
+        exec("timeout -s 9 15s ssh " + server + " pgrep emulator",
+          function(err, stdout, stderr) {
+            var numEmus = stdout.split("\n").length - 1;
+            socket.emit('serverEmu', {'server': server, 'emu': numEmus});
+        });
     });
   }
 }());
