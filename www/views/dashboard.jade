@@ -11,12 +11,26 @@ block content
       td: {{ name }}
       td: {{ ping }}
       td: {{ ssh }}
+      td: {{ clasp }} 
+        | {{#ifOn clasp }}
+        font(size='-2') (
+          a(onclick="killClasp('{{ name }}')",href="#") Kill?
+          | )
+        | {{/ifOn}}
   script(type='text/javascript')
     serverTmpl = Handlebars.compile($('#server-item').html())
   div.container
     h1 Clasp Dashboard
     ul
-      li Click on a row to use server as Clasp's master.
+      li Start Clasp by clicking on a row.
     div(id='server-table')
   script(src='/socket.io/socket.io.js')
   script(src='/scripts/dashboard.js')
+  script(type='text/javascript').
+    Handlebars.registerHelper('ifOn', function(v1, options) {
+      if (v1 === 'Yes') {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
+    });

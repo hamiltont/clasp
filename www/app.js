@@ -5,6 +5,8 @@ var express = require('express'), app = express(), http = require('http'),
 var config = require('./config'), routes = require('./routes'),
     claspDash = require('./dashboard');
 
+claspDash.setPidRegex(config.mainNames);
+
 app.use(auth.connect(auth.basic({
   realm: "Clasp",
   file: __dirname + "/users.htpasswd",
@@ -39,6 +41,12 @@ io.sockets.on('connection', function(socket) {
   var servers = config['servers'];
   var serverLength = config['servers'].length;
   for (var i = 0; i < serverLength; i++) {
-    claspDash.registerServer(socket, servers[i]);
+    socket.emit('serverRegister', servers[i]);
+    claspDash.refresh(socket, servers[i]);
   }
+
+  socket.on('killClasp', function(server) {
+    claspDash.killClasp(socket, server, servers);
+  });
 });
+

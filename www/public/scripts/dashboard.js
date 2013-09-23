@@ -9,8 +9,7 @@ var socket = io.connect('http://ataack.ece.vt.edu:9090')
 var servers = {}
 
 socket.on('serverRegister', function(serverName) {
-  servers[serverName] = {'name': serverName, 'online': 'Waiting'};
-  servers[serverName]['status'] = 'none';
+  servers[serverName] = {'name': serverName};
   redraw();
 });
 
@@ -21,18 +20,30 @@ socket.on('serverPing', function(data) {
 
 socket.on('serverSsh', function(data) {
   servers[data['server']]['ssh'] = data['ssh'];
-  if (data['ssh'] === 'Online') {
+  redraw();
+});
+
+socket.on('serverClasp', function(data) {
+  servers[data['server']]['clasp'] = data['clasp'];
+  if (data['clasp'] === 'No') {
     servers[data['server']]['status'] = 'success';
   }
   redraw();
 });
 
+socket.on('killClasp', function(data) {
+  console.log(data);
+});
+
 function redraw() {
   var newHtml =
     '<table id="servers" class="table table-condensed table-hover">' +
-    "<tr><td><b>Server</b></td>" +
-    "<td><b>Pingable</b></td>" +
-    "<td><b>ssh-able</b></td></tr>";
+    "<tr>" +
+      "<td><b>Server</b></td>" +
+      "<td><b>Pingable</b></td>" +
+      "<td><b>ssh-able</b></td>" +
+      "<td><b>Clasp running?</b></td>" +
+    "</tr>";
   var serversLength = servers.length;
   for (var i in servers) {
     newHtml += serverTmpl(servers[i]);
@@ -41,10 +52,15 @@ function redraw() {
   $('#server-table').html(newHtml);
 }
 
+function killClasp(server) {
+  socket.emit("killClasp", server);
+}
 
 $(function() {
   $('#server-table').on('click', 'tr', function() {
     var server = servers[$(this)[0].id];
-    console.log(server);
+    if (server['status'] == 'success') {
+      console.log(server);
+    }
   });
 });
