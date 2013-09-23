@@ -6,12 +6,45 @@
 // 2013.09.22
 
 var socket = io.connect('http://ataack.ece.vt.edu:9090')
-function addServers() {
-  socket.on('server', function(servers) {
-    console.log(servers[0]);
-    var length = servers.length;
-    for (var i = 0; i < length; i++) {
-      $('#servers').append(serverTmpl(servers[i]));
-    }
-  });
+var servers = {}
+
+socket.on('serverRegister', function(serverName) {
+  servers[serverName] = {'name': serverName, 'online': 'Waiting'};
+  servers[serverName]['status'] = 'none';
+  redraw();
+});
+
+socket.on('serverPing', function(data) {
+  servers[data['server']]['ping'] = data['ping'];
+  redraw();
+});
+
+socket.on('serverSsh', function(data) {
+  servers[data['server']]['ssh'] = data['ssh'];
+  if (data['ssh'] === 'Online') {
+    servers[data['server']]['status'] = 'success';
+  }
+  redraw();
+});
+
+function redraw() {
+  var newHtml =
+    '<table id="servers" class="table table-condensed table-hover">' +
+    "<tr><td><b>Server</b></td>" +
+    "<td><b>Pingable</b></td>" +
+    "<td><b>ssh-able</b></td></tr>";
+  var serversLength = servers.length;
+  for (var i in servers) {
+    newHtml += serverTmpl(servers[i]);
+  }
+  newHtml += '</table>';
+  $('#server-table').html(newHtml);
 }
+
+
+$(function() {
+  $('#server-table').on('click', 'tr', function() {
+    var server = servers[$(this)[0].id];
+    console.log(server);
+  });
+});

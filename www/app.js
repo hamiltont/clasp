@@ -36,5 +36,9 @@ server.listen(port, function(){
 });
 
 io.sockets.on('connection', function(socket) {
-  socket.emit('server', claspDash.getStatus(config['servers']));
+  var servers = config['servers'];
+  var serverLength = config['servers'].length;
+  for (var i = 0; i < serverLength; i++) {
+    claspDash.registerServer(socket, servers[i]);
+  }
 });

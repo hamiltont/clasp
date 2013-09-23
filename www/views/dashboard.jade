@@ -3,14 +3,16 @@ extends layout
 block content
   script(src='/scripts/handlebars.js')
   script(id='server-item',type='text/x-handlebars-template')
-    li
-      b {{ name }}: 
-      {{ status }}
+    tr(class='{{status}}',id='{{ name }}')
+      td: {{ name }}
+      td: {{ ping }}
+      td: {{ ssh }}
   script(type='text/javascript')
     serverTmpl = Handlebars.compile($('#server-item').html())
   div.container
     h1 Clasp Dashboard
-    ul(id='servers')
+    ul
+      li Click on a row to use server as Clasp's master.
+    div(id='server-table')
   script(src='/socket.io/socket.io.js')
   script(src='/scripts/dashboard.js')
-  script(type='text/javascript') addServers()
