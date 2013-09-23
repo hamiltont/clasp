@@ -1,6 +1,14 @@
-# Todo.
-
-## High priority.
+# Brandon
++ GUI: Interface for runs.
++ logstash
++ Rebooting
+  + Add the functionality within EmulatorActor to restart an emulator.
+  + Once we have rebooting, add a flag to wipe the device when
+    rebooting, and test this thoroughly.
+    I've had issues wiping an entire device before.
+    Reset system and user information.
++ SMS network modeling.
++ GPS simulation.
 + Shutting down.
   + Update termination conditions to catch and graceful term even if someone
   sends us signal 15 via the kill command
@@ -9,20 +17,25 @@
   successfully terminate, in which case the prompt should be abandoned to allow
   the system to finish termination
   + When a node has a java process running on it, Clasp won't fully terminate.
-+ logstash
-+ Look at process management library.
 
-## Medium priority.
+# Todo.
+## High priority.
++ (Hamilton) Create logic to automatically inject root CA into emulator cacerts file, 
+  add options for redirecting traffic to a proxy that now has the ability to MITM the 
+  emulator. See http://intrepidusgroup.com/insight/2011/08/setting-up-a-persistent-trusted-ca-in-an-android-emulator/
+  and http://www.floyd.ch/?p=244 and http://www.portswigger.net/burp/downloadfree.html
+  and https://github.com/wuntee/androidAuditTools
 + Implement emulator hibernation.
 + Delete all sdcard images on shutdown.
   Make this an option.
++ Add the option to return logcat output of emulators.
+
+## Medium priority.
 + Add an option to block until all tasks are complete.
 + Add the ability to obtain many different device configurations,
   as specified as parameters to the Clasp system.
   This can involve asking Clasp, for example, to
   run tasks across a full factorial or LHS of configuration options.
-+ Add the option to return logcat output of emulators.
-+ Network traffic redirection through tor.
 + A script to bundle files for distribution.
 + Create obfuscated jar with sbt-proguard.
 
@@ -51,41 +64,24 @@
   can find a library or create one that allows us to read/write to this protocol
   and interface with the radio chip on Android devices in a more comprehensive
   manner. 
-+ Fix command watcher...
-+ (Hamilton) Create logic to automatically inject root CA into emulator cacerts file, 
-  add options for redirecting traffic to a proxy that now has the ability to MITM the 
-  emulator. See http://intrepidusgroup.com/insight/2011/08/setting-up-a-persistent-trusted-ca-in-an-android-emulator/
-  and http://www.floyd.ch/?p=244 and http://www.portswigger.net/burp/downloadfree.html
-  and https://github.com/wuntee/androidAuditTools
-+ (Hamilton) Create 'main' script that allows directly launching the development
-  attack code on local computer. Potentially allow direct launching of unmanaged 
-  emulators and then use attack command to control these emulators after they have 
-  been created (e.g. a scripting tool) 
++ (Hamilton) Create 'main' script that allows directly launching the
+  development attack code on local computer. Potentially allow direct launching
+  of unmanaged emulators and then use attack command to control these emulators
+  after they have been created (e.g. a scripting tool) 
 
 ## Issues.
-+ If "android list targets" is empty, then creation of an emulator will 
-  always fail. The failure currently happens when a new emulator is constructed, 
-  but it should happen sooner and a more intelligent error message should appear. 
-  When the framework starts a Node, that Node should cache the available targets
-  and something should predict from the EmulatorConfig that the emulator boot
-  will fail. More importantly, we can likely auto-fix the issue by calling
-  'android update sdk --no-gui' on the command line.
++ If "android list targets" is empty, then creation of an emulator will always
+fail. The failure currently happens when a new emulator is constructed, but it
+should happen sooner and a more intelligent error message should appear.  When
+the framework starts a Node, that Node should cache the available targets and
+something should predict from the EmulatorConfig that the emulator boot will
+fail. More importantly, we can likely auto-fix the issue by calling 'android
+update sdk --no-gui' on the command line.
 
 ## Module ideas.
-+ SMS network modeling.
-+ Sensor data.
-+ GPS simulation.
++ Sensor data. What kind?
 
-# Brandon
+# Completed
 + Resource consumption
   + Memory of scala - Single node vs emulators.
   + Network latency - Heartbeat/1s
-+ Rebooting
-  + Add the functionality within EmulatorActor to restart an emulator.
-  + Once we have rebooting, add a flag to wipe the device when
-    rebooting, and test this thoroughly.
-    I've had issues wiping an entire device before.
-    Reset system and user information.
-
-# Completed
-
