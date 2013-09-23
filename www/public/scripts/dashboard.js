@@ -35,6 +35,8 @@ socket.on('serverClasp', function(data) {
   servers[data['server']]['clasp'] = data['clasp'];
   if (data['clasp'] === 'No') {
     servers[data['server']]['status'] = 'success';
+  } else {
+    delete servers[data['server']]['status'];
   }
   redraw();
 });
