@@ -9,9 +9,13 @@ div.navbar.navbar-inverse.navbar-fixed-top
       a.brand(href="/") Clasp
       div.nav-collapse.collapse
         ul.nav
-          li.active: a(href="/") Home
-          li: a(href="dashboard") Dashboard
-          li: a(href="doc") Documentation
+          block activePageBlock
+          li(class=(activePage == 'home') ? 'active' : '')
+            a(href="/") Home
+          li(class=(activePage == 'dashboard') ? 'active' : '')
+            a(href="dashboard") Dashboard
+          li(class=(activePage == 'doc') ? 'active' : '')
+            a(href="doc") Documentation
           li: a(href="#aboutModal",data-toggle="modal") About
 
 div(id="aboutModal",class="modal hide fade")
