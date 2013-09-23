@@ -87,11 +87,53 @@ function killAllEmu() {
   }
 }
 
+function getAvailableClients(serverName) {
+  var availableClients = {};
+  for (var i in servers) {
+    if (servers[i]['clasp'] === "No" &&
+        servers[i]['name'] !== serverName)  {
+      availableClients[servers[i]['name']] =
+        {'clientName': (servers[i]['name'])};
+    }
+  }
+  return availableClients;
+}
+
+function stageClaspMain(serverName) {
+  alert("Clasp main currently not supported.")
+}
+
+function runClaspMain(serverName) {
+  alert("Clasp main currently not supported.")
+}
+
+function stageAntimalware(serverName) {
+  console.log(serverName);
+  $('#controlModal .modal-body').html(
+    modalTmpl({'name': 'Antimalware', 'server': serverName,
+      'clients': getAvailableClients(serverName)}))
+}
+
+function runAntimalware(serverName) {
+  clients = [];
+  $('input:checked').each(function() {
+    clients.push(this.id);
+  });
+  var data = {'programDir': '/home/brandon/antimalware/driver',
+    'master': serverName, 'clients': clients};
+  console.log(serverName);
+  console.log(data);
+  socket.emit('compileAndRun', data);
+  $('#controlModal').modal('hide');
+}
+
 $(function() {
   $('#server-table').on('click', 'tr', function() {
     var server = servers[$(this)[0].id];
     if (server['status'] == 'success') {
-      console.log(server);
+      $('#controlModal .modal-body').html(
+        modalTmpl({'server': server['name']}))
+      $('#controlModal').modal('show')
     }
   });
 });

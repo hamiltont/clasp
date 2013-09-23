@@ -18,8 +18,35 @@ block content
           | )
         | {{/ifOn}}
       td: {{ emu }} 
+  script(id='modal-body',type='text/x-handlebars-template')
+    b Master:
+    | {{ server }}
+    {{#if clients}}
+    br
+    b Clients
+    ul
+      {{#each clients}}
+      li
+        label
+          | {{ clientName }}
+          input(type='checkbox',id='{{ clientName }}',checked)
+      {{/each}}
+    button(type='button',class='btn btn-primary',
+      onclick='run{{ name }}("{{ server }}"); return false;') Run
+    {{else}}
+    div.dropdown
+      a(class='dropdown-toggle',data-toggle='dropdown',href='#')
+        | Select a program
+        b.caret
+      ul(class='dropdown-menu',role='menu')
+        li: a(onclick='stageClaspMain("{{ server }}"); return false;',href='#').
+          Clasp Main
+        li: a(onclick='stageAntimalware("{{ server }}"); return false;',href='#').
+          Antimalware
+    {{/if}}
   script(type='text/javascript')
     serverTmpl = Handlebars.compile($('#server-item').html())
+    modalTmpl = Handlebars.compile($('#modal-body').html())
   div.container
     h1 Clasp Dashboard
     ul
@@ -41,3 +68,11 @@ block content
         return options.inverse(this);
       }
     });
+  div(id="controlModal",class="modal hide fade",tabindex='-1')
+    div(class="modal-header")
+      butten(type="button",class="close",data-dismiss="modal",
+        aria-hidden="true") &times
+      h3 Run Clasp.
+    div(class="modal-body",style='height: 300px')
+    div(class="modal-footer")
+      button(class="btn",data-dismiss="modal") Close

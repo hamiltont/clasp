@@ -94,4 +94,21 @@
         });
     });
   }
+
+  module.exports.compileAndRun = function(data) {
+    console.log("compileAndRun: " + data);
+    console.log("TODO: Compile.")
+    // TODO: Add options.
+    var runCmd = "ssh " + data['master'] + " 'cd " + data['programDir'] +
+      "; target/start -a google-play --arffTag google-play" +
+      " -n 8 -p " + data['clients'].join(",") + " -w " +
+      data['clients'].length +
+      " --profilerApk /home/brandon/antimalware/profiler/bin/Profiler-debug.apk" +
+      " > antimalware.out'";
+    console.log("Running using: " + runCmd);
+    exec(runCmd,
+      function(err, stdout, stderr) {
+        console.log(stdout);
+    });
+  }
 }());
