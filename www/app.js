@@ -45,6 +45,12 @@ io.sockets.on('connection', function(socket) {
     claspDash.refresh(socket, servers[i]);
   }
 
+  socket.on('refresh', function(data) {
+    for (var i = 0; i < serverLength; i++) {
+      claspDash.refresh(socket, servers[i]);
+    }
+  });
+
   socket.on('killClasp', function(server) {
     claspDash.killClasp(socket, server, servers);
   });

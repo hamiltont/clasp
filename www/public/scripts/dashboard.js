@@ -8,6 +8,14 @@
 var socket = io.connect('http://ataack.ece.vt.edu:9090')
 var servers = {}
 
+function refresh() {
+  socket.emit('refresh', null);
+}
+
+window.setInterval(function() {
+  refresh()
+}, 30000);
+
 socket.on('serverRegister', function(serverName) {
   servers[serverName] = {'name': serverName};
   redraw();

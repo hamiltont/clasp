@@ -50,9 +50,8 @@
             exec("timeout -s 9 20s ssh " + server + " kill " + match[1],
               function(err, stdout, stderr) {
                 if (err != null) {
-                  var matchInner = pidRegex.exec(stdout);
                   socket.emit('killClasp', {'status': 'niceKillFailed'});
-                  exec("timeout -s 9 15s ssh "+server+" kill -9 "+matchInner[1],
+                  exec("timeout -s 9 15s ssh "+server+" kill -9 "+match[1],
                     function(err, stdout, stderr) {
                       if (err != null) {
                         socket.emit('killClasp', {'status': 'forceKillFailed'});
