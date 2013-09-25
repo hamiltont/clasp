@@ -49,6 +49,7 @@
 + More robust tests.
 + Add `sigar` libraries when building with `sbt`.
   Reference: `http://stackoverflow.com/questions/14966414`
+  Trying to use `tools/pack-sigar.sh`.
 + Provide an AVD manager class for utility functions - ?
 + If you use netcat to listen on an arbitrary socket, and then direct Android's
   radio socket (an emulator command line parameter) to talk on that socket, you
