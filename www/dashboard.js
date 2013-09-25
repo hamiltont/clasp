@@ -52,6 +52,13 @@
 
   module.exports.killClasp = function(socket, server, servers) {
     console.log("Killing Clasp on " + server);
+    // TODO: Break these out into separate functions for
+    //   1) Readibility, and
+    //   2) Power.
+    // Currently, sometimes `kill` does not actually kill the process,
+    // but doesn't return an error.
+    // To fix this, instead of relying on the error,
+    // check `jps` again.
     exec("timeout -s 9 15s ssh " + server + " jps",
       function(err, stdout, stderr) {
         if (err != null) {
