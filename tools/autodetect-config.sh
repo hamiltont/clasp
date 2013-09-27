@@ -1,13 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 #
 # autodetect.sh
 # Automatically detects path to ANDROID_HOME and writes them to
 # `application.conf`.
+#
+# TODO Make this target /bin/sh to be more universal
 
 CONF_DIR=src
-function die { echo $@; exit 42; }
+die () { echo $@; exit 42; }
 
-function write_conf {
+write_conf () {
   local ANDROID_HOME=$1 # Does not have trailing backslash.
   sed "s|##ANDROID_ROOT##|\"$ANDROID_HOME/\"|g" \
     $CONF_DIR/application.conf.example \
