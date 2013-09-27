@@ -121,7 +121,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
   val (process, serialID) = EmulatorBuilder.build(port, opts)
 
   val emanager = context.system.actorFor(
-    "akka://clasp@" + serverip + ":2552/user/emulatormanager")
+    "akka://hamiltont@" + serverip + ":2552/user/emulatormanager")
 
   override def postStop = {
     info(s"Stopping emulator ${self.path}")
@@ -229,10 +229,11 @@ object EmulatorBuilder {
     val avdName = s"$hostname-$port"
     info(s"Building unique AVD $avdName")
     // TODO we must lookup the eabi for the target or this will likely fail
-    sdk.create_avd(avdName, "android-17", "armeabi-v7a", true)
+    // TODO check for failure
+    sdk.create_avd(avdName, "android-18", "armeabi-v7a", true)
 
     // TODO update this to use some working directory
-    val username: String = "logname".!!.stripLineEnd
+    val username: String = "whoami".!!.stripLineEnd
     val workspaceDir = s"/tmp/clasp/$username"
     s"mkdir -p $workspaceDir" !!
 

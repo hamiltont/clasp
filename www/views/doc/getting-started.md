@@ -11,3 +11,18 @@ which make it simple to define and use configuration.
 Locate `$ROOT/src/application.conf.example`, copy
 the example contents into `$ROOT/src/application.conf` (or anywhere else on
 your build path), and modify the paths of `sdk.root` to reflect your sdk root.
+
+### 5-minute local setup
+
+Install Dependencies: Android SDK, sbt, SSH Server, ia32-libs (for adb), ia32-libs-sdl (for emulator), nodejs & npm (if you want web interface)
+
+    $ git clone <URL>
+    $ cd attack
+    $ sbt assembly
+    $ ./tools/autodetect-config.sh
+    Note: The autodetect will only work if you have Android's tools and/or platform-tools
+    directory in your PATH. If it fails to work, read src/application.conf.example
+    $ sbt stage
+    > run --help
+    > run --local
+

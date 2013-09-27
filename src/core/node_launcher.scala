@@ -7,40 +7,30 @@ import scala.collection.mutable.ArrayStack
 import scala.collection.JavaConverters._
 import scala.util.Random
 import scala.collection.immutable.StringOps
-
 import org.slf4j.LoggerFactory
-
 import clasp.core.sdktools.sdk
 import clasp.core.sdktools.EmulatorOptions
-
 import akka.actor._
 import akka.pattern.Patterns.ask
-
-// For SSH into remotes and starting clients
 import scala.sys.process._
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
-
 import com.typesafe.config.ConfigFactory
-
 import scala.concurrent._
 import scala.language.postfixOps
 import scala.util.Random
-
-// Used for command line parsing
-//import org.rogach.scallop._
-
 import System.currentTimeMillis
+import clasp.ClaspRunner
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
 class NodeManger(val ip: String, val initial_workers: Int,
-    manual_pool: Option[String] = None, val numEmulators: Int) extends Actor {
+  manual_pool: Option[String] = None, val numEmulators: Int) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
-  import log.{error, debug, info, trace}
+  import log.{ error, debug, info, trace }
 
   var pool: ArrayStack[String] = null
   manual_pool match {
@@ -77,7 +67,7 @@ class NodeManger(val ip: String, val initial_workers: Int,
       info("Requesting a new node to replace $nodeip")
       outstanding.decrementAndGet
       boot_any
-    } 
+    }
     case BootNode => boot_any
     case Shutdown => {
       // First register to watch all nodes
@@ -101,7 +91,7 @@ class NodeManger(val ip: String, val initial_workers: Int,
       nodes -= ref
       info(s"Reaper: Termination received for ${ref.path}")
       info(s"Reaper: ${nodes.length} nodes and ${outstanding.get} outstanding")
-      if (nodes.isEmpty && outstanding.get==0 ) {
+      if (nodes.isEmpty && outstanding.get == 0) {
         info("No more remote nodes or outstanding boot requests, killing self.")
         self ! PoisonPill
       }
@@ -120,14 +110,15 @@ class NodeManger(val ip: String, val initial_workers: Int,
       outstanding.decrementAndGet
       info(s"Reaper: Ignoring busy node $id")
       info(s"Reaper: ${nodes.length} nodes and ${outstanding.get} outstanding")
-    } 
+    }
     case Shutdown => info("Reaper: Ignoring shutdown")
   }
 
   override def postStop = {
     context.system.registerOnTermination {
-      info("System shutdown achieved at " + System.currentTimeMillis ) }
-    info("postStop. Requesting system shutdown at " + System.currentTimeMillis )
+      info("System shutdown achieved at " + System.currentTimeMillis)
+    }
+    info("postStop. Requesting system shutdown at " + System.currentTimeMillis)
     context.system.shutdown()
   }
 
@@ -135,30 +126,33 @@ class NodeManger(val ip: String, val initial_workers: Int,
     info("Node boot requested")
     if (pool.length != 0)
       bootstrap(pool.pop)
-    else 
+    else
       error("Node boot request failed - worker pool is empty")
   }
 
-  def bootstrap(client_ip:String):Unit = {
+  def bootstrap(client_ip: String): Unit = {
     import ExecutionContext.Implicits.global
     val f = future {
       val directory: String = "pwd".!!.stripLineEnd
-      val username = "logname".!!.stripLineEnd
+      val username = "whoami".!!.stripLineEnd
       val workspaceDir = s"/tmp/clasp/$username"
+      val export = if (ClaspRunner.conf.local()) ":0" else "localhost:10.0"
+      val local = if (ClaspRunner.conf.local()) "--local" else ""
       val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip " +
-        "sh -c 'export DISPLAY=localhost:10.0; " +
+        s"sh -c 'export DISPLAY=$export; " +
         s"cd $directory; " +
         s"mkdir -p $workspaceDir ; " +
-        s"nohup target/start --client --ip $client_ip --mip $ip " +
+        s"nohup target/start --client $local --ip $client_ip --mip $ip " +
         s"--num-emulators $numEmulators " +
         s"> /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
       info(s"Starting $client_ip using $command")
-      command.!! 
+      command.!!
       outstanding.incrementAndGet
-    } }
+    }
+  }
 
-    // Start in monitor mode.
-    def receive = monitoring
+  // Start in monitor mode.
+  def receive = monitoring
 }
 sealed trait NM_Message
 case class Shutdown() extends NM_Message
@@ -169,11 +163,11 @@ case class NodeBusy(nodeid: String, debuglog: String) extends NM_Message
 // Manages the running of the framework on a single node,
 // including ?startup?, shutdown, etc.
 class Node(val ip: String, val serverip: String,
-    val emuOpts: EmulatorOptions, val numEmulators: Int) extends Actor {
+  val emuOpts: EmulatorOptions, val numEmulators: Int) extends Actor {
   val log = LoggerFactory.getLogger(getClass())
-  import log.{error, debug, info, trace}
-  
-  val manager = context.actorFor("akka://clasp@" + serverip + ":2552/user/nodemanager")
+  import log.{ error, debug, info, trace }
+
+  val manager = context.actorFor("akka://hamiltont@" + serverip + ":2552/user/nodemanager")
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
   var base_emulator_port = 5555
 
@@ -181,9 +175,9 @@ class Node(val ip: String, val serverip: String,
   sdk.kill_adb
   sdk.start_adb
 
-  for (i <- 0 to numEmulators-1) {
-    devices += context.actorOf(Props(new EmulatorActor(base_emulator_port + 2*i,
-      emuOpts, serverip)), s"emulator-${base_emulator_port+2*i}")
+  for (i <- 0 to numEmulators - 1) {
+    devices += context.actorOf(Props(new EmulatorActor(base_emulator_port + 2 * i,
+      emuOpts, serverip)), s"emulator-${base_emulator_port + 2 * i}")
   }
 
   override def preStart() = {
@@ -198,7 +192,8 @@ class Node(val ip: String, val serverip: String,
     info("Requested emulators to halt")
 
     context.system.registerOnTermination {
-      info(s"System shutdown achieved at ${System.currentTimeMillis}") }
+      info(s"System shutdown achieved at ${System.currentTimeMillis}")
+    }
     info(s"Requesting system shutdown at ${System.currentTimeMillis}")
     context.system.shutdown()
   }
