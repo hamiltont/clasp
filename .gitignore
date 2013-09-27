@@ -1,6 +1,10 @@
 .settings/
 .cache
 
+# Please use sbteclipse plugin to generate these for yourself
+.project
+.classpath
+
 *.classp
 *.swp
 target/*
