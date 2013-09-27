@@ -1,12 +1,17 @@
 package clasp
 
-// Used for command line parsing
-import org.rogach.scallop._
+import java.net.Inet4Address
+import java.net.Inet6Address
 
-// Used for auto-detection of hostname
-import scala.sys.process._
- 
-// TODO add --local option that forces pool to be set to --pool "$ip"
+import org.rogach.scallop.ScallopConf
+
+// TODO add --local option that forces pool to be set to --pool "$ip". Note that this will 
+//      require that the master can SSH into the local computer, so running with the 
+//      --local flag will require that the local computer is running an SSH Server. However, 
+//      this also removes the need for guessing the IP address. Both the client and the 
+//      server can use 127.0.0.1 because they run on different ports. Local should also 
+//      indicate that we are *not* going to use the clasp username, because the user will 
+//      be using their own username
 // TODO add --cleanup option to walk through all nodes in the worker pool and ensure that 
 //      there are no instances of clasp running. Can only kill processes for this user, 
 //      so should report processids / nodes where clasp processes are still running
@@ -23,26 +28,49 @@ class ClaspConf(arguments: Seq[String]) extends ScallopConf(arguments) {
     |""".stripMargin)
 
   val client = opt[Boolean](descr = "Should this run as a client instance")
-  
-  val ip     = opt[String] (descr = "Informs Clasp of the IP address it should bind to." +
-    "This should be reachable by the master and by all other clients in the system." +
-    "If no explicit IP is provided, then 10.0.2.{hostname} will be used", 
-    default=Some("10.0.2." + "hostname".!!.stripLineEnd))
-  
-  // TODO figure out how to make scallop enfore this requirement for us
-  val mip    = opt[String] (descr = "The server ip address. Does nothing without the " + 
-    "flag indicating that this is a client. Required for clients")
 
-  val workers= opt[Int]    (descr = "The number of worker clients Clasp should start " +
-    "by default. This number can grow or shrink dynamically as the system runs. All " + 
-    "clients are picked from a pool of IP addresses inside server.conf", 
-    default=Some(3))
+  val ip = opt[String](descr = "Informs Clasp of the IP address it should bind to. " +
+    "This should be reachable by the master and by all other clients in the system.",
+    default = Some(getBestIP))
 
-  val pool   = opt[String] (descr = "Override the worker pool provided in configuration " + 
-    "file by providing a comma-separated list of IP addresses e.g. [--pool " + 
-    "\"10.0.2.1,10.0.2.2\"]. Workers will be launched in the order given. No " + 
+  // TODO figure out how to make scallop enforce this requirement for us
+  val mip = opt[String](descr = "The master ip address. Only used with --client, " +
+    "and required for clients")
+
+  val workers = opt[Int](descr = "The number of worker clients Clasp should start " +
+    "by default. This number can grow or shrink dynamically as the system runs. All " +
+    "clients are picked from the pool of IP addresses inside client.conf",
+    default = Some(3))
+
+  val pool = opt[String](descr = "Override the worker pool provided in client.conf " +
+    "file by providing a comma-separated list of IP addresses e.g. [--pool " +
+    "\"10.0.2.1,10.0.2.2\"]. Workers will be launched in the order given. No " +
     "spaces are allowed after commas")
 
-  val numEmulators = opt[Int] (default=Option(1),
-    descr="The number of emulators to start on each node.")
+  val numEmulators = opt[Int](default = Option(1),
+    descr = "The number of emulators to start on each node.")
+
+  def getBestIP: String = {
+    val interfaces = java.net.NetworkInterface.getNetworkInterfaces();
+
+    var noBetterOption = "127.0.0.1"
+    while (interfaces.hasMoreElements()) {
+      val interface = interfaces.nextElement();
+      if (!(interface.isVirtual() || interface.isLoopback() ||
+        interface.isPointToPoint() || !interface.isUp())) {
+        val addresses = interface.getInetAddresses();
+        while (addresses.hasMoreElements()) {
+          val address = addresses.nextElement();
+          // More filtering could probably happen here
+          address match {
+            case a: Inet4Address => return a.getHostAddress();
+            case b: Inet6Address => noBetterOption = b.getHostAddress();
+          }
+        }
+      }
+    }
+
+    noBetterOption
+  }
 }
+
