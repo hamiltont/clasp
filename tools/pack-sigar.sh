@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Packs the '.so' files from Sigar into the assembly jar.
 
 function die { echo $@; exit 1; }
 
-JAR=target/Clasp-Assembly.jar
+JAR=`find target -name "Clasp-Assembly.jar"`
 [[ -e $JAR ]] || die "Unable to find '$JAR'"
 
 # TODO Where should these libraries be packed?

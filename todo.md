@@ -78,6 +78,12 @@ the framework starts a Node, that Node should cache the available targets and
 something should predict from the EmulatorConfig that the emulator boot will
 fail. More importantly, we can likely auto-fix the issue by calling 'android
 update sdk --no-gui' on the command line.
++ Small bug: If using -w 0 to specify zero workers, then the system
+is unable to shut down properly
++ Can we have the clients kill themselves if they receive a disconnect
+event from the master and *dont* receive a reconnect within a timeout? 
++ For some reason running with --local doesn't allow clients to be 
+killed
 
 ## Module ideas.
 + Sensor data. What kind?

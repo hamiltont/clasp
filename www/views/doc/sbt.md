@@ -5,9 +5,11 @@ After installing sbt, Clasp can be built with:
 
     $ sbt assembly
 
-This will compile the sources and include the libraries in a jar file
-located at `<Clasp>/target/Clasp-Assembly.jar`.
+This will compile the sources and include the libraries in a single "fat" jar file
+located at `<Clasp>/target/Clasp-Assembly.jar`. To build a "thin" jar that only
+links to the libraries, use `sbt stage`
 
+Note: In newer versions of sbt this file may be at <Clasp>/target/scala-X.XX/Clasp-Assembly.jar
 Note: I've had trouble using this command from a NFS client.
 
 ### Overview of sbt.
@@ -46,3 +48,11 @@ creation.
 See [sbt/sbt-assembly](https://github.com/sbt/sbt-assembly).
 
     addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.8.6")
+
+### Building Clasp using Eclipse
+
+Generate .project and .classpath files
+
+    $ sbt eclipse
+
+and then import as existing project into eclipse 
