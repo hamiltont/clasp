@@ -1,3 +1,4 @@
+// Using `sbt` version 0.12.3.
 import com.typesafe.sbt.SbtStartScript // Imports xsbt
 import AssemblyKeys._ // Imports sbt-assembly keys
 
