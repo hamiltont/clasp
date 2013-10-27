@@ -23,12 +23,12 @@ import scala.concurrent._
 import scala.language.postfixOps
 import scala.util.Random
 import System.currentTimeMillis
-import clasp.ClaspRunner
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
-class NodeManger(val ip: String, val initial_workers: Int,
-  manual_pool: Option[String] = None, val numEmulators: Int) extends Actor {
+class NodeManager(val ip: String, val initial_workers: Int,
+  manual_pool: Option[String] = None, val numEmulators: Int,
+  val local: Boolean = false) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
@@ -136,13 +136,13 @@ class NodeManger(val ip: String, val initial_workers: Int,
       val directory: String = "pwd".!!.stripLineEnd
       val username = "whoami".!!.stripLineEnd
       val workspaceDir = s"/tmp/clasp/$username"
-      val export = if (ClaspRunner.conf.local()) ":0" else "localhost:10.0"
-      val local = if (ClaspRunner.conf.local()) "--local" else ""
+      val export = if (local) ":0" else "localhost:10.0"
+      val localFlag = if (local) "--local" else ""
       val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip " +
         s"sh -c 'export DISPLAY=$export; " +
         s"cd $directory; " +
         s"mkdir -p $workspaceDir ; " +
-        s"nohup target/start --client $local --ip $client_ip --mip $ip " +
+        s"nohup target/start --client $localFlag --ip $client_ip --mip $ip " +
         s"--num-emulators $numEmulators " +
         s"> /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
       info(s"Starting $client_ip using $command")
@@ -163,7 +163,8 @@ case class NodeBusy(nodeid: String, debuglog: String) extends NM_Message
 // Manages the running of the framework on a single node,
 // including ?startup?, shutdown, etc.
 class Node(val ip: String, val serverip: String,
-  val emuOpts: EmulatorOptions, val numEmulators: Int) extends Actor {
+    val emuOpts: EmulatorOptions, val numEmulators: Int, val user: String)
+    extends Actor {
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
@@ -176,8 +177,9 @@ class Node(val ip: String, val serverip: String,
   sdk.start_adb
 
   for (i <- 0 to numEmulators - 1) {
-    devices += context.actorOf(Props(new EmulatorActor(base_emulator_port + 2 * i,
-      emuOpts, serverip)), s"emulator-${base_emulator_port + 2 * i}")
+    devices += context.actorOf(Props(new EmulatorActor(
+      base_emulator_port + 2 * i, emuOpts, serverip, user)),
+      s"emulator-${base_emulator_port + 2 * i}")
   }
 
   override def preStart() = {

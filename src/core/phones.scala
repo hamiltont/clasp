@@ -111,7 +111,7 @@ case class TaskFailure(taskId: String, err: Exception, emulator: ActorRef)
 // others to interface with the EmulatorActor without having to understand its 
 // interface
 class EmulatorActor(val port: Int, val opts: EmulatorOptions,
-    serverip: String) extends Actor {
+    serverip: String, user: String) extends Actor {
 
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
@@ -121,7 +121,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
   val (process, serialID) = EmulatorBuilder.build(port, opts)
 
   val emanager = context.system.actorFor(
-    "akka://hamiltont@" + serverip + ":2552/user/emulatormanager")
+    s"akka://$user@$serverip:2552/user/emulatormanager")
 
   override def postStop = {
     info(s"Stopping emulator ${self.path}")

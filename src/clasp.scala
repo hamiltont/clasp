@@ -161,13 +161,13 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
   val masterip = conf.mip().stripLineEnd
 
   var n = system.actorOf(Props(new Node(ip, masterip, emuOpts,
-    conf.numEmulators.apply)), name = s"node-$ip")
+    conf.numEmulators.apply, conf.user.apply)), name = s"node-$ip")
   info(s"Created Node for $ip")
 }
 
 /*
- * Interface to the clasp system. Creating this will start a clasp worker on all clients 
- * 
+ * Interface to the clasp system.
+ * Creating this will start a clasp worker on all clients 
  */
 class ClaspMaster(val conf: ClaspConf) {
   lazy val log = LoggerFactory.getLogger(getClass())
@@ -216,9 +216,9 @@ class ClaspMaster(val conf: ClaspConf) {
   info("Created EmulatorManager")
 
   var manager = system.actorOf(Props(
-    new NodeManger(ip, conf.workers(), conf.pool.get,
-      conf.numEmulators.apply)), name = "nodemanager")
-  info("Created NodeManger")
+    new NodeManager(ip, conf.workers(), conf.pool.get,
+      conf.numEmulators.apply, local = conf.local())), name = "nodemanager")
+  info("Created NodeManager")
 
   sys addShutdownHook (shutdown_listener)
 
