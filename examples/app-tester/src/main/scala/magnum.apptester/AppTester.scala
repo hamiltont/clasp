@@ -64,6 +64,7 @@ object Driver {
           clasp.kill
           return
         }
+        previousNumTested = numTested.get
       }
     }
     println("Tested " + totalToTest + " applications.")
