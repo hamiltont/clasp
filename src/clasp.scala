@@ -243,39 +243,42 @@ class ClaspMaster(val conf: ClaspConf) {
     // TODO: Context.system.shutdown somewhere?
 
     if (manager != null && !manager.isTerminated) {
-      // First shutdown everything from Node down the hierarchy
-      manager ! Shutdown
-
-      // Second shutdown all other high-level management activities
-      emanager ! PoisonPill
+      manager ! Shutdown // Shutdown everything from Node down.
+      emanager ! PoisonPill // Shutdown all other high-level management.
     }
 
-    // Manage SD cards and delete them all at/before the end of clasp's lifetime.
-    // TODO: Options to allow users to state that they want to keep SD cards after running.
-    val listSDs = sdDir.listFiles()
-    for { sd <- listSDs } {
-      //How does one delete all of the files in this list?
-      sd.delete()
-    }
-    //Next question, do we delete the directory as well at the end? Or are we happy with the temp directory continuing to exist?
+    // TODO: Give users an option to delete SD cards.
+    sdDir.listFiles().map( sd => sd.delete())
 
     var timeSlept = 0.0d; var timeout = 10.0d
+    var promptThread: Option[Thread] = None
     while (manager != null && !manager.isTerminated) {
       Thread.sleep(500)
       timeSlept += 0.5d
-      if (timeSlept >= timeout) {
-        val input = readLine(
-          s"""|Waited for $timeSlept seconds, and all nodes have not responded.
-              |Continue waiting (y)/n? """.stripMargin)
-        if (input != null && input.size > 0 &&
-          input.toLowerCase.charAt(0) == 'n') {
-          println("Exiting.")
-          println("Warning: Nodes may still have emulators running on them!")
-          return ;
-        } else {
-          println("Waiting for 10 more seconds.")
-          timeout += 10.0d
-        }
+      if (promptThread.isEmpty && timeSlept >= timeout) {
+        promptThread = Option(
+          new Thread(
+            new Runnable {
+              def run() {
+                val input = readLine(
+                  s"""|Waited for $timeSlept seconds, 
+                      |and all nodes have not responded.
+                      |Continue waiting (y)/n? """.stripMargin)
+                if (input != null && input.size > 0 &&
+                  input.toLowerCase.charAt(0) == 'n') {
+                  println("Exiting.")
+                  println("Warning: Nodes may still have emulators" +
+                    " running on them!")
+                  System.exit(42)
+                } else {
+                  println("Waiting for 10 more seconds.")
+                  timeout = timeSlept + 10.0d // Don't care about race.
+                  promptThread = None
+                }
+              }
+            }
+          )
+        )
       }
     }
   }
@@ -300,4 +303,8 @@ class ClaspMaster(val conf: ClaspConf) {
 class Emulator(val serialID: String) extends Serializable {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
+
+  def rebootWhenFinished() = {
+    // TODO
+  }
 }

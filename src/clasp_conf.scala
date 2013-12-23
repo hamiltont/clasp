@@ -62,6 +62,10 @@ class ClaspConf(arguments: Seq[String]) extends ScallopConf(arguments) {
     "127.0.0.1, user will be the current user, pool to be 127.0.0.1. Currently forces " + 
     "emulators to run in non-headless mode")
 
+  //TODO
+  //var smsListenAndForward: Option[Boolean] = None
+  //var smsSendEvery: Option[TimeTODO] = None
+
   def getBestIP: String = {
     val interfaces = java.net.NetworkInterface.getNetworkInterfaces();
 

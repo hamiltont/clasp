@@ -70,17 +70,25 @@ class NodeManager(val ip: String, val initial_workers: Int,
     }
     case BootNode => boot_any
     case Shutdown => {
-      // First register to watch all nodes
-      nodes.foreach(node => context.watch(node))
-      info("Shutdown requested.")
+      if (nodes.size == 0) {
+        // Terminate if there are no nodes.
+        info("Killing self.")
+        self ! PoisonPill
+      } else {
+        // Otherwise, reap the nodes.
 
-      // Second, transition our receive loop into a Reaper
-      context.become(reaper)
-      info("Transitioned to a reaper.")
+        // 1. Register to watch all nodes.
+        nodes.foreach(node => context.watch(node))
+        info("Shutdown requested.")
 
-      // Second, ask all of our nodes to stop
-      nodes.foreach(n => n ! PoisonPill)
-      info("Pill sent to all nodes.")
+        // 2. Transition our receive loop into a Reaper
+        context.become(reaper)
+        info("Transitioned to a reaper.")
+
+        // 3. Ask all of our nodes to stop.
+        nodes.foreach(n => n ! PoisonPill)
+        info("Pill sent to all nodes.")
+      }
     }
     case _ => error("Received unknown message!")
   }
@@ -168,7 +176,8 @@ class Node(val ip: String, val serverip: String,
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
-  val manager = context.actorFor("akka://hamiltont@" + serverip + ":2552/user/nodemanager")
+  val manager = context.actorFor(
+    s"akka://$user@$serverip:2552/user/nodemanager")
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
   var base_emulator_port = 5555
 

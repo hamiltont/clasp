@@ -52,7 +52,7 @@ class EmulatorManager extends Actor {
       // Alternatively, just copy all *.class files
       to ! undeliveredTasks.dequeue
     } else
-      error("Emulator came online, but no work was available. Permanently wasted!")
+      error("Emulator came online, but no work was available.")
   }
 
   def receive = {
