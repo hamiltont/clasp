@@ -227,10 +227,12 @@ object EmulatorBuilder {
     var hostname = "hostname".!!.stripLineEnd;
 
     val avdName = s"$hostname-$port"
-    info(s"Building unique AVD $avdName")
+    val target = Option(opts.avdTarget) getOrElse "android-18"
+    val abi = Option(opts.abiName) getOrElse "armeabi-v7a"
+    info(s"Building AVD $avdName for $abi $target.")
     // TODO we must lookup the eabi for the target or this will likely fail
     // TODO check for failure
-    sdk.create_avd(avdName, "android-18", "armeabi-v7a", true)
+    sdk.create_avd(avdName, target, abi, true)
 
     // TODO update this to use some working directory
     val username: String = "whoami".!!.stripLineEnd

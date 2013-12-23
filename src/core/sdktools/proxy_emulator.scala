@@ -157,7 +157,7 @@ class EmulatorOptions {
        shellSerial, tcpDump, bootChartTimeout, charmapFile,
        propNameVal, sharedNetID, nandLimits, memCheckFlags,
        gpuMode, cameraBackMode, cameraFrontMode, screenMode,
-       qemuArgs: String = null
+       qemuArgs, avdTarget, abiName: String = null
   
   var noCache, noSnapStorage, noSnapShot, noSnapShotSave,
       noSnapShotLoad, noSnapShotUpdateTime, wipeData, noSkin,
