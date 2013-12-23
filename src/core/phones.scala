@@ -4,6 +4,10 @@
  */
 package clasp.core
 
+import clasp.core.sdktools._
+import clasp.Emulator
+import clasp.modules.Personas
+
 import scala.util.{Success, Failure}
 import scala.collection.mutable.ListBuffer
 import scala.collection.immutable.Map
@@ -16,8 +20,6 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import akka.event.Logging
 //import org.hyperic.sigar.ProcTime
-import clasp.core.sdktools._
-import clasp.Emulator
 import org.slf4j.LoggerFactory
 
 import java.util.UUID
@@ -142,7 +144,6 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
   }
   
   override def preStart() {
-    var me: ActorRef = self
     implicit val system = context.system
     val f = future {
       info(s"Waiting for emulator $port to come online")
@@ -152,14 +153,22 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
       case Success(_) => {
         val bootTime = System.currentTimeMillis
         info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}")
+
+        // Apply all personas.
+        Personas.applyAll(serialID, opts)
+
+        // Start the heartbeats.
         system.scheduler.schedule(0 seconds, 1 seconds, self, EmulatorHeartbeat)
         Thread.sleep(5000)
-        emanager ! EmulatorReady(me) }
+
+        emanager ! EmulatorReady(self)
+      }
       case Failure(_) => { 
         val failTime = System.currentTimeMillis
         info(s"Emulator $port failed to boot. Reported failure at $failTime, took ${failTime - buildTime}");    
         emanager ! EmulatorFailed(self)
-        context.stop(self)}
+        context.stop(self)
+      }
     }
   }
 
@@ -233,8 +242,8 @@ object EmulatorBuilder {
     var hostname = "hostname".!!.stripLineEnd;
 
     val avdName = s"$hostname-$port"
-    val target = Option(opts.avdTarget) getOrElse "android-18"
-    val abi = Option(opts.abiName) getOrElse "armeabi-v7a"
+    val target = opts.avdTarget getOrElse "android-18"
+    val abi = opts.abiName getOrElse "armeabi-v7a"
     info(s"Building AVD $avdName for $abi $target.")
     // TODO we must lookup the eabi for the target or this will likely fail
     // TODO check for failure

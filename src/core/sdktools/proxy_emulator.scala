@@ -147,6 +147,7 @@ trait EmulatorProxy {
  * Contains various settings and flags for the emulator.
  */
 class EmulatorOptions {
+  // Command-line flags.
   var sysdir, system, datadir, kernel, ramdisk, image,
        data, partitionSize, cache, cacheSize, sdCard,
        snapStorage, snapShot, skinDir, skin, memory,
@@ -157,10 +158,14 @@ class EmulatorOptions {
        shellSerial, tcpDump, bootChartTimeout, charmapFile,
        propNameVal, sharedNetID, nandLimits, memCheckFlags,
        gpuMode, cameraBackMode, cameraFrontMode, screenMode,
-       qemuArgs, avdTarget, abiName: String = null
+       qemuArgs: String = null
   
   var noCache, noSnapStorage, noSnapShot, noSnapShotSave,
       noSnapShotLoad, noSnapShotUpdateTime, wipeData, noSkin,
       dynamicSkin, netFast, showKernel, shell, noJni, noAudio,
       rawKeys, noBootAnim, noWindow, force32Bit, verbose = false
+
+  // AVD and initialization options.
+  var avdTarget, abiName: Option[String] = None
+  var randomContacts, randomCalendar: Int = 0
 }
