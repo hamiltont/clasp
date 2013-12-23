@@ -43,7 +43,6 @@ object ClaspBuild extends Build {
     )
     .settings(scalaSource in Compile <<= baseDirectory(_ / "src"))
     .settings(scalaSource in Test <<= baseDirectory(_ / "test"))
-    //.settings(test in assembly := {}) // Don't run tests when creating the fat jar
     .settings(resourceDirectory in Test <<= baseDirectory(_ / "src"))
     .settings(resourceDirectory in Compile <<= baseDirectory(_ / "src"))
     .settings(testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-a", "-n"))

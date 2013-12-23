@@ -8,6 +8,9 @@ object BuildSettings {
   // unmanagedJars in Compile +=
   //    file("lib/hyperic-sigar-1.6.4/sigar-bin/lib/sigar.jar")
 
+  import sbtassembly.Plugin._ // sbt-assembly settings for building a fat jar
+  import AssemblyKeys._ // Imports sbt-assembly keys.
+
   lazy val basicSettings = Seq[Setting[_]](
     organization :=  "Magnum Research Group",
     version :=  "0.0.1",
@@ -32,14 +35,9 @@ object BuildSettings {
     Seq(file)
   })
 
-  // sbt-assembly settings for building a fat jar
-  import sbtassembly.Plugin._
-  import AssemblyKeys._ // Imports sbt-assembly keys.
   lazy val sbtAssemblySettings = assemblySettings ++ Seq(
-    // Slightly cleaner jar name
-    jarName in assembly := {
-      name.value + "-" + version.value + ".jar"
-    }
+    test in assembly := {}, // Don't run tests for 'assembly'.
+    jarName in assembly := { name.value + "-" + version.value + ".jar" }
   )
 
   lazy val buildSettings = basicSettings ++ scalifySettings ++ sbtAssemblySettings
