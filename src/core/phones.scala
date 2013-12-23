@@ -80,11 +80,17 @@ class EmulatorManager extends Actor {
       // Currently there's little danger of that, but still....
       undeliveredTasks.enqueue(new EmulatorTask(id, task))
     }
-    case TaskSuccess(id, data, emu) => {
+    case TaskSuccess(id, data, emu, emuObj, node) => {
       info(s"Task $id has completed")
       val promise_option = outstandingTasks remove id
       promise_option.get success data
-      sendTask(emu)
+      if (emuObj.rebootWhenFinished) {
+        info(s"Rebooting emulator ${emuObj.serialID}.")
+        emu ! PoisonPill
+        node ! BootEmulator
+      } else {
+        sendTask(emu)
+      }
     }
     case TaskFailure(id, err, emu) => {
       info(s"Task $id has failed")
@@ -94,13 +100,16 @@ class EmulatorManager extends Actor {
     }
   }
 }
+
+case class EmulatorHeartbeat()
 case class EmulatorReady(emu: ActorRef)
 case class EmulatorFailed(emu: ActorRef)
 case class EmulatorCrashed(emu: ActorRef)
 case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
 case class QueueEmulatorTask(function: Emulator => Map[String, Any], promise: Promise[Map[String,Any]])
 // TODO can I make Any require serializable? 
-case class TaskSuccess(taskId: String, data: Map[String, Any], emulator: ActorRef)
+case class TaskSuccess(taskId: String, data: Map[String, Any],
+  emulator: ActorRef, emulatorObj: Emulator, node: ActorRef)
 case class TaskFailure(taskId: String, err: Exception, emulator: ActorRef)
 
 // An always-on presence for a single emulator process. 
@@ -111,7 +120,7 @@ case class TaskFailure(taskId: String, err: Exception, emulator: ActorRef)
 // others to interface with the EmulatorActor without having to understand its 
 // interface
 class EmulatorActor(val port: Int, val opts: EmulatorOptions,
-    serverip: String, user: String) extends Actor {
+    serverip: String, user: String, node: ActorRef) extends Actor {
 
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
@@ -142,8 +151,8 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
     } onComplete { 
       case Success(_) => {
         val bootTime = System.currentTimeMillis
-        info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}");
-        system.scheduler.schedule(0 seconds, 1 seconds, self, "heartbeat");
+        info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}")
+        system.scheduler.schedule(0 seconds, 1 seconds, self, EmulatorHeartbeat)
         Thread.sleep(5000)
         emanager ! EmulatorReady(me) }
       case Failure(_) => { 
@@ -155,10 +164,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
   }
 
   def receive = {
-    case "get_serialID" => {
-      sender ! serialID
-    }
-    case "heartbeat" => {
+    case EmulatorHeartbeat => {
       // This heartbeat is sent every second and is initiated
       // once the emulator has booted.
       //
@@ -189,7 +195,7 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
 
       val data = future{ callback(emu) }
       data onSuccess {
-        case map => emanager ! TaskSuccess(id, map, self)
+        case map => emanager ! TaskSuccess(id, map, self, emu, node)
       }
       data onFailure {
         case e: Exception => emanager ! TaskFailure(id, e, self)

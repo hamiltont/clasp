@@ -300,11 +300,8 @@ class ClaspMaster(val conf: ClaspConf) {
  * We may want to avoid caching in the future and just have this know how
  * to ask the emulator for the right things
  */
-class Emulator(val serialID: String) extends Serializable {
+class Emulator(val serialID: String, var rebootWhenFinished: Boolean = false)
+    extends Serializable {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
-
-  def rebootWhenFinished() = {
-    // TODO
-  }
 }

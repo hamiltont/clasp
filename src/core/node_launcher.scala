@@ -185,10 +185,15 @@ class Node(val ip: String, val serverip: String,
   sdk.kill_adb
   sdk.start_adb
 
-  for (i <- 0 to numEmulators - 1) {
-    devices += context.actorOf(Props(new EmulatorActor(
-      base_emulator_port + 2 * i, emuOpts, serverip, user)),
+  private def bootEmulator(i: Int): ActorRef =
+    context.actorOf(Props(new EmulatorActor(
+      base_emulator_port + 2 * i, emuOpts, serverip, user, self)),
       s"emulator-${base_emulator_port + 2 * i}")
+
+  var i = 0
+  while (i < numEmulators ) {
+    devices += bootEmulator(i);
+    i += 1;
   }
 
   override def preStart() = {
@@ -210,6 +215,9 @@ class Node(val ip: String, val serverip: String,
   }
 
   def receive = {
+    case BootEmulator => devices += bootEmulator(i); i += 1
     case _ => info("Node received a message, but it doesn't do anything!")
   }
 }
+
+case class BootEmulator()
