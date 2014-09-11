@@ -35,6 +35,7 @@
     * If you only have one machine, then your `localhost` will double as master and worker, and `ssh localhost` needs to work
     * `ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa`
     * `cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys`
+* Android SDK on worker machines
 
 ## Build and Run Methods
 
@@ -62,6 +63,10 @@ This is provided by the [sbt-start-script plugin](https://github.com/sbt/sbt-sta
 ### Unit Testing
 
 Use `sbt test` to run any unit tests found in the project
+
+## Android SDK Location
+
+Update the file `src/application.conf.example` to point to your SDK location
 
 ## Options
 
