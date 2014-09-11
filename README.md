@@ -1,26 +1,5 @@
 # Clasp
 
-## Directory structure
- * `android-config` - Android project we build+install on each emulator
- * `attic` - Old but interesting files
- * `examples`
-    * `antimalware` - Dynamic Android malware analysis.
-    * `app-tester` - APK tester across many configurations. 
- * `project` - SBT build files (replaces `build.sbt`)
- * `src` - Clasp source.
- * `test` - Clasp tests.
- * `tools`
-    * `output-parser`
-    * `autoaccept-keys.sh` - Autoaccept SSH keys.
-    * `autodetect-config.sh` - Autodetect and populate Clasp configuration.
-    * `gather-logs.sh`
-    * `log-info.py` - Obtain heartbeat statistics from logs.
-    * `resources.py` - Profile process resource usage.
-    * `wipe-logs.sh` - Wipe logs from the notes.
- * `www` - Web application (ClaspWeb).
-    * Dashboard
-    * Configuration documentation and ScalaDoc
-
 ## Dependencies
 
 * Ubuntu 14.04
@@ -67,6 +46,27 @@ Use `sbt test` to run any unit tests found in the project
 ## Android SDK Location
 
 Update the file `src/application.conf.example` to point to your SDK location
+
+## Directory structure
+ * `android-config` - Android project we build+install on each emulator
+ * `attic` - Old but interesting files
+ * `examples`
+    * `antimalware` - Dynamic Android malware analysis.
+    * `app-tester` - APK tester across many configurations. 
+ * `project` - SBT build files (replaces `build.sbt`)
+ * `src` - Clasp source.
+ * `test` - Clasp tests.
+ * `tools`
+    * `output-parser`
+    * `autoaccept-keys.sh` - Autoaccept SSH keys.
+    * `autodetect-config.sh` - Autodetect and populate Clasp configuration.
+    * `gather-logs.sh`
+    * `log-info.py` - Obtain heartbeat statistics from logs.
+    * `resources.py` - Profile process resource usage.
+    * `wipe-logs.sh` - Wipe logs from the notes.
+ * `www` - Web application (ClaspWeb).
+    * Dashboard
+    * Configuration documentation and ScalaDoc
 
 ## Options
 
