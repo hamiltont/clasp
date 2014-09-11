@@ -23,7 +23,8 @@
 
 ## Dependencies
 
-* Only tested on Ubuntu 12.04 so far. 
+* Developed for Ubuntu 12.04, use others cautiously, but it should work fine
+    * For EC2, I used ami-0d9c9f64
 * Java, Scala
     * `apt-get install -y openjdk-7-jdk scala`
 * sbt
