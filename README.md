@@ -36,15 +36,30 @@
     * `ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa`
     * `cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys`
 
-## Build and Run
+## Build and Run Methods
 
+### SBT Run
 
-To build and run, use `sbt run` from the project root
+Use `sbt run` from the project root. Project will compile and run
 
-To create a Jar file, use `sbt assembly` from the project root, and find the result inside 
-of `target/scala-<version>/` (e.g. `target/scala-2.10/clasp-0.0.1.jar`. You can use 
-`java -jar clasp-0.0.1.jar` to run this file directly, including passing additional 
-flags using `java -jar clasp-0.0.1.jar --help`
+### Fat Jar
+
+This is a Jar that has all dependencies baked in, so it's large in size but guaranteed to run. Run `sbt assembly` from
+the project root, and find the Jar inside `target/scala-<version>/` (e.g. `target/scala-2.10/clasp-0.0.1.jar`). 
+
+You can run using `java -jar clasp-0.0.1.jar`, including passing additional flags (e.g. `java -jar clasp-0.0.1.jar --help`)
+
+To create a Fat Jar file, we use [sbt assembly](https://github.com/sbt/sbt-assembly)
+
+### Skinny Jar and Target Script
+
+Use `sbt target` from the project root to compile a jar without merging in all the dependencies. There
+will be a bash script output as `target/start` that will properly setup the classpath and then launch 
+this jar for you. Run using `target/start --help`
+
+### Unit Testing
+
+Use `sbt test` to run any unit tests found in the project
 
 ## Options
 
