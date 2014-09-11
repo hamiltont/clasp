@@ -49,7 +49,7 @@ the project root, and find the Jar inside `target/scala-<version>/` (e.g. `targe
 
 You can run using `java -jar clasp-0.0.1.jar`, including passing additional flags (e.g. `java -jar clasp-0.0.1.jar --help`)
 
-To create a Fat Jar file, we use [sbt assembly](https://github.com/sbt/sbt-assembly)
+To create the fat jar, we use [sbt assembly](https://github.com/sbt/sbt-assembly)
 
 ### Skinny Jar and Target Script
 
@@ -57,13 +57,15 @@ Use `sbt target` from the project root to compile a jar without merging in all t
 will be a bash script output as `target/start` that will properly setup the classpath and then launch 
 this jar for you. Run using `target/start --help`
 
+This is provided by the [sbt-start-script plugin](https://github.com/sbt/sbt-start-script)
+
 ### Unit Testing
 
 Use `sbt test` to run any unit tests found in the project
 
 ## Options
 
-*Note: As of Sept 2014*
+*As of Sept 2014*
 
 ```
 Usage: clasp [-c|--client] [-i|--ip <external ip>] [-m|--mip <master ip>] [-w|--workers <number>]
