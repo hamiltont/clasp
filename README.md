@@ -47,7 +47,11 @@ Use `sbt test` to run any unit tests found in the project
 
 Update the file `src/application.conf.example` to point to your SDK location
 
-## Directory structure
+## Development
+
+In the scala community, version numbers are huge! We use SBT 0.13, Scala 2.10, and Akka 2.1
+
+### Directory structure
  * `android-config` - Android project we build+install on each emulator
  * `attic` - Old but interesting files
  * `examples`
