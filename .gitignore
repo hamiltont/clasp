@@ -23,3 +23,5 @@ tools/memoryLoad.eps
 tools/resources.pickle
 
 www/node_modules
+
+.vagrant
