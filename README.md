@@ -72,6 +72,17 @@ In the scala community, version numbers are huge! We use SBT 0.13, Scala 2.10, a
     * Dashboard
     * Configuration documentation and ScalaDoc
 
+## Website and Documentation
+
+To turn on the website, run these:
+
+```
+$ sudo apt-get install nodejs npm
+$ cd www
+$ npm install
+$ nodejs app.js
+```
+
 ## Options
 
 *As of Sept 2014*
