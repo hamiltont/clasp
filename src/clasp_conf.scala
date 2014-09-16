@@ -19,11 +19,11 @@ import org.rogach.scallop.ScallopConf
 //      there are no instances of clasp running. Can only kill processes for this user, 
 //      so should report processids / nodes where clasp processes are still running
 class ClaspConf(arguments: Seq[String]) extends ScallopConf(arguments) {
-  version("Clasp 0.0.0")
+  version("Clasp 0.0.1")
   banner("""Usage: clasp [-c|--client] [-i|--ip <external ip>] [-m|--mip <master ip>] [-w|--workers <number>]
     |
-    |By default clasp runs as though it was a server with only 
-    |the local node. This makes it easier for people running in
+    |By default clasp runs as a server with only the local node. 
+    |This makes it easier for people running in
     |a non-distributed manner. If you use sbt, then to run a 
     |client use sbt "run --client". To run a whole system you
     |need a server running on the main node and then clients on
@@ -39,11 +39,11 @@ class ClaspConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   // TODO figure out how to make scallop enforce this requirement for us
   val mip = opt[String](descr = "The master ip address. Only used with --client, " +
     "and required for clients")
-
+    
   var user = opt[String](descr = "The username that clasp should use when SSHing into " +
     "worker systems", default = Some("clasp"))
 
-  val workers = opt[Int](descr = "The number of worker clients Clasp should start " +
+  var workers = opt[Int](descr = "The number of worker clients Clasp should start " +
     "by default. This number can grow or shrink dynamically as the system runs. All " +
     "clients are picked from the pool of IP addresses inside client.conf",
     default = Some(3))
@@ -94,11 +94,15 @@ class ClaspConf(arguments: Seq[String]) extends ScallopConf(arguments) {
 
       // Both master and client run on localhost
       if (!ip.isSupplied) ip = opt[String](default = Some("127.0.0.1"));
-      if (!pool.isSupplied) pool = opt[String](default = Some("127.0.0.1"));
-
-      // User name defaults to me
-      if (!user.isSupplied) user = opt[String](default = Some("whoami".!!))
+      if (!pool.isSupplied) {
+        pool = opt[String](default = Some("127.0.0.1"))
+        workers = opt[Int](default = Some(1))
+      }
     }
+    
+    // Default to current user
+    if (!user.isSupplied) user = opt[String](default = Some("whoami".!!.trim()))
+    
   }
 }
 
