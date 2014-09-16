@@ -2,12 +2,12 @@ package clasp.core.sdktools
 
 import akka.actor.ActorSystem
 import scala.language.postfixOps
-
 import scala.sys.process.Process
 import scala.sys.process.stringToProcess
 import scala.sys.process.ProcessLogger
-
 import sdk_config.log.info
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /**
  * Provides an interface to the
@@ -22,6 +22,10 @@ trait EmulatorProxy {
   val mksdcard:String = sdk_config.config.getString(sdk_config.mksdcard_config)
   import sdk_config.log.{error, debug, info, trace}
 
+  def valid = {
+    Files.exists(Paths.get(emulator)) && Files.exists(Paths.get(mksdcard)) 
+  }
+  
   /**
    * Start an emulator with the given options.
    */

@@ -5,19 +5,18 @@
 package clasp.core.sdktools
 
 import org.slf4j.LoggerFactory
-
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-
 import scala.sys.process._
 import scala.concurrent._
 import scala.concurrent.duration._
 import ExecutionContext.Implicits.global
-
 import akka.actor._
 import akka.actor.ActorDSL._
 import akka.actor.ActorSystem
 import akka.pattern.ask
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /**
  * The entire SDK tool facade!
@@ -29,6 +28,11 @@ object sdk extends AndroidProxy
               with AaptProxy {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
+  
+  // TODO extend to all
+  override def valid = {
+    super[AndroidProxy].valid && super[EmulatorProxy].valid
+  }
 
   //val adb:String = sdk_config.config.getString(sdk_config.adb_config)
   
@@ -78,13 +82,14 @@ object sdk extends AndroidProxy
 }
 
 object sdk_config {
-  // TODO run checks to ensure that all three of these can be accessed
+
   val aapt_config     = "sdk.aapt"
   val adb_config      = "sdk.adb"
   val android_config  = "sdk.android"
   val emulator_config = "sdk.emulator"
   val mksdcard_config = "sdk.mksdcard"
   val config: Config  = ConfigFactory.load()
+  
   // TODO make this return the proper class at runtime.
   // Currently only returns clasp.core.sdk_config
   lazy val log = LoggerFactory.getLogger(getClass())

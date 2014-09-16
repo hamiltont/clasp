@@ -1,12 +1,12 @@
 package clasp.core.sdktools
 
 import scala.language.postfixOps
-
 import scala.sys.process._
-
 import util.control.Breaks._
 import sdk_config.log.error
 import sdk_config.log.info
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /**
  * Provides an interface to the
@@ -19,6 +19,11 @@ import sdk_config.log.info
 trait AndroidProxy {
   val android:String = sdk_config.config.getString(sdk_config.android_config)
   import sdk_config.log.{error, debug, info, trace}
+  
+  def valid = {
+    debug(s"Checking for binary at $android")
+    Files.exists(Paths.get(android))
+  }
   
   /**
    * Return the available Android Virtual Devices.
