@@ -25,6 +25,9 @@ import scala.util.Random
 import System.currentTimeMillis
 import scala.concurrent.duration._
 import ExecutionContext.Implicits.global
+import akka.remote.RemoteClientLifeCycleEvent
+import akka.remote.RemoteClientShutdown
+import akka.remote.RemoteClientConnected
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
@@ -175,9 +178,10 @@ class NodeManager(val ip: String,
         info(s"Deploying using $copy")
         copy.!!
 
-        val build = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $workspaceDir && sbt stage'"
+        val build = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $workspaceDir && sbt clean && sbt stage'"
         info(s"Building using $build")
-        build.!!
+        val buildtxt = build.!!
+        // debug(s"Build Output: $buildtxt")
 
         val export = if (local) ":0" else "localhost:10.0"
         val localFlag = if (local) "--local" else ""
@@ -218,6 +222,7 @@ class Node(val ip: String, val serverip: String,
     s"akka://$user@$serverip:2552/user/nodemanager")
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
   var base_emulator_port = 5555
+  context.system.eventStream.subscribe(self, classOf[RemoteClientLifeCycleEvent])
 
   // TODO: Better ways to ensure devices appear online?
   sdk.kill_adb
@@ -249,12 +254,17 @@ class Node(val ip: String, val serverip: String,
       info(s"System shutdown achieved at ${System.currentTimeMillis}")
     }
     info(s"Requesting system shutdown at ${System.currentTimeMillis}")
-    context.system.shutdown()
+    context.system.shutdown
   }
 
   def receive = {
     case BootEmulator =>
       devices += bootEmulator(i); i += 1
+	case _: RemoteClientShutdown    => {
+	  info("The master appears to have terminated")
+	  info("Terminating ourself in response")
+	  context.system.shutdown
+	}
     case _ => info("Node received a message, but it doesn't do anything!")
   }
 }
