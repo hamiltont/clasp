@@ -22,6 +22,17 @@
 
 Use `sbt run` from the project root. Project will compile and run
 
+You can pass arguments using `sbt "run --client"`
+
+### Run and View Typesafe Console
+
+Use `sbt atmos:run`. Project will compile and run, and will output the 
+port where you can access the 
+[Typesafe Console](http://typesafe.com/platform/runtime/console), which 
+the image below shows is pretty slick (mem/cpu/messages sent/etc)
+
+<img src="http://i.imgur.com/QKmm2Bz.png" style="width:400px">
+
 ### Fat Jar
 
 This is a Jar that has all dependencies baked in, so it's large in size but guaranteed to run. Run `sbt assembly` from
@@ -33,7 +44,7 @@ To create the fat jar, we use [sbt assembly](https://github.com/sbt/sbt-assembly
 
 ### Skinny Jar and Target Script
 
-Use `sbt target` from the project root to compile a jar without merging in all the dependencies. There
+Use `sbt stage` from the project root to compile a jar without merging in all the dependencies. There
 will be a bash script output as `target/start` that will properly setup the classpath and then launch 
 this jar for you. Run using `target/start --help`
 
@@ -50,6 +61,12 @@ Update the file `src/application.conf.example` to point to your SDK location
 ## Development
 
 In the scala community, version numbers are huge! We use SBT 0.13, Scala 2.10, and Akka 2.1
+
+### Using ScalaIDE for Eclipse
+
+1. Download from [here](http://scala-ide.org/)
+2. Run `sbt eclipse` to create `.project` and `.classpath` files
+3. In eclipse, use import existing project
 
 ### Directory structure
  * `android-config` - Android project we build+install on each emulator
@@ -128,3 +145,24 @@ all other nodes
       --help                   Show help message
       --version                Show version of this program
 ```
+
+## VNC Support
+
+We support viewing and controlling emulators using VNC. This is exposed natively 
+in the dashboard, or you can connect to a single emulator using your VNC viewer
+of choice. 
+
+Each emulator is launched as so: 
+
+```bash
+$ # Create virtual framebuffer of necessary size
+$ Xvfb :5 -screen 0 1024x768x16 &
+$ # Launch desired emulator
+$ DISPLAY=:5 emulator 
+$ # Convert X11 into VNC server (Enables any VNC connection)
+$ x11vnc -display :5 -bg -nopw -listen localhost -xkb
+$ # Use websockify to proxy TCP port (enables noVNC connection)
+$ noVNC/utils/launch.sh --vnc localhost:5901
+```
+
+Both `Xvfb` and `x11vnc` are supported natively on Ubuntu and Mac OSX

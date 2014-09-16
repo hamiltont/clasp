@@ -6,6 +6,7 @@ object ClaspBuild extends Build {
   import Dependencies._
   import BuildSettings._
   import com.typesafe.sbt.SbtStartScript // Imports xsbt.
+  import com.typesafe.sbt.SbtAtmos.{ Atmos, atmosSettings }
 
   // Configure prompt to show current project
   override lazy val settings = super.settings :+ {
@@ -36,8 +37,8 @@ object ClaspBuild extends Build {
     )
     .settings(
       unmanagedJars in Test ++= Seq(
-        file("lib/akka-2.1.0/akka/config-1.0.0.jar"),
-        file("lib/akka-2.1.0/akka/akka-testkit_2.10-2.1.0.jar"),
+        file("lib/akka-2.1.4/lib/config-1.0.0.jar"),
+        file("lib/akka-2.1.4/lib/akka-testkit_2.10-2.1.4.jar"),
         file("lib/commons-io-2.4/commons-io-2.4.jar")
       )
     )
@@ -46,4 +47,6 @@ object ClaspBuild extends Build {
     .settings(resourceDirectory in Test <<= baseDirectory(_ / "src"))
     .settings(resourceDirectory in Compile <<= baseDirectory(_ / "src"))
     .settings(testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-a", "-n"))
+    .configs(Atmos)
+    .settings(atmosSettings: _*)
 }
