@@ -58,8 +58,8 @@ class NodeManager(val ip: String,
 
   var outstandingList = ListBuffer[String]()
   
-  // Shut ourselves down in 60 seconds if we are empty
-  context.system.scheduler.scheduleOnce(40 seconds, self, Shutdown(true))
+  // Shut ourselves down if no Nodes start
+  context.system.scheduler.scheduleOnce(120 seconds, self, Shutdown(true))
 
   def monitoring: Receive = {
     case NodeUp(nodeip) => {

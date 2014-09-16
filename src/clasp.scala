@@ -241,6 +241,16 @@ class ClaspMaster(val conf: ClaspConf) {
     System.exit(0)
   }
 
+  // If the JVM indicates it's shutting down (via Ctrl-C or a SIGTERM), 
+  // then try to cleanup our ActorSystem
+  sys addShutdownHook {
+    if (!system.isTerminated) {
+      debug("JVM is going to terminate, trigger ActorSystem cleanup")
+      system.shutdown
+      Thread.sleep(1000)
+    }
+  }
+
   // When a new emulator is ready to be used, the provided function will 
   // be transported to the node that emulator runs on and then executed
   //
