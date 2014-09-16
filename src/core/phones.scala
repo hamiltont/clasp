@@ -244,14 +244,14 @@ object EmulatorBuilder {
     val avdName = s"$hostname-$port"
     val target = opts.avdTarget getOrElse "android-18"
     val abi = opts.abiName getOrElse "armeabi-v7a"
-    info(s"Building AVD $avdName for $abi $target.")
+    info(s"Building AVD `$avdName` for ABI `$abi` Target `$target`")
     // TODO we must lookup the eabi for the target or this will likely fail
     // TODO check for failure
     sdk.create_avd(avdName, target, abi, true)
 
     // TODO update this to use some working directory
     val username: String = "whoami".!!.stripLineEnd
-    val workspaceDir = s"/tmp/clasp/$username"
+    val workspaceDir = s"/tmp/clasp/$username/sdcards"
     s"mkdir -p $workspaceDir" !!
 
     val sdcardName = workspaceDir + "/sdcard-" + hostname + "-" +
