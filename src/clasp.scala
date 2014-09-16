@@ -1,46 +1,31 @@
 package clasp
 
-import scala.collection.mutable.MutableList
-
-import scala.collection.mutable.ListBuffer
-import scala.sys.process._
-import scala.language.postfixOps
-
+import java.io.File
 import scala.concurrent._
+import scala.language.postfixOps
+import scala.sys.process._
 import scala.concurrent.duration._
-
 import org.slf4j.LoggerFactory
-
 import com.typesafe.config.ConfigFactory
-
 import akka.actor._
 import akka.pattern.Patterns.ask
-import akka.util.Timeout
-import java.util.concurrent.TimeUnit
-
+import akka.pattern.AskSupport
+import akka.pattern.Patterns._
 import clasp.core._
-import clasp.core.sdktools.sdk
 import clasp.core.sdktools.EmulatorOptions
-import java.io.File
+import clasp.core.sdktools.sdk
+import akka.util.Timeout
+import core.sdktools.EmulatorOptions
+import core.sdktools.sdk
+import core.EmulatorManager
+import java.text.SimpleDateFormat
+import java.util.Date
 
-/*
- * Example of using Clasp. The App will be packaged and deployed to both the
- * server and the client machines. Note that you should never be the one
- * specifying --client on the command line. Starting the server will, with
- * proper configuration parameters, start all of the worker machines. The
- * corollary is that stopping the server is a graceful operation and all of the
- * worker machines will be properly shutdown as soon as they are done
- * processing their current message. If your messages are huge this might take
- * a while, but this is much better than logging into each machine and force
- * killing all of the processes associated with running clasp. If you manually
- * shutdown instead of using the graceful operation then you had better know
- * how to clean up the proper processes, because the system may refuse to
- * restart on any computers that have an incorrect start state!
- */
+/* Used to launch Clasp from the command line */
 object ClaspRunner extends App {
   // If you would like logging on remote machines(all workers), then use these
   // logging methods in your codebase. The logs will (eventually) be pulled
-  // back to the master, so that you don't need to manually aggregrate your
+  // back to the master, so that you don't need to manually aggregate your
   // logs
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
@@ -49,7 +34,6 @@ object ClaspRunner extends App {
   val conf = new ClaspConf(args)
   conf.doModificationAfterParse
 
-  // TODO: Add a way for emulator options to be nonuniform?
   // Setup some options for the emulator
   // TODO instead of passing arguments one at a time to the client 
   // (who then uses those options to setup the EmulatorOptions), 
@@ -68,7 +52,6 @@ object ClaspRunner extends App {
     new ClaspClient(conf, opts)
   else {
     var clasp = new ClaspMaster(conf)
-    printf("Testing callback abilities")
 
     import ExecutionContext.Implicits.global
     // Any logging done inside the callback will show up in the remote host
@@ -112,37 +95,28 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
   } catch {
     case inuse: org.jboss.netty.channel.ChannelException => {
       val logbuffer = new StringBuilder(s"Another person is using $ip as a client node!\n")
-      logbuffer ++= "Refusing to start a new client here\n"
-      logbuffer ++= "Here is some debug info to help detect what is running:\n"
-      // TODO update this to include any sdk commands
-      val emu_cmds = "emulator,emulator64-arm,emulator64-mips,emulator64-x86,emulator-arm,emulator-mips,emulator-x86"
-      val ps_list: String = s"ps -o user,cmd -C java,$emu_cmds".!!.stripLineEnd
-      logbuffer ++= s"Process List (including this java process!): \n$ps_list\n"
+      try {
+        // Print to local log
+        print("Cannot start: Channel in use")
 
-      logbuffer ++= "User List (including you!):\n"
-      val user_list: String = s"ps --no-headers -o user -C java,$emu_cmds".!!
-      import scala.collection.immutable.StringOps
-      (new StringOps(user_list)).lines.foreach(line => {
-        val user: String = (s"getent passwd $line").!!.stripLineEnd
-        logbuffer ++= user
-      })
+        logbuffer ++= "Refusing to start a new client here\n"
+        logbuffer ++= "Here is some debug info to help detect what is running:\n"
+        // TODO update this to include any sdk commands
+        // TODO use java library for PS instead of shell commands to make this cross-platform
+        val emu_cmds = "emulator,emulator64-arm,emulator64-mips,emulator64-x86,emulator-arm,emulator-mips,emulator-x86"
+        val ps_list: String = s"ps -o user,cmd -C java,$emu_cmds".!!.stripLineEnd
+        logbuffer ++= s"Process List (including this java process!): \n$ps_list\n"
 
-      // Notify failure
-      val failConf = ConfigFactory
-        .parseString(s"""akka.remote.netty.hostname="$ip"""")
-        .withFallback(ConfigFactory.parseString("akka.remote.netty.port=0"))
-        .withFallback(ConfigFactory.load("application"))
-
-      val masterip = conf.mip()
-      val user = conf.user()
-      val temp = ActorSystem("clasp-failure", failConf)
-      val manager = temp.actorFor(s"akka://$user@$masterip:2552/user/nodemanager")
-      manager ! NodeBusy(ip, logbuffer.toString)
-      // TODO replace above with ask and terminate as soon as the Ack receive
-
-      // 99% confidence the busy message was received
-      Thread.sleep(2000)
-      System.exit(1)
+        logbuffer ++= "User List (including you!):\n"
+        val user_list: String = s"ps --no-headers -o user -C java,$emu_cmds".!!
+        import scala.collection.immutable.StringOps
+        (new StringOps(user_list)).lines.foreach(line => {
+          val user: String = (s"getent passwd $line").!!.stripLineEnd
+          logbuffer ++= user
+        })
+      } finally {
+        shutdown(1, Some(logbuffer.toString))
+      }
     }
   }
 
@@ -156,13 +130,48 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
 
   if (conf.mip.get == None) {
     error("Client started without an ip address for the master node, aborting")
-    System.exit(1)
+    shutdown(1, Some("No master IP address passed"))
   }
-  val masterip = conf.mip().stripLineEnd
+  if (!sdk.valid) {
+    error("Unable to locate SDK, refusing to create Node")
+    shutdown(1, Some("Unable to locate SDK"))
+  }
 
+  val masterip = conf.mip().stripLineEnd
   var n = system.actorOf(Props(new Node(ip, masterip, emuOpts,
     conf.numEmulators.apply, conf.user.apply)), name = s"node-$ip")
   info(s"Created Node for $ip")
+
+  def shutdown(exitcode: Int = 0, message: Option[String] = None) = {
+    system.shutdown
+    system.awaitTermination(30 second)
+
+    // Do our best to preemptively notify the master that we're done
+    if (!message.isEmpty) {
+      val tempConf = ConfigFactory
+        .parseString(s"""akka.remote.netty.hostname="$ip"""")
+        .withFallback(ConfigFactory.parseString("akka.remote.netty.port=0"))
+        .withFallback(ConfigFactory.load("application"))
+
+      val masterip = conf.mip()
+      val user = conf.user()
+      val temp = ActorSystem("clasp-temp", tempConf)
+      debug(s"Sending message to akka://clasp@$masterip:2552/user/nodemanager")
+      val manager = temp.actorFor(s"akka://clasp@$masterip:2552/user/nodemanager")
+
+      manager ! NodeStartError(ip, message.get)
+
+      debug("Waiting 10 seconds for the message to be delivered")
+      Thread.sleep(10000)
+
+      temp.shutdown
+      temp.awaitTermination(10 second)
+    }
+
+    debug("Shutting down")
+    System.exit(exitcode)
+
+  }
 }
 
 /*
@@ -182,9 +191,9 @@ class ClaspMaster(val conf: ClaspConf) {
 
   var system: ActorSystem = null
   try {
-    debug("About to create Master ActorSystem");
+    debug(s"About to create Master ActorSystem clasp");
     system = ActorSystem("clasp", serverConf)
-    debug("Master's ActorSystem created");
+    debug("Master's ActorSystem created")
   } catch {
     case inuse: org.jboss.netty.channel.ChannelException => {
       error(s"Another person is using $ip as a master node!")
@@ -204,10 +213,9 @@ class ClaspMaster(val conf: ClaspConf) {
     }
   }
 
-  //Check for presence of and make a temporary SD card directory if it does not yet exist
+  // Make SD card directory
   val logname = getLogDirectoryForMe
-
-  val sdDir: File = new File("/tmp/sdcards" + logname)
+  val sdDir: File = new File(s"/tmp/sdcards/$logname")
   if (!sdDir.exists()) {
     sdDir.mkdir()
   }
@@ -215,12 +223,23 @@ class ClaspMaster(val conf: ClaspConf) {
   val emanager = system.actorOf(Props[EmulatorManager], name = "emulatormanager")
   info("Created EmulatorManager")
 
-  var manager = system.actorOf(Props(
-    new NodeManager(ip, conf.workers(), conf.pool.get,
-      conf.numEmulators.apply, local = conf.local())), name = "nodemanager")
+  var manager = system.actorOf(Props(new NodeManager(ip,
+    conf.workers(),
+    conf.pool.get, conf.numEmulators.apply,
+    local = conf.local())), name = "nodemanager")
   info("Created NodeManager")
 
-  sys addShutdownHook (shutdown_listener)
+  // Cleanup then exit JVM
+  system.registerOnTermination {
+    info("Termination of clasp ActorSystem detected")
+    info("Running cleanup tasks")
+    // TODO: Give users an option 
+    if (sdDir.listFiles() != null)
+      sdDir.listFiles().map(sd => sd.delete())
+
+    info("Exiting JVM")
+    System.exit(0)
+  }
 
   // When a new emulator is ready to be used, the provided function will 
   // be transported to the node that emulator runs on and then executed
@@ -236,51 +255,8 @@ class ClaspMaster(val conf: ClaspConf) {
 
   def kill {
     info("Killing Clasp and emulators.")
-    shutdown_listener
-  }
 
-  private def shutdown_listener() {
-    // TODO: Context.system.shutdown somewhere?
-
-    if (manager != null && !manager.isTerminated) {
-      manager ! Shutdown // Shutdown everything from Node down.
-      emanager ! PoisonPill // Shutdown all other high-level management.
-    }
-
-    // TODO: Give users an option to delete SD cards.
-    sdDir.listFiles().map( sd => sd.delete())
-
-    var timeSlept = 0.0d; var timeout = 10.0d
-    var promptThread: Option[Thread] = None
-    while (manager != null && !manager.isTerminated) {
-      Thread.sleep(500)
-      timeSlept += 0.5d
-      if (promptThread.isEmpty && timeSlept >= timeout) {
-        promptThread = Option(
-          new Thread(
-            new Runnable {
-              def run() {
-                val input = readLine(
-                  s"""|Waited for $timeSlept seconds, 
-                      |and all nodes have not responded.
-                      |Continue waiting (y)/n? """.stripMargin)
-                if (input != null && input.size > 0 &&
-                  input.toLowerCase.charAt(0) == 'n') {
-                  println("Exiting.")
-                  println("Warning: Nodes may still have emulators" +
-                    " running on them!")
-                  System.exit(42)
-                } else {
-                  println("Waiting for 10 more seconds.")
-                  timeout = timeSlept + 10.0d // Don't care about race.
-                  promptThread = None
-                }
-              }
-            }
-          )
-        )
-      }
-    }
+    system.shutdown
   }
 
   def getLogDirectoryForMe: String = {
@@ -301,7 +277,7 @@ class ClaspMaster(val conf: ClaspConf) {
  * to ask the emulator for the right things
  */
 class Emulator(val serialID: String, var rebootWhenFinished: Boolean = false)
-    extends Serializable {
+  extends Serializable {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 }

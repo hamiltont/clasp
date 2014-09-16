@@ -23,11 +23,15 @@ import scala.concurrent._
 import scala.language.postfixOps
 import scala.util.Random
 import System.currentTimeMillis
+import scala.concurrent.duration._
+import ExecutionContext.Implicits.global
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
-class NodeManager(val ip: String, val initial_workers: Int,
-  manual_pool: Option[String] = None, val numEmulators: Int,
+class NodeManager(val ip: String,
+  val initial_workers: Int,
+  manual_pool: Option[String] = None,
+  val numEmulators: Int,
   val local: Boolean = false) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
@@ -36,6 +40,7 @@ class NodeManager(val ip: String, val initial_workers: Int,
   manual_pool match {
     case Some(mpool) => {
       pool = (new ArrayStack) union mpool.split(',')
+      debug("Worker pool override: " + mpool)
     }
     case None => {
       // Build a pool of worker IP addresses
@@ -43,119 +48,151 @@ class NodeManager(val ip: String, val initial_workers: Int,
       val pool_list = config.getStringList("clasp.workerpool")
       val it = pool_list.iterator
       pool = Random.shuffle((new ArrayStack) union pool_list.asScala)
+      debug("Worker pool from config file: " + pool_list)
     }
   }
 
   for (i <- 1 to initial_workers) yield (self ! BootNode)
 
   val nodes = ListBuffer[ActorRef]()
-  // Tracks how many nodes have been triggered but have not yet replied
-  var outstanding: AtomicInteger = new AtomicInteger
+
+  var outstandingList = ListBuffer[String]()
+  
+  // Shut ourselves down in 60 seconds if we are empty
+  context.system.scheduler.scheduleOnce(40 seconds, self, Shutdown(true))
 
   def monitoring: Receive = {
-    case NodeUp => {
+    case NodeUp(nodeip) => {
       nodes += sender
       info(s"${nodes.length}: Node ${sender.path} has registered!")
-      outstanding.decrementAndGet
-
-      if (outstanding.get == 0)
-        info("All nodes requested (to this point) are awake and registered")
+      outstandingList -= nodeip
+      if (outstandingList.isEmpty)
+        info("All nodes requested to this point are awake and registered")
     }
-    case NodeBusy(nodeip, nodelog) => {
-      info(s"Node $nodeip has declared itself busy")
+    case NodeStartError(nodeip, nodelog) => {
+      outstandingList -= nodeip
+      info(s"Node $nodeip (${sender.path}) has declared it had an error starting")
       info(s"Debug log for node $nodeip:\n$nodelog")
       info("Requesting a new node to replace $nodeip")
-      outstanding.decrementAndGet
+
       boot_any
     }
+    case NodeBootExpected(nodeip) => {
+      if (outstandingList.contains(nodeip)) {
+        info(s"Node $nodeip appears to have failed to boot")
+        info("Requesting a new node to replace $nodeip")
+        outstandingList -= nodeip
+
+        boot_any
+      } else
+        debug(s"Ignoring boot timeout message for $nodeip, reply already received")
+    }
     case BootNode => boot_any
-    case Shutdown => {
-      if (nodes.size == 0) {
-        // Terminate if there are no nodes.
-        info("Killing self.")
+    case Shutdown(ifempty: Boolean) => {
+      if (nodes.isEmpty && outstandingList.isEmpty) {
+        // Terminate if there are no nodes or outstanding requests 
+        info("Shutdown requested. No nodes active, terminating")
         self ! PoisonPill
-      } else {
-        // Otherwise, reap the nodes.
+      } else if (!ifempty) {
+        // Otherwise, reap the nodes
 
         // 1. Register to watch all nodes.
         nodes.foreach(node => context.watch(node))
-        info("Shutdown requested.")
+        info("Shutdown requested")
 
         // 2. Transition our receive loop into a Reaper
         context.become(reaper)
-        info("Transitioned to a reaper.")
+        info("Transitioned to a reaper")
 
         // 3. Ask all of our nodes to stop.
         nodes.foreach(n => n ! PoisonPill)
-        info("Pill sent to all nodes.")
+        info("Pill sent to all nodes")
+      } else {
+        debug("Request : 'If not empty, then shutdown'")
+        debug("Response: 'Not empty, ignoring'")
       }
     }
     case _ => error("Received unknown message!")
   }
 
   def reaper: Receive = {
-
     case Terminated(ref) => {
       nodes -= ref
       info(s"Reaper: Termination received for ${ref.path}")
-      info(s"Reaper: ${nodes.length} nodes and ${outstanding.get} outstanding")
-      if (nodes.isEmpty && outstanding.get == 0) {
-        info("No more remote nodes or outstanding boot requests, killing self.")
-        self ! PoisonPill
-      }
+      info(s"Reaper: ${nodes.length} nodes and ${outstandingList.length} outstanding")
+      terminateIfReaped
     }
-    case NodeUp => {
-      outstanding.decrementAndGet
+    case NodeUp(nodeip) => {
+      outstandingList -= nodeip
       info(s"Reaper: Node registered at ${sender.path}")
       nodes += sender
       info(s"Reaper: Replying with a PoisonPill")
-      info(s"Reaper: ${nodes.length} nodes and ${outstanding.get} outstanding")
+      info(s"Reaper: ${nodes.length} nodes and ${outstandingList.length} outstanding")
       context.watch(sender)
       sender ! PoisonPill
     }
-    case BootNode => info("Reaper: Ignoring boot request")
-    case NodeBusy(id, log) => {
-      outstanding.decrementAndGet
-      info(s"Reaper: Ignoring busy node $id")
-      info(s"Reaper: ${nodes.length} nodes and ${outstanding.get} outstanding")
+    case NodeStartError(ip, log) => {
+      outstandingList -= ip
+      info(s"Reaper: Ignoring busy node $ip")
+      info(s"Reaper: ${nodes.length} nodes and ${outstandingList.length} outstanding")
+      terminateIfReaped
     }
-    case Shutdown => info("Reaper: Ignoring shutdown")
+    case NodeBootExpected(ip) => {
+      outstandingList -= ip
+      info(s"Reaper: Received boot timeout check message for $ip")
+      info(s"Reaper: ${nodes.length} nodes and ${outstandingList.length} outstanding")
+      terminateIfReaped
+    }
+    // TODO log message type
+    case _ => info("Reaper: Ignoring message")
+  }
+
+  def terminateIfReaped() = {
+    if (nodes.isEmpty && outstandingList.isEmpty) {
+      info("No more remote nodes or outstanding boot requests, terminating")
+      self ! PoisonPill
+    }
   }
 
   override def postStop = {
-    context.system.registerOnTermination {
-      info("System shutdown achieved at " + System.currentTimeMillis)
-    }
-    info("postStop. Requesting system shutdown at " + System.currentTimeMillis)
+    info("NodeManager halted. Triggering full ActorSystem shutdown")
     context.system.shutdown()
   }
 
   def boot_any = {
-    info("Node boot requested")
-    if (pool.length != 0)
-      bootstrap(pool.pop)
-    else
+    info(s"Node boot requested (by ${sender.path})")
+    if (pool.length == 0)
       error("Node boot request failed - worker pool is empty")
-  }
+    else {
+      val client_ip = pool.pop
 
-  def bootstrap(client_ip: String): Unit = {
-    import ExecutionContext.Implicits.global
-    val f = future {
-      val directory: String = "pwd".!!.stripLineEnd
-      val username = "whoami".!!.stripLineEnd
-      val workspaceDir = s"/tmp/clasp/$username"
-      val export = if (local) ":0" else "localhost:10.0"
-      val localFlag = if (local) "--local" else ""
-      val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip " +
-        s"sh -c 'export DISPLAY=$export; " +
-        s"cd $directory; " +
-        s"mkdir -p $workspaceDir ; " +
-        s"nohup target/start --client $localFlag --ip $client_ip --mip $ip " +
-        s"--num-emulators $numEmulators " +
-        s"> /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
-      info(s"Starting $client_ip using $command")
-      command.!!
-      outstanding.incrementAndGet
+      val f = future {
+        val directory: String = "pwd".!!.stripLineEnd
+        val username = "whoami".!!.stripLineEnd
+        val workspaceDir = s"/tmp/clasp/$username"
+
+        val copy = s"rsync --archive --exclude='.git/' . localhost:$workspaceDir"
+        info(s"Deploying using $copy")
+        copy.!!
+
+        val build = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $workspaceDir && sbt stage'"
+        info(s"Building using $build")
+        build.!!
+
+        val export = if (local) ":0" else "localhost:10.0"
+        val localFlag = if (local) "--local" else ""
+        val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip " +
+          s"sh -c 'cd $workspaceDir; " +
+          s"nohup target/start --client $localFlag --ip $client_ip --mip $ip " +
+          s"--num-emulators $numEmulators " +
+          s"> /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
+        info(s"Starting $client_ip using $command")
+        command.!!
+        outstandingList += client_ip
+
+        // Check that we've heard back
+        context.system.scheduler.scheduleOnce(30 seconds, self, NodeBootExpected(client_ip))
+      }
     }
   }
 
@@ -163,16 +200,17 @@ class NodeManager(val ip: String, val initial_workers: Int,
   def receive = monitoring
 }
 sealed trait NM_Message
-case class Shutdown() extends NM_Message
-case class NodeUp() extends NM_Message
+case class Shutdown(ifempty: Boolean = false) extends NM_Message
+case class NodeUp(nodeip: String) extends NM_Message
 case class BootNode() extends NM_Message
-case class NodeBusy(nodeid: String, debuglog: String) extends NM_Message
+case class NodeStartError(nodeip: String, debuglog: String) extends NM_Message
+case class NodeBootExpected(nodeip: String) extends NM_Message
 
 // Manages the running of the framework on a single node,
 // including ?startup?, shutdown, etc.
 class Node(val ip: String, val serverip: String,
-    val emuOpts: EmulatorOptions, val numEmulators: Int, val user: String)
-    extends Actor {
+  val emuOpts: EmulatorOptions, val numEmulators: Int, val user: String)
+  extends Actor {
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
@@ -191,14 +229,14 @@ class Node(val ip: String, val serverip: String,
       s"emulator-${base_emulator_port + 2 * i}")
 
   var i = 0
-  while (i < numEmulators ) {
+  while (i < numEmulators) {
     devices += bootEmulator(i);
     i += 1;
   }
 
   override def preStart() = {
     info(s"Node online: ${self.path}")
-    manager ! NodeUp
+    manager ! NodeUp(ip)
   }
 
   override def postStop() = {
@@ -215,7 +253,8 @@ class Node(val ip: String, val serverip: String,
   }
 
   def receive = {
-    case BootEmulator => devices += bootEmulator(i); i += 1
+    case BootEmulator =>
+      devices += bootEmulator(i); i += 1
     case _ => info("Node received a message, but it doesn't do anything!")
   }
 }
