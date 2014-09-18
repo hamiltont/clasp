@@ -36,12 +36,20 @@ if [ ! -e "~/.firstboot" ]; then
   chmod 600 ~/.ssh/authorized_keys
 
   # Setup 
-  echo "Installing software"
+  echo "Setup SBT"
   cd $HOME/clasp
   sbt assembly
 
+  echo "Setup NodeJS"
   sudo apt-get install nodejs npm
   cd www
   npm install
-  
+
+  echo "Setup Android"
+  sudo apt-get install -y zip
+  sudo mkdir /android
+  sudo chown $USER:$USER /android
+  cd /android
+  wget https://dl.google.com/android/adt/adt-bundle-linux-x86_64-20140702.zip -O android.zip
+  unzip android.zip
 fi
