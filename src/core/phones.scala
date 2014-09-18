@@ -122,21 +122,29 @@ case class TaskFailure(taskId: String, err: Exception, emulator: ActorRef)
 // Eventually we will have an Emulator object, which will be a proxy that allows 
 // others to interface with the EmulatorActor without having to understand its 
 // interface
-class EmulatorActor(val port: Int, val opts: EmulatorOptions,
-    serverip: String, user: String, node: ActorRef) extends Actor {
-
+// TODO make EmulatorActor a FSM with states Booted, Booting, and Not Booted
+class EmulatorActor(val id: Int, val opts: EmulatorOptions,
+  val node: NodeDetails) extends Actor {
+  
   lazy val log = LoggerFactory.getLogger(getClass())
-  import log.{error, debug, info, trace}
+  import log.{ error, debug, info, trace }
+  
+  // Emulator ports (each needs two)
+  val base_emulator_port = 5555
+  val port = base_emulator_port + 2 * id
+  
+  // Display port (1 is 5601, 99 is 5699)
+  val base_display_port = 1
+  val display = base_display_port + id
+  
+  // Emulator manager reference
+  val emanager = context.system.actorFor(s"akka://clasp@${node.masterip}:2552/user/emulatormanager")
 
   // Processes for display management on X11 based system
   var XvfbProcess: Option[Process] = None
   var x11vncProcess: Option[Process] = None
   val buildTime = System.currentTimeMillis
-  info(s"Building emulator for port $port at $buildTime")
-  val (process, serialID) = EmulatorBuilder.build(port, opts)
-
-  val emanager = context.system.actorFor(
-    s"akka://$user@$serverip:2552/user/emulatormanager")
+  val (process, serialID) = build()
 
   override def postStop = {
     info(s"Stopping emulator ${self.path}")
@@ -245,15 +253,12 @@ class Device(SerialID: String) {
   }
 }
 
-object EmulatorBuilder {
-  lazy val log = LoggerFactory.getLogger(getClass())
-  import log.{error, debug, info, trace}
-  
-  def build(port: Int, opts: EmulatorOptions): (Process, String) = {
-    info("Building and starting emulator.")
+  // TODO Put this all inside a future
+  def build(): (Process, String) = {
+    info(s"Building and starting emulator $id on port $port")
 
     val avds = sdk.get_avd_names
-      
+
     // Give each emulator a unique sdcard.
     // TODO: Where should this be put?
     //       Putting it here seemed logical (and easy) to me.
@@ -268,19 +273,19 @@ object EmulatorBuilder {
     // TODO check for failure
     sdk.create_avd(avdName, target, abi, true)
 
-    // TODO update this to use some working directory
-    val username: String = "whoami".!!.stripLineEnd
+    val username = "whoami".!!.stripLineEnd
+    val workdir = s"/tmp/clash/$username/avds"
     val workspaceDir = s"/tmp/clasp/$username/sdcards"
     s"mkdir -p $workspaceDir" !!
 
-    val sdcardName = workspaceDir + "/sdcard-" + hostname + "-" +
-      port + ".img"
-    info(s"Creating sdcard: '$sdcardName'")
+    // Create SD card
+    val sdcardName = s"$workspaceDir/sdcard-$hostname-$port.img"
+    info(s"Creating sdcard: $sdcardName")
     sdk.mksdcard("9MB", sdcardName)
-    if (opts.sdCard != null) {
+    if (opts.sdCard != null)
       // TODO: What should be done in this case?
-      info("Warning: Overriding default sdcard option.")
-    }
+      info("Warning: Overriding provided sdcard option.")
+    
     opts.sdCard = sdcardName
     
     // Determine display type
@@ -327,6 +332,7 @@ object EmulatorBuilder {
       }
     } 
 
+    // TODO spawn thread to watch for premature exit
     return sdk.start_emulator(avdName, port, opts);
   }
 }
