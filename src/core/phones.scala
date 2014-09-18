@@ -143,6 +143,8 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
   // Processes for display management on X11 based system
   var XvfbProcess: Option[Process] = None
   var x11vncProcess: Option[Process] = None
+  // Build sdcard, avd, and start emulator
+  var avd:avd = null
   val buildTime = System.currentTimeMillis
   val (process, serialID) = build()
 
@@ -167,6 +169,9 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
       x11vncProcess.get.exitValue
       info("Halted x11vnc")
     }
+    
+    // info(s"Removing AVD")
+    // avd.delete
     
   }
   
@@ -272,10 +277,12 @@ class Device(SerialID: String) {
     info(s"Building AVD `$avdName` for ABI `$abi` Target `$target`")
     // TODO we must lookup the eabi for the target or this will likely fail
     // TODO check for failure
-    sdk.create_avd(avdName, target, abi, true)
 
     val username = "whoami".!!.stripLineEnd
     val workdir = s"/tmp/clash/$username/avds"
+
+    avd = new avd(avdName, target, abi)
+
     val workspaceDir = s"/tmp/clasp/$username/sdcards"
     s"mkdir -p $workspaceDir" !!
 

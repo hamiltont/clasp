@@ -253,6 +253,35 @@ trait AndroidProxy {
   }
 
   /**
+   * Returns a map of key/value pairs describing the AVD
+   */
+  def list_avd(name: String): Map[String, String] = {
+    var command = s"$android list avd".!!
+
+    var insideCurrent = false
+    var current: Map[String, String] = Map()
+    breakable {
+      for (line <- command.linesIterator) {
+        // TODO use regex and include end of line in match
+        if (line.contains(s"Name: $name")) 
+          insideCurrent = true
+        if (line.contains("------") && insideCurrent) {
+          insideCurrent = false
+          break
+        }
+        if (insideCurrent) {
+          val map = line.split(": ")
+          val key = map(0).trim()
+          val value = map(1).trim()
+          current += (key -> value)
+        }
+      }
+    }
+
+    current.toMap
+  }
+
+  /**
    * Deletes an Android Virtual Device.
    */
   def delete_avd(name: String): Boolean = {
