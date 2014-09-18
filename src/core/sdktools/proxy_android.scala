@@ -8,6 +8,7 @@ import sdk_config.log.info
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.regex.Pattern
+import scala.None
 
 /**
  * Provides an interface to the
@@ -109,7 +110,8 @@ trait AndroidProxy {
   def create_avd(name: String,
     target: String,
     abiName: String,
-    force: Boolean): Boolean = {
+    force: Boolean,
+    path: Option[String] = None): Boolean = {
     if (!force && (get_avd_names contains name)) {
       val errorMsg = s"Error: AVD '$name' already exists."
       error(errorMsg)
@@ -140,6 +142,10 @@ trait AndroidProxy {
     if (force) {
       command += " --force"
     }
+    // TODO make path work properly
+    //if (!path.isEmpty) 
+    //  command += s" --path ${path.get}"
+
     info(s"Building an AVD using $command")
 
     var create = Process(command)

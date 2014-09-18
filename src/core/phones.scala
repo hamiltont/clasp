@@ -4,42 +4,38 @@
  */
 package clasp.core
 
-import clasp.core.sdktools._
-import clasp.Emulator
-import clasp.modules.Personas
-
-import scala.util.{Success, Failure}
-import scala.collection.mutable.ListBuffer
-import scala.collection.immutable.Map
-import scala.sys.process.Process
-import scala.sys.process._ 
-import akka.actor._
-import akka.serialization._
-
-import scala.concurrent._
-import scala.concurrent.duration._
-import akka.event.Logging
-//import org.hyperic.sigar.ProcTime
-import org.slf4j.LoggerFactory
-
 import java.util.UUID
-import java.util.concurrent.TimeUnit;
+import scala.collection.immutable.Map
+import scala.collection.mutable.ListBuffer
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.language.postfixOps
-
-import ExecutionContext.Implicits.global
+import scala.sys.process._
+import scala.sys.process.Process
+import scala.util.Failure
+import scala.util.Success
+import org.slf4j.LoggerFactory
+import akka.actor._
+import akka.dispatch.OnFailure
+import akka.dispatch.OnSuccess
+import clasp.Emulator
+import core.sdktools.avd
+import core.sdktools.EmulatorOptions
+import core.sdktools.sdk
+import modules.Personas
 
 class EmulatorManager extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
-  import log.{error, debug, info, trace}
+  import log.{ error, debug, info, trace }
 
   val emulators = ListBuffer[ActorRef]()
 
   // Tasks that have been delivered but not fulfilled
-  val outstandingTasks: scala.collection.mutable.Map[String, Promise[Map[String,Any]]] = scala.collection.mutable.Map() 
+  val outstandingTasks: scala.collection.mutable.Map[String, Promise[Map[String, Any]]] = scala.collection.mutable.Map()
 
   // Contains tasks that need to be delivered to workers
-  val undeliveredTasks: scala.collection.mutable.Queue[EmulatorTask] = scala.collection.mutable.Queue() 
-
+  val undeliveredTasks: scala.collection.mutable.Queue[EmulatorTask] = scala.collection.mutable.Queue()
 
   def sendTask(to: ActorRef) = {
     if (undeliveredTasks.length != 0) {
@@ -62,7 +58,7 @@ class EmulatorManager extends Actor {
       emulators += emu
       info(s"${emulators.length} emulators awake: ${emu.path}")
       sendTask(emu)
-   }
+    }
     case EmulatorFailed(emu) => {
       emulators -= emu
       info(s"Emulator failed to boot: ${emu.path}")
@@ -109,7 +105,7 @@ case class EmulatorReady(emu: ActorRef)
 case class EmulatorFailed(emu: ActorRef)
 case class EmulatorCrashed(emu: ActorRef)
 case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
-case class QueueEmulatorTask(function: Emulator => Map[String, Any], promise: Promise[Map[String,Any]])
+case class QueueEmulatorTask(function: Emulator => Map[String, Any], promise: Promise[Map[String, Any]])
 // TODO can I make Any require serializable? 
 case class TaskSuccess(taskId: String, data: Map[String, Any],
   emulator: ActorRef, emulatorObj: Emulator, node: ActorRef)
@@ -143,18 +139,20 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
   // Processes for display management on X11 based system
   var XvfbProcess: Option[Process] = None
   var x11vncProcess: Option[Process] = None
+ 
+  var heartbeatSchedule: Cancellable = null
+  
   // Build sdcard, avd, and start emulator
   var avd:avd = null
   val buildTime = System.currentTimeMillis
   val (process, serialID) = build()
 
+  // TODO why is getting a PoisonPill not calling this?
   override def postStop = {
-    info(s"Stopping emulator ${self.path}")
-
-    // TODO can we stop politely by sending a command to the emulator? 
+    info(s"Halting emulator process ($id,$serialID,$port,${self.path})")
     process.destroy
     process.exitValue // block until destroyed
-    info(s"Emulator ${self.path} stopped")
+    info(s"Halted emulator process")
     
     if (!XvfbProcess.isEmpty) {
       info("Halting Xvfb")
@@ -173,34 +171,39 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
     // info(s"Removing AVD")
     // avd.delete
     
+    if (heartbeatSchedule != null)
+      heartbeatSchedule.cancel
+    else
+      debug("Heartbeat schedule was null")    
   }
-  
+
   override def preStart() {
     implicit val system = context.system
-    val f = future {
-      info(s"Waiting for emulator $port to come online")
-      if (false == sdk.wait_for_emulator(serialID, 200.second))
+    val boot = future {
+      info(s"Waiting for emulator ($id,$port) to come online")
+      if (false == sdk.wait_for_emulator(serialID, 200 second))
         throw new IllegalStateException("Emulator has not booted")
-    } onComplete { 
-      case Success(_) => {
-        val bootTime = System.currentTimeMillis
-        info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}")
+    } 
+    
+    boot onSuccess { case _ =>
+      val bootTime = System.currentTimeMillis
+      info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}")
 
-        // Apply all personas.
-        Personas.applyAll(serialID, opts)
+      // Apply all personas
+      Personas.applyAll(serialID, opts)
 
-        // Start the heartbeats.
-        system.scheduler.schedule(0 seconds, 1 seconds, self, EmulatorHeartbeat)
-        Thread.sleep(5000)
+      // Start the heartbeats
+      heartbeatSchedule = system.scheduler.schedule(0 seconds, 1 seconds, self, EmulatorHeartbeat)
+      Thread.sleep(5000)
 
-        emanager ! EmulatorReady(self)
-      }
-      case Failure(_) => { 
-        val failTime = System.currentTimeMillis
-        info(s"Emulator $port failed to boot. Reported failure at $failTime, took ${failTime - buildTime}");    
-        emanager ! EmulatorFailed(self)
-        context.stop(self)
-      }
+      emanager ! EmulatorReady(self)
+    } 
+    
+    boot onFailure { case _ =>
+      val failTime = System.currentTimeMillis
+      info(s"Emulator $port failed to boot. Reported failure at $failTime");
+      emanager ! EmulatorFailed(self)
+      context.stop(self)
     }
   }
 
@@ -213,11 +216,10 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
       // mechanism to determine if the device is online
       // than just making sure the process is alive.
       info(s"Sending heartbeat to $serialID.")
-      val ret = future{ sdk.remote_shell(serialID, "echo", 5 seconds) }
+      val ret = future { sdk.remote_shell(serialID, "echo alive", 5 seconds) }
       ret onComplete {
         case Success(out) => {
           if (out.isEmpty) {
-            // TODO: What if we're in the middle of a task?
             error(s"Emulator $serialID heartbeat failed. Destroying.")
             emanager ! EmulatorCrashed(self)
             context.stop(self)
@@ -234,9 +236,9 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
       info(s"Performing task $id")
       val emu = new Emulator(serialID)
 
-      val data = future{ callback(emu) }
+      val data = future { callback(emu) }
       data onSuccess {
-        case map => emanager ! TaskSuccess(id, map, self, emu, node)
+        case map => emanager ! TaskSuccess(id, map, self, emu, node.node)
       }
       data onFailure {
         case e: Exception => emanager ! TaskFailure(id, e, self)
@@ -247,16 +249,6 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
       info(s"EmulatorActor ${self.path} received unknown message from ${sender.path}: $unknown")
     }
   }
-}
-
-/* Physical hardware */
-class Device(SerialID: String) {
-  override def toString = "Device " + SerialID
-
-  def setup {
-    // Trigger the 4.2.1 verify apps dialog to allow choice to enable/disable
-  }
-}
 
   // TODO Put this all inside a future
   def build(): (Process, String) = {
@@ -342,5 +334,15 @@ class Device(SerialID: String) {
 
     // TODO spawn thread to watch for premature exit
     return sdk.start_emulator(avdName, port, opts);
+  }
+
+}
+
+/* Physical hardware */
+class Device(SerialID: String) {
+  override def toString = "Device " + SerialID
+
+  def setup {
+    // Trigger the 4.2.1 verify apps dialog to allow choice to enable/disable
   }
 }
