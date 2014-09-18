@@ -100,6 +100,7 @@ class EmulatorManager extends Actor {
       promise_option.get failure err
       sendTask(emu)
     }
+    case unknown => error(s"Received unknown message from ${sender.path}: $unknown")
   }
 }
 
@@ -211,8 +212,8 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
         case t => error("Obtained a Throwable.")
       }
     }
-    case _ => {
-      info(s"EmulatorActor ${self.path} received unknown message")
+    case unknown => {
+      info(s"EmulatorActor ${self.path} received unknown message from ${sender.path}: $unknown")
     }
   }
 }

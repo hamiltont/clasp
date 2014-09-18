@@ -28,39 +28,44 @@ import ExecutionContext.Implicits.global
 import akka.remote.RemoteClientLifeCycleEvent
 import akka.remote.RemoteClientShutdown
 import akka.remote.RemoteClientConnected
+import clasp.ClaspConf
+import akka.dispatch.Resume
+import akka.actor.SupervisorStrategy._
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
-class NodeManager(val ip: String,
-  val initial_workers: Int,
-  manual_pool: Option[String] = None,
-  val numEmulators: Int,
-  val local: Boolean = false) extends Actor {
+class NodeManager(val conf: ClaspConf) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
+  //  val ip: String,
+  //  val initial_workers: Int,
+  //  val numEmulators: Int,
+  //  val local: Boolean = false
+
   var pool: ArrayStack[String] = null
-  manual_pool match {
+  conf.pool.get match {
     case Some(mpool) => {
+      debug(s"Worker pool override: $mpool")
       pool = (new ArrayStack) union mpool.split(',')
-      debug("Worker pool override: " + mpool)
     }
     case None => {
       // Build a pool of worker IP addresses
-      val config = ConfigFactory.load("client")
-      val pool_list = config.getStringList("clasp.workerpool")
+      val config = ConfigFactory.load("master")
+
+      val pool_list = config.getStringList(conf.poolKey())
       val it = pool_list.iterator
       pool = Random.shuffle((new ArrayStack) union pool_list.asScala)
       debug("Worker pool from config file: " + pool_list)
     }
   }
 
-  for (i <- 1 to initial_workers) yield (self ! BootNode)
+  for (i <- 1 to conf.workers()) yield (self ! BootNode)
 
   val nodes = ListBuffer[ActorRef]()
 
   var outstandingList = ListBuffer[String]()
-  
+
   // Shut ourselves down if no Nodes start
   context.system.scheduler.scheduleOnce(120 seconds, self, Shutdown(true))
 
@@ -76,9 +81,9 @@ class NodeManager(val ip: String,
       outstandingList -= nodeip
       info(s"Node $nodeip (${sender.path}) has declared it had an error starting")
       info(s"Debug log for node $nodeip:\n$nodelog")
-      info("Requesting a new node to replace $nodeip")
+      info(s"Requesting a new node to replace $nodeip")
 
-      boot_any
+      self ! BootNode()
     }
     case NodeBootExpected(nodeip) => {
       if (outstandingList.contains(nodeip)) {
@@ -86,22 +91,23 @@ class NodeManager(val ip: String,
         info("Requesting a new node to replace $nodeip")
         outstandingList -= nodeip
 
-        boot_any
+        self ! BootNode()
       } else
         debug(s"Ignoring boot timeout message for $nodeip, reply already received")
     }
     case BootNode => boot_any
     case Shutdown(ifempty: Boolean) => {
+      debug(s"Received Shutdown request, with force=${!ifempty}")
       if (nodes.isEmpty && outstandingList.isEmpty) {
         // Terminate if there are no nodes or outstanding requests 
-        info("Shutdown requested. No nodes active, terminating")
+        info("No nodes active, terminating")
         self ! PoisonPill
       } else if (!ifempty) {
         // Otherwise, reap the nodes
 
         // 1. Register to watch all nodes.
         nodes.foreach(node => context.watch(node))
-        info("Shutdown requested")
+        info("Nodes active, forcing shutdown")
 
         // 2. Transition our receive loop into a Reaper
         context.become(reaper)
@@ -111,11 +117,10 @@ class NodeManager(val ip: String,
         nodes.foreach(n => n ! PoisonPill)
         info("Pill sent to all nodes")
       } else {
-        debug("Request : 'If not empty, then shutdown'")
-        debug("Response: 'Not empty, ignoring'")
+        debug("Nodes active, ignoring shutdown")
       }
     }
-    case _ => error("Received unknown message!")
+    case unknown => error(s"Received unknown message from ${sender.path}: $unknown")
   }
 
   def reaper: Receive = {
@@ -146,8 +151,7 @@ class NodeManager(val ip: String,
       info(s"Reaper: ${nodes.length} nodes and ${outstandingList.length} outstanding")
       terminateIfReaped
     }
-    // TODO log message type
-    case _ => info("Reaper: Ignoring message")
+    case unknown => error(s"Reaper: Ignoring unknown message from ${sender.path}: $unknown")
   }
 
   def terminateIfReaped() = {
@@ -186,12 +190,11 @@ class NodeManager(val ip: String,
         val buildtxt = build.!!
         // debug(s"Build Output: $buildtxt")
 
-        val export = if (local) ":0" else "localhost:10.0"
-        val localFlag = if (local) "--local" else ""
+        val localFlag = if (conf.local()) "--local" else ""
         val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip " +
           s"sh -c 'cd $workspaceDir; " +
-          s"nohup target/start --client $localFlag --ip $client_ip --mip $ip " +
-          s"--num-emulators $numEmulators " +
+          s"nohup target/start --client $localFlag --ip $client_ip --mip ${conf.ip()} " +
+          s"--num-emulators ${conf.numEmulators()} " +
           s"> /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
         info(s"Starting $client_ip using $command")
         command.!!
@@ -213,33 +216,58 @@ case class BootNode() extends NM_Message
 case class NodeStartError(nodeip: String, debuglog: String) extends NM_Message
 case class NodeBootExpected(nodeip: String) extends NM_Message
 
-// Manages the running of the framework on a single node,
-// including ?startup?, shutdown, etc.
+// Used to pass a bunch of static node information to each EmulatorActor
+case class NodeDetails(nodeip: String, ostype: String, masterip: String, node: ActorRef)
+
+// Manages the running of the framework on a single node
 class Node(val ip: String, val serverip: String,
-  val emuOpts: EmulatorOptions, val numEmulators: Int, val user: String)
+  val emuOpts: EmulatorOptions, val numEmulators: Int)
   extends Actor {
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
-  val manager = context.actorFor(
-    s"akka://$user@$serverip:2552/user/nodemanager")
+  val manager = context.actorFor(s"akka://clasp@$serverip:2552/user/nodemanager")
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
-  var base_emulator_port = 5555
+
+  // Be alerted if master crashes
   context.system.eventStream.subscribe(self, classOf[RemoteClientLifeCycleEvent])
 
-  // TODO: Better ways to ensure devices appear online?
+  // Restart ADB with the node
   sdk.kill_adb
   sdk.start_adb
 
-  private def bootEmulator(i: Int): ActorRef =
-    context.actorOf(Props(new EmulatorActor(
-      base_emulator_port + 2 * i, emuOpts, serverip, user, self)),
-      s"emulator-${base_emulator_port + 2 * i}")
+  override val supervisorStrategy =
+    OneForOneStrategy(maxNrOfRetries = 2, withinTimeRange = 3 minutes) {
+      case _: ActorInitializationException => {
+        // TODO if we are starting up and the failed EmulatorActor was our only
+        // child, then we need to terminate
+        debug(s"A child failed to initialize")
+        Stop
+      }
+      case _: ActorKilledException => Stop
+      case _: Exception => Escalate
+    }
 
-  var i = 0
-  while (i < numEmulators) {
-    devices += bootEmulator(i);
-    i += 1;
+  // Launch initial emulators
+  var current_emulator_ID = 0
+  while (current_emulator_ID < numEmulators)
+    devices += bootEmulator();
+
+  private def bootEmulator(): ActorRef = {
+    val me = NodeDetails(ip, get_os_type, serverip, self)
+    current_emulator_ID = current_emulator_ID + 1
+    debug(s"Booting new emulator with ID $current_emulator_ID")
+    context.actorOf(
+      Props(new EmulatorActor(current_emulator_ID, emuOpts, me)),
+      s"emulator-${5555 + 2 * current_emulator_ID}")
+  }
+
+  def get_os_type(): String = {
+    val name = System.getProperty("os.name").toLowerCase()
+    if (name.contains("darwin") || name.contains("mac")) { return "mac" }
+    else if (name.contains("nux")) { return "linux" }
+    else if (name.contains("win")) { return "windows" }
+    else { return "unknown" }
   }
 
   override def preStart() = {
@@ -249,26 +277,26 @@ class Node(val ip: String, val serverip: String,
 
   override def postStop() = {
     info(s"Node ${self.path} has stopped");
-
+    info("Sending PoisonPill to emulators")
     devices.foreach(phone => phone ! PoisonPill)
-    info("Requested emulators to halt")
 
+    info(s"Requesting system shutdown at ${System.currentTimeMillis}")
     context.system.registerOnTermination {
       info(s"System shutdown achieved at ${System.currentTimeMillis}")
     }
-    info(s"Requesting system shutdown at ${System.currentTimeMillis}")
+
     context.system.shutdown
   }
 
   def receive = {
     case BootEmulator =>
-      devices += bootEmulator(i); i += 1
-	case _: RemoteClientShutdown    => {
-	  info("The master appears to have terminated")
-	  info("Terminating ourself in response")
-	  context.system.shutdown
-	}
-    case _ => info("Node received a message, but it doesn't do anything!")
+      devices += bootEmulator()
+    case _: RemoteClientShutdown => {
+      info("The master appears to have terminated")
+      info("Terminating ourself in response")
+      context.system.shutdown
+    }
+    case unknown => info(s"Received unknown message from ${sender.path}: $unknown")
   }
 }
 
