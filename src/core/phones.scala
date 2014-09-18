@@ -267,7 +267,8 @@ class Device(SerialID: String) {
 
     val avdName = s"$hostname-$port"
     val target = opts.avdTarget getOrElse "android-18"
-    val abi = opts.abiName getOrElse "armeabi-v7a"
+    val abi = opts.abiName getOrElse "x86"
+    
     info(s"Building AVD `$avdName` for ABI `$abi` Target `$target`")
     // TODO we must lookup the eabi for the target or this will likely fail
     // TODO check for failure
