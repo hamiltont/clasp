@@ -10,11 +10,13 @@
 * sbt
     * `wget http://repo.scala-sbt.org/scalasbt/sbt-native-packages/org/scala-sbt/sbt/0.13.0/sbt.deb --no-verbose`
     * `dpkg -i sbt.deb`
+    * Needed on all workers
 * Passwordless SSH from the launch machine to all other machines
     * If you only have one machine, then your `localhost` will double as master and worker, and `ssh localhost` needs to work
     * `ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa`
     * `cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys`
 * Android SDK on worker machines
+* Xvfb, x11vnc on linux workers
 
 ## Build and Run Methods
 

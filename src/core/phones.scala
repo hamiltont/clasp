@@ -128,6 +128,9 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{error, debug, info, trace}
 
+  // Processes for display management on X11 based system
+  var XvfbProcess: Option[Process] = None
+  var x11vncProcess: Option[Process] = None
   val buildTime = System.currentTimeMillis
   info(s"Building emulator for port $port at $buildTime")
   val (process, serialID) = EmulatorBuilder.build(port, opts)
@@ -142,6 +145,21 @@ class EmulatorActor(val port: Int, val opts: EmulatorOptions,
     process.destroy
     process.exitValue // block until destroyed
     info(s"Emulator ${self.path} stopped")
+    
+    if (!XvfbProcess.isEmpty) {
+      info("Halting Xvfb")
+      XvfbProcess.get.destroy
+      XvfbProcess.get.exitValue
+      info("Halted Xvfb")
+    }
+    
+    if (!x11vncProcess.isEmpty) {
+      info("Halting x11vnc")
+      x11vncProcess.get.destroy
+      x11vncProcess.get.exitValue
+      info("Halted x11vnc")
+    }
+    
   }
   
   override def preStart() {
@@ -264,6 +282,50 @@ object EmulatorBuilder {
       info("Warning: Overriding default sdcard option.")
     }
     opts.sdCard = sdcardName
+    
+    // Determine display type
+    node.ostype match {
+      case "linux" => {
+        debug("Running on Linux, assuming headless. Searching for Xvfb and x11vnc")
+        val xvfb = "which Xvfb".! == 0
+        val x11vnc = "which x11vnc".! == 0
+        if (xvfb && x11vnc) {
+          debug(s"Found, will run emulator in graphical mode using DISPLAY=:$id")
+          opts.noWindow = false
+           
+          // Start a virtual frame buffer
+          val xvfbCommand = s"Xvfb :${id} -screen 0 1024x768x16"
+          val xvfbProcess = Process(xvfbCommand)
+          val xvfbLogger = ProcessLogger ( line => info(s"xvfb:${id}:out: $line"), 
+          		line => error(s"xvfb:${id}:err: $line") )
+          debug(s"Running Xvfb using: $xvfbCommand")
+          val xvfb = xvfbProcess.run(xvfbLogger)
+          XvfbProcess = Some(xvfb)
+          
+          // Ensure Xvfb is started before being used
+          Thread.sleep(850)
+          
+          // Start a VNC server for the frame buffer
+          val xvncCommand = s"x11vnc -display :${id} -nopw -listen 0.0.0.0 -xkb"
+          val xvncProcess = Process(xvncCommand)
+          val xvncLogger = ProcessLogger ( line => info(s"x11vnc:${id}:out: $line"), 
+          		line => error(s"x11vnc:${id}:err: $line") )
+          debug(s"Running x11vnc using: $xvncCommand")
+          val xvnc = xvncCommand.run(xvncLogger)
+          x11vncProcess = Some(xvnc)
+          
+          // Set the DISPLAY variable used when starting the emulator
+          opts.display = Some(id)
+        } else {
+          debug("Not found, running emulator headless")
+          opts.noWindow = true
+        }
+      }
+      case _ => {
+        debug("Running emulator on non-linux platform")
+        debug("Showing window, but VNC will not work")
+      }
+    } 
 
     return sdk.start_emulator(avdName, port, opts);
   }
