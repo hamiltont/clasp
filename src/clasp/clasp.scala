@@ -2,24 +2,18 @@ package clasp
 
 import java.io.File
 import scala.concurrent._
-import scala.language.postfixOps
 import scala.sys.process._
 import scala.concurrent.duration._
 import org.slf4j.LoggerFactory
 import com.typesafe.config.ConfigFactory
 import akka.actor._
-import akka.pattern.Patterns.ask
-import akka.pattern.AskSupport
 import akka.pattern.Patterns._
 import clasp.core._
-import clasp.core.sdktools.EmulatorOptions
-import clasp.core.sdktools.sdk
-import akka.util.Timeout
+import scala.Array.canBuildFrom
+import scala.collection.immutable.StringOps
+import scala.concurrent.ExecutionContext.Implicits.global
 import core.sdktools.EmulatorOptions
 import core.sdktools.sdk
-import core.EmulatorManager
-import java.text.SimpleDateFormat
-import java.util.Date
 
 /* Used to launch Clasp from the command line */
 object ClaspRunner extends App {
@@ -40,10 +34,6 @@ object ClaspRunner extends App {
   // can we just serialize EmulatorOptions on master and deliver 
   // then entire object? Would there be any benefit?!
   val opts = new EmulatorOptions
-  if (conf.local())
-    opts.noWindow = false
-  else
-    opts.noWindow = true
 
   // Create a new instance of the framework. There should be at least one
   // instance of Clasp started per computer in your cluster, although you
@@ -138,8 +128,10 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
   }
 
   val masterip = conf.mip().stripLineEnd
-  var n = system.actorOf(Props(new Node(ip, masterip, emuOpts,
-    conf.numEmulators.apply, conf.user.apply)), name = s"node-$ip")
+  var n = system.actorOf(Props(new Node(ip,
+    masterip,
+    emuOpts,
+    conf.numEmulators.apply)), name = s"node-$ip")
   info(s"Created Node for $ip")
 
   def shutdown(exitcode: Int = 0, message: Option[String] = None) = {
@@ -193,6 +185,7 @@ class ClaspMaster(val conf: ClaspConf) {
   try {
     debug(s"About to create Master ActorSystem clasp");
     system = ActorSystem("clasp", serverConf)
+    
     debug("Master's ActorSystem created")
   } catch {
     case inuse: org.jboss.netty.channel.ChannelException => {
@@ -223,10 +216,7 @@ class ClaspMaster(val conf: ClaspConf) {
   val emanager = system.actorOf(Props[EmulatorManager], name = "emulatormanager")
   info("Created EmulatorManager")
 
-  var manager = system.actorOf(Props(new NodeManager(ip,
-    conf.workers(),
-    conf.pool.get, conf.numEmulators.apply,
-    local = conf.local())), name = "nodemanager")
+  var manager = system.actorOf(Props(new NodeManager(conf)), name = "nodemanager")
   info("Created NodeManager")
 
   // Cleanup then exit JVM
@@ -265,7 +255,6 @@ class ClaspMaster(val conf: ClaspConf) {
 
   def kill {
     info("Killing Clasp and emulators.")
-
     system.shutdown
   }
 

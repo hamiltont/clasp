@@ -2,8 +2,7 @@ package clasp
 
 import java.net.Inet4Address
 import java.net.Inet6Address
-
-import scala.sys.process.stringToProcess
+import scala.sys.process._
 
 import org.rogach.scallop.ScallopConf
 
@@ -52,6 +51,9 @@ class ClaspConf(arguments: Seq[String]) extends ScallopConf(arguments) {
     "file by providing a comma-separated list of IP addresses e.g. [--pool " +
     "\"10.0.2.1,10.0.2.2\"]. Workers will be launched in the order given. No " +
     "spaces are allowed after commas")
+    
+  var poolKey = opt[String](descr = "The key used to find the workerpool in master.conf", 
+      default = Some("clasp.workerpool"))
 
   val numEmulators = opt[Int](default = Option(1),
     descr = "The number of emulators to start on each node.")
