@@ -174,7 +174,10 @@ class NodeManager(val ip: String,
         val username = "whoami".!!.stripLineEnd
         val workspaceDir = s"/tmp/clasp/$username"
 
-        val copy = s"rsync --archive --exclude='.git/' . localhost:$workspaceDir"
+        val mkdir = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'mkdir -p $workspaceDir'"
+        mkdir.!!
+
+        val copy = s"rsync --archive --exclude='.git/' . $client_ip:$workspaceDir"
         info(s"Deploying using $copy")
         copy.!!
 
