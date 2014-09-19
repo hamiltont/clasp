@@ -19,11 +19,11 @@ import org.slf4j.LoggerFactory
 import akka.actor._
 import akka.dispatch.OnFailure
 import akka.dispatch.OnSuccess
+import clasp.modules.Personas
 import clasp.Emulator
-import core.sdktools.avd
-import core.sdktools.EmulatorOptions
-import core.sdktools.sdk
-import modules.Personas
+import clasp.core.sdktools.sdk
+import clasp.core.sdktools.EmulatorOptions
+import clasp.core.sdktools.avd
 
 class EmulatorManager extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
@@ -154,22 +154,23 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
     process.exitValue // block until destroyed
     info(s"Halted emulator process")
     
-    if (!XvfbProcess.isEmpty) {
-      info("Halting Xvfb")
-      XvfbProcess.get.destroy
-      XvfbProcess.get.exitValue
-      info("Halted Xvfb")
-    }
-    
     if (!x11vncProcess.isEmpty) {
       info("Halting x11vnc")
       x11vncProcess.get.destroy
       x11vncProcess.get.exitValue
       info("Halted x11vnc")
     }
+
     
-    // info(s"Removing AVD")
-    // avd.delete
+    if (!XvfbProcess.isEmpty) {
+      info("Halting Xvfb")
+      XvfbProcess.get.destroy
+      XvfbProcess.get.exitValue
+      info("Halted Xvfb")
+    }
+        
+    info(s"Removing AVD")
+    avd.delete
     
     if (heartbeatSchedule != null)
       heartbeatSchedule.cancel
@@ -299,7 +300,8 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
           opts.noWindow = false
            
           // Start a virtual frame buffer
-          val xvfbCommand = s"Xvfb :${id} -screen 0 1024x768x16"
+          val screen = avd.get_skin_dimensions
+          val xvfbCommand = s"Xvfb :${id} -screen 0 ${screen}x16"
           val xvfbProcess = Process(xvfbCommand)
           val xvfbLogger = ProcessLogger ( line => info(s"xvfb:${id}:out: $line"), 
           		line => error(s"xvfb:${id}:err: $line") )
@@ -311,7 +313,7 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
           Thread.sleep(850)
           
           // Start a VNC server for the frame buffer
-          val xvncCommand = s"x11vnc -display :${id} -nopw -listen 0.0.0.0 -xkb"
+          val xvncCommand = s"x11vnc -display :${id} -nopw -listen 0.0.0.0 -forever -shared -xkb"
           val xvncProcess = Process(xvncCommand)
           val xvncLogger = ProcessLogger ( line => info(s"x11vnc:${id}:out: $line"), 
           		line => error(s"x11vnc:${id}:err: $line") )
@@ -321,6 +323,11 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
           
           // Set the DISPLAY variable used when starting the emulator
           opts.display = Some(id)
+          
+          // Toss out the extra stuff and force a framebuffer 
+          // that's exactly the size we want
+          opts.skin = screen 
+          opts.scale = "1"
         } else {
           debug("Not found, running emulator headless")
           opts.noWindow = true
