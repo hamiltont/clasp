@@ -1,4 +1,4 @@
-package core.sdktools
+package clasp.core.sdktools
 
 import clasp.core.sdktools._
 import org.slf4j.LoggerFactory

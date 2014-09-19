@@ -1,14 +1,14 @@
 
 package clasp.modules
 
-import clasp.core.sdktools._
-import clasp.Emulator
-
 import java.text.DecimalFormat
-import java.util.UUID
 import java.util.Random
+import java.util.UUID
 
 import org.slf4j.LoggerFactory
+
+import clasp.core.sdktools.EmulatorOptions
+import clasp.core.sdktools.sdk
 
 // TODO: Because Android changes so much between versions, and
 // because configuring personas with adb isn't very well documented

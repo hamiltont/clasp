@@ -2,7 +2,8 @@ package clasp
 
 import java.net.Inet4Address
 import java.net.Inet6Address
-import scala.sys.process._
+
+import scala.sys.process.stringToProcess
 
 import org.rogach.scallop.ScallopConf
 

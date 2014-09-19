@@ -181,7 +181,7 @@ class NodeManager(val conf: ClaspConf) extends Actor {
         val mkdir = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'mkdir -p $workspaceDir'"
         mkdir.!!
 
-        val copy = s"rsync --archive --exclude='.git/' . $client_ip:$workspaceDir"
+        val copy = s"rsync --verbose --archive --exclude='.git/' --exclude='*.class' . $client_ip:$workspaceDir"
         info(s"Deploying using $copy")
         copy.!!
 
@@ -189,6 +189,9 @@ class NodeManager(val conf: ClaspConf) extends Actor {
         info(s"Building using $build")
         val buildtxt = build.!!
         // debug(s"Build Output: $buildtxt")
+        
+        // TODO use ssh port forwarding to punch connections in any NAT and 
+        // ensure connectivity between master and client. PS - nastyyyyy
 
         val localFlag = if (conf.local()) "--local" else ""
         val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip " +

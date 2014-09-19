@@ -1,19 +1,26 @@
 package clasp
 
 import java.io.File
-import scala.concurrent._
-import scala.sys.process._
-import scala.concurrent.duration._
-import org.slf4j.LoggerFactory
-import com.typesafe.config.ConfigFactory
-import akka.actor._
-import akka.pattern.Patterns._
-import clasp.core._
 import scala.Array.canBuildFrom
 import scala.collection.immutable.StringOps
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.promise
+import scala.sys.process.stringToProcess
+import org.slf4j.LoggerFactory
+import com.typesafe.config.ConfigFactory
+import akka.actor.ActorSystem
+import akka.actor.Props
+import akka.actor.actorRef2Scala
+import clasp.core.Node
+import clasp.core.QueueEmulatorTask
+import core.EmulatorManager
+import core.NodeManager
+import core.NodeStartError
 import core.sdktools.EmulatorOptions
 import core.sdktools.sdk
+import scala.concurrent.ExecutionContext
 
 /* Used to launch Clasp from the command line */
 object ClaspRunner extends App {

@@ -1,4 +1,4 @@
-package main
+package clasp.scripts
 import scala.language.postfixOps
 import scala.sys.process.stringToProcess
 
