@@ -33,7 +33,7 @@ akka {
 
     remote-daemon-ack-timeout = 5s
 
-    transport = "akka.remote.netty.NettyRemoteTransport"
+    enabled-transports = ["akka.remote.netty.tcp"]
 
     netty {
       port = 2552

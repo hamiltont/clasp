@@ -81,7 +81,7 @@ object ClaspRunner extends App {
 class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
   val ip = conf.ip()
   val clientConf = ConfigFactory
-    .parseString(s"""akka.remote.netty.hostname="$ip"""")
+    .parseString(s"""akka.remote.netty.tcp.hostname="$ip"""")
     .withFallback(ConfigFactory.load("client"))
 
   // Turn on the actor system, avoiding logging until we are sure we can run so we 
@@ -148,15 +148,15 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
     // Do our best to preemptively notify the master that we're done
     if (!message.isEmpty) {
       val tempConf = ConfigFactory
-        .parseString(s"""akka.remote.netty.hostname="$ip"""")
-        .withFallback(ConfigFactory.parseString("akka.remote.netty.port=0"))
+        .parseString(s"""akka.remote.netty.tcp.hostname="$ip"""")
+        .withFallback(ConfigFactory.parseString("akka.remote.netty.tcp.port=0"))
         .withFallback(ConfigFactory.load("application"))
 
       val masterip = conf.mip()
       val user = conf.user()
       val temp = ActorSystem("clasp-temp", tempConf)
-      debug(s"Sending message to akka://clasp@$masterip:2552/user/nodemanager")
-      val manager = temp.actorFor(s"akka://clasp@$masterip:2552/user/nodemanager")
+      debug(s"Sending message to akka.tcp://clasp@$masterip:2552/user/nodemanager")
+      val manager = temp.actorFor(s"akka.tcp://clasp@$masterip:2552/user/nodemanager")
 
       manager ! NodeStartError(ip, message.get)
 
@@ -185,7 +185,7 @@ class ClaspMaster(val conf: ClaspConf) {
   info(s"Using IP $ip")
   info("I am the master!")
   val serverConf = ConfigFactory
-    .parseString(s"""akka.remote.netty.hostname="$ip" """)
+    .parseString(s"""akka.remote.netty.tcp.hostname="$ip" """)
     .withFallback(ConfigFactory.load("master"))
 
   var system: ActorSystem = null

@@ -28,6 +28,8 @@ You can pass arguments using `sbt "run --client"`
 
 ### Run and View Typesafe Console
 
+**Note: doesn't work anymore, use typesafe activator instead**
+
 Use `sbt atmos:run`. Project will compile and run, and will output the 
 port where you can access the 
 [Typesafe Console](http://typesafe.com/platform/runtime/console), which 
@@ -62,7 +64,7 @@ Update the file `src/application.conf.example` to point to your SDK location
 
 ## Development
 
-In the scala community, version numbers are huge! We use SBT 0.13, Scala 2.10, and Akka 2.1
+In the scala community, version numbers are huge! We use SBT 0.13, Scala 2.10.4, and Akka 2.3.6
 
 ### Using ScalaIDE for Eclipse
 

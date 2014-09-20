@@ -12,7 +12,7 @@ object BuildSettings {
     organization :=  "Magnum Research Group",
     version :=  "0.0.1",
     description :=  "Distributed Android emulator framework.",
-    scalaVersion :=  "2.10.1",
+    scalaVersion :=  "2.10.4",
     scalacOptions :=  Seq("-deprecation", "-encoding", "utf8",
       "-feature", "-unchecked"),
     //scalacOptions in Test :=  Seq("-Yrangepos"),

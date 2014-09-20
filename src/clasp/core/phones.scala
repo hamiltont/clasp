@@ -134,7 +134,7 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
   val display = base_display_port + id
   
   // Emulator manager reference
-  val emanager = context.system.actorFor(s"akka://clasp@${node.masterip}:2552/user/emulatormanager")
+  val emanager = context.system.actorFor(s"akka.tcp://clasp@${node.masterip}:2552/user/emulatormanager")
 
   // Processes for display management on X11 based system
   var XvfbProcess: Option[Process] = None
