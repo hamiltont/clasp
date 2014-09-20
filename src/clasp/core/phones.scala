@@ -139,6 +139,7 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
   // Processes for display management on X11 based system
   var XvfbProcess: Option[Process] = None
   var x11vncProcess: Option[Process] = None
+  var websockifyProcess: Option[Process] = None
  
   var heartbeatSchedule: Cancellable = null
   
@@ -153,6 +154,13 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
     process.destroy
     process.exitValue // block until destroyed
     info(s"Halted emulator process")
+    
+    if (!websockifyProcess.isEmpty) {
+      info("Halting websockify")
+      websockifyProcess.get.destroy
+      websockifyProcess.get.exitValue
+      info("Halted websockify")
+    }
     
     if (!x11vncProcess.isEmpty) {
       info("Halting x11vnc")
@@ -323,6 +331,18 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
           
           // Set the DISPLAY variable used when starting the emulator
           opts.display = Some(id)
+          
+          // Ensure x11vnc is started before being used
+          Thread.sleep(850)
+          
+          // Start a TCP<-->WebSocket proxy
+          val webpCommand = s"./lib/noVNC/utils/websockify 6080 127.0.0.1:5900"
+          val webpProcess = Process(webpCommand)
+          val webpLogger = ProcessLogger ( line => info(s"websockify:${id}:out: $line"), 
+          		line => error(s"websockify:${id}:err: $line") )
+          debug(s"Running websockify using: $webpCommand")
+          val webp = webpCommand.run(webpLogger)
+          websockifyProcess = Some(webp)
           
           // Toss out the extra stuff and force a framebuffer 
           // that's exactly the size we want
