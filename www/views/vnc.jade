@@ -1,0 +1,42 @@
+extends layout
+
+block activePageBlock
+  -var activePage = 'home'
+
+block content
+  div.container
+    h1 VNC Test
+    p Testing noVNC connection to 10.0.0.2:6080
+    div#noVNC_screen
+      canvas#noVNC_canvas
+        p Canvas not supported
+    script.
+      INCLUDE_URI="scripts/noVNC/";
+      // Load supporting scripts
+      Util.load_scripts(["webutil.js", "base64.js", "websock.js", "des.js",
+                           "keysymdef.js", "keyboard.js", "input.js", "display.js",
+                           "jsunzip.js", "rfb.js"]);
+      var rfb;
+
+      window.onscriptsload = function () {
+          var host, port, password, path, token;
+          WebUtil.init_logging(WebUtil.getQueryVar('logging', 'debug'));
+          host = "10.0.0.2";
+          port = "6080";
+          password = WebUtil.getQueryVar('password', '');
+          path = WebUtil.getQueryVar('path', 'websockify');
+          rfb = new RFB({'target':       $D('noVNC_canvas'),
+               'encrypt':      WebUtil.getQueryVar('encrypt', false),
+               'repeaterID':   WebUtil.getQueryVar('repeaterID', ''),
+               'true_color':   WebUtil.getQueryVar('true_color', true),
+               'local_cursor': WebUtil.getQueryVar('cursor', false),
+               'shared':       WebUtil.getQueryVar('shared', true),
+               'view_only':    WebUtil.getQueryVar('view_only', false)
+               });
+          rfb.connect(host, port, password, path);
+      };
+
+
+
+
+

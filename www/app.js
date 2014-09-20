@@ -32,6 +32,7 @@ app.configure('development', function(){
 app.get('/', routes.index);
 app.get('/doc', routes.doc);
 app.get('/dashboard', routes.dashboard);
+app.get('/vnc', routes.vnc);
 
 server.listen(port, function(){
   console.log("Express server listening on port " + app.get('port'));

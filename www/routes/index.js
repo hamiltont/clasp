@@ -9,3 +9,7 @@ exports.doc = function(req, res) {
 exports.dashboard = function(req, res) {
   res.render('dashboard');
 }
+
+exports.vnc = function(req, res) {
+  res.render('vnc');
+}
