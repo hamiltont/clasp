@@ -85,7 +85,7 @@ class EmulatorManager extends Actor {
       if (emuObj.rebootWhenFinished) {
         info(s"Rebooting emulator ${emuObj.serialID}.")
         emu ! PoisonPill
-        node ! BootEmulator
+        node ! Node.LaunchEmulator()
       } else {
         sendTask(emu)
       }
@@ -148,7 +148,6 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
   val buildTime = System.currentTimeMillis
   val (process, serialID) = build()
 
-  // TODO why is getting a PoisonPill not calling this?
   override def postStop = {
     info(s"Halting emulator process ($id,$serialID,$port,${self.path})")
     process.destroy

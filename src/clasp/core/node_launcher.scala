@@ -25,12 +25,15 @@ import scala.util.Random
 import System.currentTimeMillis
 import scala.concurrent.duration._
 import ExecutionContext.Implicits.global
-import akka.remote.RemoteClientLifeCycleEvent
-import akka.remote.RemoteClientShutdown
-import akka.remote.RemoteClientConnected
 import clasp.ClaspConf
-import akka.dispatch.Resume
 import akka.actor.SupervisorStrategy._
+import akka.remote.RemotingLifecycleEvent
+import akka.remote.DisassociatedEvent
+import akka.remote.RemotingShutdownEvent
+import akka.remote.RemotingShutdownEvent
+import akka.remote.ShutDownAssociation
+import akka.remote.transport.AssociationHandle.Disassociated
+import akka.dispatch.Foreach
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
@@ -189,7 +192,7 @@ class NodeManager(val conf: ClaspConf) extends Actor {
         info(s"Building using $build")
         val buildtxt = build.!!
         // debug(s"Build Output: $buildtxt")
-        
+
         // TODO use ssh port forwarding to punch connections in any NAT and 
         // ensure connectivity between master and client. PS - nastyyyyy
 
@@ -223,38 +226,96 @@ case class NodeBootExpected(nodeip: String) extends NM_Message
 case class NodeDetails(nodeip: String, ostype: String, masterip: String, node: ActorRef)
 
 // Manages the running of the framework on a single node
+object Node {
+  case class LaunchEmulator(count: Int = 1) extends NM_Message
+  case class Shutdown
+}
 class Node(val ip: String, val serverip: String,
   val emuOpts: EmulatorOptions, val numEmulators: Int)
   extends Actor {
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
-  val manager = context.actorFor(s"akka://clasp@$serverip:2552/user/nodemanager")
-  val devices: MutableList[ActorRef] = MutableList[ActorRef]()
+  val managerId = "manager"
+  context.actorSelection(s"akka.tcp://clasp@$serverip:2552/user/nodemanager") ! Identify(managerId)
 
-  // Be alerted if master crashes
-  context.system.eventStream.subscribe(self, classOf[RemoteClientLifeCycleEvent])
+  val devices: MutableList[ActorRef] = MutableList[ActorRef]()
+  var current_emulator_ID = 0
 
   // Restart ADB with the node
   sdk.kill_adb
   sdk.start_adb
 
   override val supervisorStrategy =
-    OneForOneStrategy(maxNrOfRetries = 2, withinTimeRange = 3 minutes) {
+    OneForOneStrategy(maxNrOfRetries = 2, withinTimeRange = 3.minutes) {
       case _: ActorInitializationException => {
         // TODO if we are starting up and the failed EmulatorActor was our only
         // child, then we need to terminate
-        debug(s"A child failed to initialize")
+        debug(s"The EmulatorActor failed to initialize")
         Stop
       }
       case _: ActorKilledException => Stop
       case _: Exception => Escalate
     }
 
-  // Launch initial emulators
-  var current_emulator_ID = 0
-  while (current_emulator_ID < numEmulators)
-    devices += bootEmulator();
+  override def postStop() = {
+    info(s"NodeActor has stopped ($self)");
+    info("Stopping ActorSystem on this node");
+   
+    info(s"Requesting system shutdown at ${System.currentTimeMillis}")
+    context.system.registerOnTermination {
+      info(s"System shutdown achieved at ${System.currentTimeMillis}")
+    }
+
+    context.system.shutdown
+  }
+
+  // Wait until we are connected to the nodemanager with an ActorRef
+  def receive = {
+    case ActorIdentity(`managerId`, Some(manager)) =>
+      debug(s"Found ActorRefFor NodeManger of ${manager}")
+
+      // We need to kill ourself if the manager dies
+      context.watch(manager)
+
+      info(s"Node online: ${self.path}")
+      manager ! NodeUp(ip)
+      context.become(active(manager))
+
+      // Launch initial emulators
+      self ! Node.LaunchEmulator(numEmulators)
+    case ActorIdentity(`managerId`, None) => {
+      debug(s"No Identity Received For NodeManger, terminating")
+      context.system.shutdown
+    }
+  }
+
+  def active(manager: ActorRef): Actor.Receive = {
+    case Terminated(`manager`) => {
+      info(s"NodeManager has terminated (${sender})")
+      info("Terminating ourself in response")
+      context.become(reaper)
+      self ! Node.Shutdown
+    }
+    case Node.LaunchEmulator(count) => {
+      for (_ <- 1 to count)
+        devices += bootEmulator()
+    }
+    case unknown => info(s"Received unknown message from ${sender.path}: $unknown")
+  }
+  
+  def reaper(): Actor.Receive = {
+    case Node.Shutdown => {
+      info("Stopping all emulators")
+      context.children.foreach(context.stop)
+    }
+    case Terminated(child) => {
+      info(s"Node Reaper: Termination from $child")
+      if (context.children.isEmpty)
+        context.stop(self)
+    }
+  }
+
 
   private def bootEmulator(): ActorRef = {
     val me = NodeDetails(ip, get_os_type, serverip, self)
@@ -272,35 +333,6 @@ class Node(val ip: String, val serverip: String,
     else if (name.contains("win")) { return "windows" }
     else { return "unknown" }
   }
-
-  override def preStart() = {
-    info(s"Node online: ${self.path}")
-    manager ! NodeUp(ip)
-  }
-
-  override def postStop() = {
-    info(s"Node ${self.path} has stopped");
-    info("Sending PoisonPill to emulators")
-    devices.foreach(phone => phone ! PoisonPill)
-
-    info(s"Requesting system shutdown at ${System.currentTimeMillis}")
-    context.system.registerOnTermination {
-      info(s"System shutdown achieved at ${System.currentTimeMillis}")
-    }
-
-    context.system.shutdown
-  }
-
-  def receive = {
-    case BootEmulator =>
-      devices += bootEmulator()
-    case _: RemoteClientShutdown => {
-      info("The master appears to have terminated")
-      info("Terminating ourself in response")
-      context.system.shutdown
-    }
-    case unknown => info(s"Received unknown message from ${sender.path}: $unknown")
-  }
 }
 
-case class BootEmulator()
+
