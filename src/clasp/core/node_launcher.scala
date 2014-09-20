@@ -37,15 +37,22 @@ import akka.dispatch.Foreach
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
+
+object NodeManager {
+  sealed trait NM_Message
+  case class Shutdown(ifempty: Boolean = false) extends NM_Message
+  case class NodeUp(description: Node.NodeDescription) extends NM_Message
+  case class BootNode() extends NM_Message
+  case class NodeStartError(nodeip: String, debuglog: String) extends NM_Message
+  case class NodeBootExpected(nodeip: String) extends NM_Message
+  case class NodeList() extends NM_Message
+}
 class NodeManager(val conf: ClaspConf) extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
+  import NodeManager._
 
-  //  val ip: String,
-  //  val initial_workers: Int,
-  //  val numEmulators: Int,
-  //  val local: Boolean = false
-
+  // Build pool of potential worker nodes
   var pool: ArrayStack[String] = null
   conf.pool.get match {
     case Some(mpool) => {
@@ -62,21 +69,21 @@ class NodeManager(val conf: ClaspConf) extends Actor {
       debug("Worker pool from config file: " + pool_list)
     }
   }
+  conf.workers.foreach(_ => self ! BootNode())
 
-  for (i <- 1 to conf.workers()) yield (self ! BootNode)
-
-  val nodes = ListBuffer[ActorRef]()
-
+  val nodes = ListBuffer[Node.NodeDescription]()
   var outstandingList = ListBuffer[String]()
 
   // Shut ourselves down if no Nodes start
   context.system.scheduler.scheduleOnce(120 seconds, self, Shutdown(true))
 
+  // Start in monitor mode.
+  def receive = monitoring
   def monitoring: Receive = {
-    case NodeUp(nodeip) => {
-      nodes += sender
+    case NodeUp(description) => {
+      nodes += description
       info(s"${nodes.length}: Node ${sender.path} has registered!")
-      outstandingList -= nodeip
+      outstandingList -= description.ip
       if (outstandingList.isEmpty)
         info("All nodes requested to this point are awake and registered")
     }
@@ -98,7 +105,8 @@ class NodeManager(val conf: ClaspConf) extends Actor {
       } else
         debug(s"Ignoring boot timeout message for $nodeip, reply already received")
     }
-    case BootNode => boot_any
+    case _: NodeList => { sender ! nodes.toList }
+    case _: BootNode => boot_any
     case Shutdown(ifempty: Boolean) => {
       debug(s"Received Shutdown request, with force=${!ifempty}")
       if (nodes.isEmpty && outstandingList.isEmpty) {
@@ -109,7 +117,7 @@ class NodeManager(val conf: ClaspConf) extends Actor {
         // Otherwise, reap the nodes
 
         // 1. Register to watch all nodes.
-        nodes.foreach(node => context.watch(node))
+        nodes.foreach(node => context.watch(node.actor))
         info("Nodes active, forcing shutdown")
 
         // 2. Transition our receive loop into a Reaper
@@ -117,7 +125,7 @@ class NodeManager(val conf: ClaspConf) extends Actor {
         info("Transitioned to a reaper")
 
         // 3. Ask all of our nodes to stop.
-        nodes.foreach(n => n ! PoisonPill)
+        nodes.foreach(n => n.actor ! PoisonPill)
         info("Pill sent to all nodes")
       } else {
         debug("Nodes active, ignoring shutdown")
@@ -128,15 +136,19 @@ class NodeManager(val conf: ClaspConf) extends Actor {
 
   def reaper: Receive = {
     case Terminated(ref) => {
-      nodes -= ref
-      info(s"Reaper: Termination received for ${ref.path}")
-      info(s"Reaper: ${nodes.length} nodes and ${outstandingList.length} outstanding")
-      terminateIfReaped
+      var target: Node.NodeDescription = null
+      nodes.foreach(n => if (n.actor == ref) target = n)
+      if (target != null) {
+        nodes -= target
+        info(s"Reaper: Termination received for ${ref.path}")
+        info(s"Reaper: ${nodes.length} nodes and ${outstandingList.length} outstanding")
+        terminateIfReaped
+      }
     }
-    case NodeUp(nodeip) => {
-      outstandingList -= nodeip
+    case NodeUp(description) => {
+      outstandingList -= description.ip
       info(s"Reaper: Node registered at ${sender.path}")
-      nodes += sender
+      nodes += description
       info(s"Reaper: Replying with a PoisonPill")
       info(s"Reaper: ${nodes.length} nodes and ${outstandingList.length} outstanding")
       context.watch(sender)
@@ -211,24 +223,16 @@ class NodeManager(val conf: ClaspConf) extends Actor {
       }
     }
   }
-
-  // Start in monitor mode.
-  def receive = monitoring
 }
-sealed trait NM_Message
-case class Shutdown(ifempty: Boolean = false) extends NM_Message
-case class NodeUp(nodeip: String) extends NM_Message
-case class BootNode() extends NM_Message
-case class NodeStartError(nodeip: String, debuglog: String) extends NM_Message
-case class NodeBootExpected(nodeip: String) extends NM_Message
 
 // Used to pass a bunch of static node information to each EmulatorActor
 case class NodeDetails(nodeip: String, ostype: String, masterip: String, node: ActorRef)
 
 // Manages the running of the framework on a single node
 object Node {
-  case class LaunchEmulator(count: Int = 1) extends NM_Message
-  case class Shutdown
+  case class LaunchEmulator(count: Int = 1)
+  case object Shutdown
+  case class NodeDescription(val ip: String, val actor: ActorRef, val onlineEmulators: Int, val asOf: Long = System.currentTimeMillis)
 }
 class Node(val ip: String, val serverip: String,
   val emuOpts: EmulatorOptions, val numEmulators: Int)
@@ -261,7 +265,7 @@ class Node(val ip: String, val serverip: String,
   override def postStop() = {
     info(s"NodeActor has stopped ($self)");
     info("Stopping ActorSystem on this node");
-   
+
     info(s"Requesting system shutdown at ${System.currentTimeMillis}")
     context.system.registerOnTermination {
       info(s"System shutdown achieved at ${System.currentTimeMillis}")
@@ -279,7 +283,7 @@ class Node(val ip: String, val serverip: String,
       context.watch(manager)
 
       info(s"Node online: ${self.path}")
-      manager ! NodeUp(ip)
+      manager ! NodeManager.NodeUp(Node.NodeDescription(ip, self, 0))
       context.become(active(manager))
 
       // Launch initial emulators
@@ -303,7 +307,7 @@ class Node(val ip: String, val serverip: String,
     }
     case unknown => info(s"Received unknown message from ${sender.path}: $unknown")
   }
-  
+
   def reaper(): Actor.Receive = {
     case Node.Shutdown => {
       info("Stopping all emulators")
@@ -315,7 +319,6 @@ class Node(val ip: String, val serverip: String,
         context.stop(self)
     }
   }
-
 
   private def bootEmulator(): ActorRef = {
     val me = NodeDetails(ip, get_os_type, serverip, self)

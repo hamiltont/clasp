@@ -1,7 +1,6 @@
 package clasp
 
 import java.io.File
-
 import scala.Array.canBuildFrom
 import scala.collection.immutable.StringOps
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -9,24 +8,20 @@ import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.promise
 import scala.sys.process.stringToProcess
-
 import org.slf4j.LoggerFactory
-
 import com.typesafe.config.ConfigFactory
-
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
 import akka.io.IO
 import clasp.core.HttpApi
 import clasp.core.Node
-import clasp.core.QueueEmulatorTask
 import core.EmulatorManager
 import core.NodeManager
-import core.NodeStartError
 import core.sdktools.EmulatorOptions
 import core.sdktools.sdk
 import spray.can.Http
+import scala.concurrent.ExecutionContext
 
 /* Used to launch Clasp from the command line */
 object ClaspRunner extends App {
@@ -149,7 +144,7 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
 
   def shutdown(exitcode: Int = 0, message: Option[String] = None) = {
     system.shutdown
-    system.awaitTermination(30 second)
+    system.awaitTermination(30.second)
 
     // Do our best to preemptively notify the master that we're done
     if (!message.isEmpty) {
@@ -164,13 +159,13 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
       debug(s"Sending message to akka.tcp://clasp@$masterip:2552/user/nodemanager")
       val manager = temp.actorFor(s"akka.tcp://clasp@$masterip:2552/user/nodemanager")
 
-      manager ! NodeStartError(ip, message.get)
+      manager ! NodeManager.NodeStartError(ip, message.get)
 
       debug("Waiting 10 seconds for the message to be delivered")
       Thread.sleep(10000)
 
       temp.shutdown
-      temp.awaitTermination(10 second)
+      temp.awaitTermination(10.second)
     }
 
     debug("Shutting down")
@@ -183,7 +178,7 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
  * Interface to the clasp system.
  * Creating this will start a clasp worker on all clients 
  */
-class ClaspMaster(val conf: ClaspConf) extends SimpleRoutingApp{
+class ClaspMaster(val conf: ClaspConf) {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
@@ -198,7 +193,7 @@ class ClaspMaster(val conf: ClaspConf) extends SimpleRoutingApp{
   try {
     debug(s"About to create Master ActorSystem clasp");
     system = ActorSystem("clasp", serverConf)
-    
+
     debug("Master's ActorSystem created")
   } catch {
     case inuse: org.jboss.netty.channel.ChannelException => {
@@ -266,7 +261,7 @@ class ClaspMaster(val conf: ClaspConf) extends SimpleRoutingApp{
   def register_on_new_emulator(func: Emulator => Map[String, Any]): Future[Map[String, Any]] = {
     import ExecutionContext.Implicits.global
     val result = promise[Map[String, Any]]
-    emanager ! QueueEmulatorTask(func, result)
+    emanager ! EmulatorManager.QueueEmulatorTask(func, result)
     result.future
   }
 

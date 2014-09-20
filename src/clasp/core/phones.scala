@@ -25,6 +25,21 @@ import clasp.core.sdktools.sdk
 import clasp.core.sdktools.EmulatorOptions
 import clasp.core.sdktools.avd
 
+import EmulatorManager._
+  
+object EmulatorManager {
+  case class EmulatorReady(emu: ActorRef)
+  case class EmulatorFailed(emu: ActorRef)
+  case class EmulatorCrashed(emu: ActorRef)
+  case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
+  case class QueueEmulatorTask(function: Emulator => Map[String, Any], promise: Promise[Map[String, Any]])
+
+  // TODO can I make Any require serializable? 
+  case class TaskSuccess(taskId: String, data: Map[String, Any],
+    emulator: ActorRef, emulatorObj: Emulator, node: ActorRef)
+  case class TaskFailure(taskId: String, err: Exception, emulator: ActorRef)
+  case class ListEmulators()
+}
 class EmulatorManager extends Actor {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
@@ -67,6 +82,7 @@ class EmulatorManager extends Actor {
       emulators -= emu
       info(s"Emulator crashed: ${emu.path}")
     }
+    case _: ListEmulators => sender ! emulators.toList
     case QueueEmulatorTask(task, promise) => {
       // Note that this is not strictly threadsafe.
       // Consider using twitter's snowflake library
@@ -100,16 +116,11 @@ class EmulatorManager extends Actor {
   }
 }
 
-case class EmulatorHeartbeat()
-case class EmulatorReady(emu: ActorRef)
-case class EmulatorFailed(emu: ActorRef)
-case class EmulatorCrashed(emu: ActorRef)
-case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
-case class QueueEmulatorTask(function: Emulator => Map[String, Any], promise: Promise[Map[String, Any]])
-// TODO can I make Any require serializable? 
-case class TaskSuccess(taskId: String, data: Map[String, Any],
-  emulator: ActorRef, emulatorObj: Emulator, node: ActorRef)
-case class TaskFailure(taskId: String, err: Exception, emulator: ActorRef)
+
+object EmulatorActor {
+  case class EmulatorHeartbeat()
+}
+import EmulatorActor._
 
 // An always-on presence for a single emulator process. 
 //  - Monitors process state (STARTED, READY, etc)
@@ -202,7 +213,6 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
 
       // Start the heartbeats
       heartbeatSchedule = system.scheduler.schedule(0.seconds, 1.seconds, self, EmulatorHeartbeat)
-      Thread.sleep(5000)
 
       emanager ! EmulatorReady(self)
     } 
