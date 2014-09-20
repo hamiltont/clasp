@@ -6,10 +6,10 @@ object Dependencies {
     "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
   )
 
-  // val spray = "io.spray" % "spray-can" % "1.1.1"
-  // val sprayRouting = "io.spray" % "spray-routing" % "1.1.1"
+  
 
   val akkaVersion = "2.3.6"
+  val sprayVersion = "1.3.1"
   
   object Libraries {
     val scalaActors = "org.scala-lang" % "scala-actors" % "2.10.0-M6"
@@ -21,5 +21,7 @@ object Dependencies {
     val akkaSlf4j = "com.typesafe.akka" %% "akka-slf4j" % akkaVersion
     val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion
     val logback = "ch.qos.logback" % "logback-classic" % "1.0.9"
+    val spray = "io.spray" % "spray-can" % sprayVersion
+    val sprayRouting = "io.spray" % "spray-routing" % sprayVersion
   }
 }

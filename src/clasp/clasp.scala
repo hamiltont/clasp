@@ -22,6 +22,8 @@ import core.sdktools.EmulatorOptions
 import core.sdktools.sdk
 import scala.concurrent.ExecutionContext
 
+import spray.routing.SimpleRoutingApp
+
 /* Used to launch Clasp from the command line */
 object ClaspRunner extends App {
   // If you would like logging on remote machines(all workers), then use these
@@ -177,7 +179,7 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
  * Interface to the clasp system.
  * Creating this will start a clasp worker on all clients 
  */
-class ClaspMaster(val conf: ClaspConf) {
+class ClaspMaster(val conf: ClaspConf) extends SimpleRoutingApp{
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
@@ -188,7 +190,7 @@ class ClaspMaster(val conf: ClaspConf) {
     .parseString(s"""akka.remote.netty.tcp.hostname="$ip" """)
     .withFallback(ConfigFactory.load("master"))
 
-  var system: ActorSystem = null
+  implicit var system: ActorSystem = null
   try {
     debug(s"About to create Master ActorSystem clasp");
     system = ActorSystem("clasp", serverConf)
@@ -212,6 +214,17 @@ class ClaspMaster(val conf: ClaspConf) {
       System.exit(0)
     }
   }
+  
+    startServer(interface = "localhost", port = 8080) {
+    path("hello") {
+      get {
+        complete {
+          <h1>Say hello to spray</h1>
+        }
+      }
+    }
+  }
+
 
   // Make SD card directory
   val logname = getLogDirectoryForMe
