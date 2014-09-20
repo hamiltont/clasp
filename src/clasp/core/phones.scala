@@ -190,7 +190,7 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
     implicit val system = context.system
     val boot = future {
       info(s"Waiting for emulator ($id,$port) to come online")
-      if (false == sdk.wait_for_emulator(serialID, 200 second))
+      if (false == sdk.wait_for_emulator(serialID, 200.second))
         throw new IllegalStateException("Emulator has not booted")
     } 
     
@@ -202,7 +202,7 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
       Personas.applyAll(serialID, opts)
 
       // Start the heartbeats
-      heartbeatSchedule = system.scheduler.schedule(0 seconds, 1 seconds, self, EmulatorHeartbeat)
+      heartbeatSchedule = system.scheduler.schedule(0.seconds, 1.seconds, self, EmulatorHeartbeat)
       Thread.sleep(5000)
 
       emanager ! EmulatorReady(self)
@@ -225,7 +225,7 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
       // mechanism to determine if the device is online
       // than just making sure the process is alive.
       info(s"Sending heartbeat to $serialID.")
-      val ret = future { sdk.remote_shell(serialID, "echo alive", 5 seconds) }
+      val ret = future { sdk.remote_shell(serialID, "echo alive", 5.seconds) }
       ret onComplete {
         case Success(out) => {
           if (out.isEmpty) {
