@@ -1,6 +1,7 @@
 package clasp
 
 import java.io.File
+
 import scala.Array.canBuildFrom
 import scala.collection.immutable.StringOps
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -8,11 +9,16 @@ import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.promise
 import scala.sys.process.stringToProcess
+
 import org.slf4j.LoggerFactory
+
 import com.typesafe.config.ConfigFactory
+
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
+import akka.io.IO
+import clasp.core.HttpApi
 import clasp.core.Node
 import clasp.core.QueueEmulatorTask
 import core.EmulatorManager
@@ -20,9 +26,7 @@ import core.NodeManager
 import core.NodeStartError
 import core.sdktools.EmulatorOptions
 import core.sdktools.sdk
-import scala.concurrent.ExecutionContext
-
-import spray.routing.SimpleRoutingApp
+import spray.can.Http
 
 /* Used to launch Clasp from the command line */
 object ClaspRunner extends App {
@@ -214,17 +218,6 @@ class ClaspMaster(val conf: ClaspConf) extends SimpleRoutingApp{
       System.exit(0)
     }
   }
-  
-    startServer(interface = "localhost", port = 8080) {
-    path("hello") {
-      get {
-        complete {
-          <h1>Say hello to spray</h1>
-        }
-      }
-    }
-  }
-
 
   // Make SD card directory
   val logname = getLogDirectoryForMe
@@ -238,6 +231,10 @@ class ClaspMaster(val conf: ClaspConf) extends SimpleRoutingApp{
 
   var manager = system.actorOf(Props(new NodeManager(conf)), name = "nodemanager")
   info("Created NodeManager")
+
+  var httpApi = system.actorOf(Props(new HttpApi(manager, emanager)), name = "httpApi")
+  info("Created HttpApi")
+  IO(Http) ! Http.Bind(httpApi, interface = "localhost", port = 8080)
 
   // Cleanup then exit JVM
   system.registerOnTermination {

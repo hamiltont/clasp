@@ -23,5 +23,7 @@ object Dependencies {
     val logback = "ch.qos.logback" % "logback-classic" % "1.0.9"
     val spray = "io.spray" % "spray-can" % sprayVersion
     val sprayRouting = "io.spray" % "spray-routing" % sprayVersion
+    val sprayJson = "io.spray" %%  "spray-json" % "1.2.6"
+    val sprayHttpx = "io.spray" % "spray-httpx" % sprayVersion
   }
 }

@@ -28,7 +28,9 @@ object ClaspBuild extends Build {
         Libraries.akkaTestkit,
         Libraries.logback,
         Libraries.spray,
-        Libraries.sprayRouting
+        Libraries.sprayRouting,
+        Libraries.sprayJson,
+        Libraries.sprayHttpx
       )
     )
     .settings(
