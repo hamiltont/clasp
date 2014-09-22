@@ -103,13 +103,6 @@ class EmulatorManager extends Actor with ActorLifecycleLogging {
       info(s"Task $id has completed")
       val promise_option = outstandingTasks remove id
       promise_option.get success data
-      if (emuObj.rebootWhenFinished) {
-        info(s"Rebooting emulator ${emuObj.serialID}.")
-        emu ! PoisonPill
-        node ! Node.LaunchEmulator()
-      } else {
-        sendTask(emu)
-      }
       sendTask(emulator)
     }
     case TaskFailure(id, reason, emulator) => {
