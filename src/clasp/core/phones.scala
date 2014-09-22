@@ -143,11 +143,16 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
   
   // Emulator ports (each needs two)
   val base_emulator_port = 5555
-  val port = base_emulator_port + 2 * id
+  val port = base_emulator_port + 2 * nodeId
   
-  // Display port (1 is 5601, 99 is 5699)
-  val base_display_port = 1
-  val display = base_display_port + id
+  // Display port (1 is 5901, 99 is 5999)
+  val base_display_num = 1
+  val display_number = base_display_num + nodeId
+  val base_display_port = 5900
+  val display_port = base_display_port + display_number
+  
+  val base_wsDisplay_port = 6080
+  val ws_display_port = base_wsDisplay_port + display_number
   
   // Emulator manager reference
   val emanager = context.system.actorFor(s"akka.tcp://clasp@${node.masterip}:2552/user/emulatormanager")
@@ -278,22 +283,16 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
 
   // TODO Put this all inside a future
   def build(): (Process, String) = {
-    val avds = sdk.get_avd_names
-
-    // Give each emulator a unique sdcard.
-    // TODO: Where should this be put?
-    //       Putting it here seemed logical (and easy) to me.
-    // TODO: Make this work for multiple nodes.
-    var hostname = "hostname".!!.stripLineEnd;
     info(s"Building and starting emulator $this")
 
+    // Give each emulator a unique name and SDcard
+    val hostname = "hostname".!!.stripLineEnd;
     val avdName = s"$hostname-$port"
     val target = opts.avdTarget getOrElse "android-18"
     val abi = opts.abiName getOrElse "x86"
     
-    info(s"Building AVD `$avdName` for ABI `$abi` Target `$target`")
+    info(s"Building AVD `$avdName` for ABI `$abi` target `$target`")
     // TODO we must lookup the eabi for the target or this will likely fail
-    // TODO check for failure
 
     val username = "whoami".!!.stripLineEnd
     val workdir = s"/tmp/clash/$username/avds"
@@ -312,6 +311,7 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
       info("Warning: Overriding provided sdcard option.")
     
     opts.sdCard = sdcardName
+    opts.verbose = true
     
     // Determine display type
     node.ostype match {
@@ -320,15 +320,15 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
         val xvfb = "which Xvfb".! == 0
         val x11vnc = "which x11vnc".! == 0
         if (xvfb && x11vnc) {
-          debug(s"Found, will run emulator in graphical mode using DISPLAY=:$id")
+          debug(s"Found, will run emulator in graphical mode using DISPLAY=:$nodeId")
           opts.noWindow = false
            
           // Start a virtual frame buffer
           val screen = avd.get_skin_dimensions
-          val xvfbCommand = s"Xvfb :${id} -screen 0 ${screen}x16"
+          val xvfbCommand = s"Xvfb :${nodeId} -screen 0 ${screen}x16"
           val xvfbProcess = Process(xvfbCommand)
-          val xvfbLogger = ProcessLogger ( line => info(s"xvfb:${id}:out: $line"), 
-          		line => error(s"xvfb:${id}:err: $line") )
+          val xvfbLogger = ProcessLogger ( line => info(s"xvfb:${nodeId}:out: $line"), 
+          		line => error(s"xvfb:${nodeId}:err: $line") )
           debug(s"Running Xvfb using: $xvfbCommand")
           val xvfb = xvfbProcess.run(xvfbLogger)
           XvfbProcess = Some(xvfb)
@@ -337,25 +337,25 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
           Thread.sleep(850)
           
           // Start a VNC server for the frame buffer
-          val xvncCommand = s"x11vnc -display :${id} -nopw -listen 0.0.0.0 -forever -shared -xkb"
+          val xvncCommand = s"x11vnc -display :${nodeId} -nopw -listen 0.0.0.0 -forever -shared -rfbport $display_port -xkb"
           val xvncProcess = Process(xvncCommand)
-          val xvncLogger = ProcessLogger ( line => info(s"x11vnc:${id}:out: $line"), 
-          		line => error(s"x11vnc:${id}:err: $line") )
+          val xvncLogger = ProcessLogger ( line => info(s"x11vnc:${nodeId}:out: $line"), 
+          		line => error(s"x11vnc:${nodeId}:err: $line") )
           debug(s"Running x11vnc using: $xvncCommand")
           val xvnc = xvncCommand.run(xvncLogger)
           x11vncProcess = Some(xvnc)
           
           // Set the DISPLAY variable used when starting the emulator
-          opts.display = Some(id)
+          opts.display = Some(nodeId)
           
           // Ensure x11vnc is started before being used
           Thread.sleep(850)
           
           // Start a TCP<-->WebSocket proxy
-          val webpCommand = s"./lib/noVNC/utils/websockify 6080 127.0.0.1:5900"
+          val webpCommand = s"./lib/noVNC/utils/websockify $ws_display_port 127.0.0.1:$display_port"
           val webpProcess = Process(webpCommand)
-          val webpLogger = ProcessLogger ( line => info(s"websockify:${id}:out: $line"), 
-          		line => error(s"websockify:${id}:err: $line") )
+          val webpLogger = ProcessLogger ( line => info(s"websockify:${nodeId}:out: $line"), 
+          		line => error(s"websockify:${nodeId}:err: $line") )
           debug(s"Running websockify using: $webpCommand")
           val webp = webpCommand.run(webpLogger)
           websockifyProcess = Some(webp)
@@ -375,7 +375,6 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
       }
     } 
 
-    // TODO spawn thread to watch for premature exit
     return sdk.start_emulator(avdName, port, opts);
   }
   
