@@ -1,6 +1,7 @@
 package clasp
 
 import java.io.File
+
 import scala.Array.canBuildFrom
 import scala.collection.immutable.StringOps
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -10,6 +11,7 @@ import scala.concurrent.promise
 import scala.sys.process.stringToProcess
 import org.slf4j.LoggerFactory
 import com.typesafe.config.ConfigFactory
+
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
@@ -21,7 +23,6 @@ import core.NodeManager
 import core.sdktools.EmulatorOptions
 import core.sdktools.sdk
 import spray.can.Http
-import scala.concurrent.ExecutionContext
 
 /* Used to launch Clasp from the command line */
 object ClaspRunner extends App {
@@ -51,14 +52,13 @@ object ClaspRunner extends App {
   else {
     var clasp = new ClaspMaster(conf)
 
-    import ExecutionContext.Implicits.global
     // Any logging done inside the callback will show up in the remote host
     // nohup file Any exceptions thrown will be delivered to onFailure handler.
     val f = clasp.register_on_new_emulator((emu: Emulator) => {
-      var result = scala.collection.mutable.Map[String, Any]()
+      var result = scala.collection.mutable.Map[String, Serializable]()
       info("About to install")
-      result("serialID") = emu.serialID
-      result("node") = "hostname".!!.stripLineEnd
+      // result("serialID") = emu.serialID
+      // result("node") = "hostname".!!.stripLineEnd
 
       sdk.install_package(emu.serialID, "examples/antimalware/Profiler.apk")
       info("Installed.")
@@ -258,9 +258,8 @@ class ClaspMaster(val conf: ClaspConf) {
   //
   // Any values set on the returned Map will be delivered back to the
   // originating caller by way of the future
-  def register_on_new_emulator(func: Emulator => Map[String, Any]): Future[Map[String, Any]] = {
-    import ExecutionContext.Implicits.global
-    val result = promise[Map[String, Any]]
+  def register_on_new_emulator(func: Emulator => Map[String, Serializable]): Future[Map[String, Serializable]] = {
+    val result = promise[Map[String, Serializable]]
     emanager ! EmulatorManager.QueueEmulatorTask(func, result)
     result.future
   }

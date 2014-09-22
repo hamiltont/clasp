@@ -52,7 +52,7 @@ class EmulatorManager extends Actor with ActorLifecycleLogging {
   val emulators = ListBuffer[EmulatorDescription]()
 
   // Tasks that have been delivered but not fulfilled
-  val outstandingTasks: scala.collection.mutable.Map[String, Promise[Map[String, Any]]] = scala.collection.mutable.Map()
+  val outstandingTasks: scala.collection.mutable.Map[String, Promise[Map[String, Serializable]]] = scala.collection.mutable.Map()
 
   // Contains tasks that need to be delivered to workers
   val undeliveredTasks: scala.collection.mutable.Queue[EmulatorTask] = scala.collection.mutable.Queue()
