@@ -267,13 +267,32 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
       val emu = new Emulator(serialID)
 
       val data = future { callback(emu) }
-      data onSuccess {
-        case map => emanager ! TaskSuccess(id, map, self, emu, node.node)
+      data.mapTo[Map[String, Serializable]] onComplete {
+        case Success(result) => emanager ! TaskSuccess(id, result, description.get)
+        case Failure(reason) => {
+          error("Obtained a Throwable.")
+          emanager ! TaskFailure(id, reason, description.get)
+        }
       }
-      data onFailure {
-        case e: Exception => emanager ! TaskFailure(id, e, self)
-        case t => error("Obtained a Throwable.")
-      }
+    }
+    case _ : BootSuccess => {
+      val bootTime = System.currentTimeMillis
+      info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}")
+
+      // Apply all personas
+      Personas.applyAll(serialID, opts)
+
+      // Start the heartbeats
+      heartbeatSchedule = context.system.scheduler.schedule(0.seconds, 10.seconds, self, EmulatorHeartbeat())
+
+      description = Some(EmulatorDescription(node.nodeip, port, display_port, ws_display_port, self))
+      emanager ! EmulatorReady(description.get) 
+    }
+    case _ : BootFailure => {
+      val failTime = System.currentTimeMillis
+      info(s"Emulator $this failed to boot. Reported failure at $failTime");
+      emanager ! EmulatorFailedBoot(self)
+      context.stop(self)
     }
     case unknown => {
       info(s"EmulatorActor ${self.path} received unknown message from ${sender.path}: $unknown")
