@@ -9,7 +9,9 @@ import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.promise
 import scala.sys.process.stringToProcess
+
 import org.slf4j.LoggerFactory
+
 import com.typesafe.config.ConfigFactory
 
 import akka.actor.ActorSystem
@@ -141,6 +143,27 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
     emuOpts,
     conf.numEmulators.apply)), name = s"node-$ip")
   info(s"Created Node for $ip")
+  
+  // If the JVM indicates it's shutting down (via Ctrl-C or a SIGTERM), 
+  // then try to cleanup our ActorSystem
+  // NOTE: Eclipse uses SIGKILL -- this will not be called if you click the red square
+  sys addShutdownHook {
+    debug("JVM shutdown triggered")
+    if (!system.isTerminated) {
+      debug("JVM is going to terminate, trigger ActorSystem cleanup")
+      system.shutdown
+      Thread.sleep(1000)
+    }
+  }
+
+  // Cleanup then exit JVM
+  // NOTE: Eclipse uses SIGKILL -- this will not be called if you click the red square
+  system.registerOnTermination {
+    info("Termination of clasp ActorSystem detected")
+    info("Exiting JVM")
+    System.exit(0)
+  }
+
 
   def shutdown(exitcode: Int = 0, message: Option[String] = None) = {
     system.shutdown
@@ -214,24 +237,20 @@ class ClaspMaster(val conf: ClaspConf) {
     }
   }
 
-  // Make SD card directory
-  val logname = getLogDirectoryForMe
-  val sdDir: File = new File(s"/tmp/sdcards/$logname")
-  if (!sdDir.exists()) {
-    sdDir.mkdir()
+  // If the JVM indicates it's shutting down (via Ctrl-C or a SIGTERM), 
+  // then try to cleanup our ActorSystem
+  // NOTE: Eclipse uses SIGKILL -- this will not be called if you click the red square
+  sys addShutdownHook {
+    debug("JVM shutdown triggered")
+    if (!system.isTerminated) {
+      debug("JVM is going to terminate, trigger ActorSystem cleanup")
+      system.shutdown
+      Thread.sleep(1000)
+    }
   }
 
-  val emanager = system.actorOf(Props[EmulatorManager], name = "emulatormanager")
-  info("Created EmulatorManager")
-
-  var manager = system.actorOf(Props(new NodeManager(conf)), name = "nodemanager")
-  info("Created NodeManager")
-
-  var httpApi = system.actorOf(Props(new HttpApi(manager, emanager)), name = "httpApi")
-  info("Created HttpApi")
-  IO(Http) ! Http.Bind(httpApi, interface = "localhost", port = 8080)
-
   // Cleanup then exit JVM
+  // NOTE: Eclipse uses SIGKILL -- this will not be called if you click the red square
   system.registerOnTermination {
     info("Termination of clasp ActorSystem detected")
     info("Running cleanup tasks")
@@ -243,15 +262,22 @@ class ClaspMaster(val conf: ClaspConf) {
     System.exit(0)
   }
 
-  // If the JVM indicates it's shutting down (via Ctrl-C or a SIGTERM), 
-  // then try to cleanup our ActorSystem
-  sys addShutdownHook {
-    if (!system.isTerminated) {
-      debug("JVM is going to terminate, trigger ActorSystem cleanup")
-      system.shutdown
-      Thread.sleep(1000)
-    }
+  // Make SD card directory
+  val logname = getLogDirectoryForMe
+  val sdDir: File = new File(s"/tmp/sdcards/$logname")
+  if (!sdDir.exists()) {
+    sdDir.mkdir()
   }
+
+  var manager = system.actorOf(Props(new NodeManager(conf)), name = "nodemanager")
+  info("Created NodeManager")
+
+  val emanager = system.actorOf(Props[EmulatorManager], name = "emulatormanager")
+  info("Created EmulatorManager")
+
+  var httpApi = system.actorOf(Props(new HttpApi(manager, emanager)), name = "httpApi")
+  info("Created HttpApi")
+  IO(Http) ! Http.Bind(httpApi, interface = "localhost", port = 8080)
 
   // When a new emulator is ready to be used, the provided function will 
   // be transported to the node that emulator runs on and then executed
