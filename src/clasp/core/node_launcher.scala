@@ -204,13 +204,19 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
 
         val copy = s"rsync --verbose --archive --exclude='.git/' --exclude='*.class' . $client_ip:$workspaceDir"
         info(s"Deploying using $copy")
-        copy.!!
+        val copyLogger = ProcessLogger ( line => info(s"deploy:${client_ip}:out: $line"), 
+          		line => error(s"deploy:${client_ip}:err: $line") )
+        val copyProc = Process(copy).run(copyLogger)
+        copyProc.exitValue
 
-        val build = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $workspaceDir && sbt clean && sbt stage'"
+        // val build = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $workspaceDir && sbt -Dsbt.log.noformat=true clean && sbt -Dsbt.log.noformat=true stage'"
+        val build = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $workspaceDir && sbt -Dsbt.log.noformat=true stage'"
         info(s"Building using $build")
-        val buildtxt = build.!!
-        // debug(s"Build Output: $buildtxt")
-
+        val buildLogger = ProcessLogger ( line => info(s"build:${client_ip}:out: $line"), 
+          		line => error(s"build:${client_ip}:err: $line") )
+        val buildProc = Process(build).run(buildLogger)
+        buildProc.exitValue
+          		
         // TODO use ssh port forwarding to punch connections in any NAT and 
         // ensure connectivity between master and client. PS - nastyyyyy
 
