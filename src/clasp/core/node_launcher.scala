@@ -79,8 +79,9 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
   val nodes = ListBuffer[Node.NodeDescription]()
   var outstandingList = ListBuffer[String]()
 
-  // Shut ourselves down if no Nodes start
-  context.system.scheduler.scheduleOnce(120 seconds, self, Shutdown(true))
+  // Shut ourselves down if no Nodes start within 10 minutes
+  // Deploy+compile can take some time
+  context.system.scheduler.scheduleOnce(10.minutes, self, Shutdown(true))
 
   // Start in monitor mode.
   def receive = monitoring
@@ -103,7 +104,7 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
     case NodeBootExpected(nodeip) => {
       if (outstandingList.contains(nodeip)) {
         info(s"Node $nodeip appears to have failed to boot")
-        info("Requesting a new node to replace $nodeip")
+        info(s"Requesting a new node to replace $nodeip")
         outstandingList -= nodeip
 
         self ! BootNode()
@@ -118,6 +119,7 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
         // Terminate if there are no nodes or outstanding requests 
         info("No nodes active, terminating")
         self ! PoisonPill
+        sender ! true
       } else if (!ifempty) {
         // Otherwise, reap the nodes
 
@@ -132,8 +134,10 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
         // 3. Ask all of our nodes to stop.
         nodes.foreach(n => n.actor ! PoisonPill)
         info("Pill sent to all nodes")
+        sender ! true
       } else {
         debug("Nodes active, ignoring shutdown")
+        sender ! false
       }
     }
     case unknown => error(s"Received unknown message from ${sender.path}: $unknown")

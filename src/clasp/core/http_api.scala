@@ -51,6 +51,21 @@ object MyJsonProtocol extends DefaultJsonProtocol {
       }
   }
 
+  implicit object booleanFormat extends JsonFormat[Boolean] {
+    def write(b: Boolean) = {
+        JsObject(Map(
+            "result" -> JsBoolean(b)
+        ))
+    }
+
+    def read(value: JsValue) =
+      value.asJsObject.getFields("result") match {
+        case Seq(JsBoolean(value)) =>
+          value
+        case _ => deserializationError("Boolean expected")
+      }
+  }
+  
   implicit val nodeFormat = jsonFormat(NodeDescription, "ip", "name", "emulators", "asOf")
   
   implicit val emulatorDescriptionFormat = jsonFormat(EmulatorDescription, "publicip", "consolePort", "vncPort", "wsVncPort", "actorPath")
@@ -88,6 +103,23 @@ class HttpApi(val nodeManager: ActorRef,
             complete(InternalServerError, s"An error occurred: ${ex.getMessage}")
           }
         }
+      }
+    } ~
+    pathPrefix ("nodemanager") {
+      // TODO send reply before shutting down. Current approach means no reply is sent
+      path("shutdown") {
+        onComplete(nodeManager.ask(NodeManager.Shutdown())(3.seconds).mapTo[Boolean]) {
+          case Success(value) => {
+            debug(s"Shutdown request received")
+            complete(value.toString)
+          } 
+          case Failure(ex) => {
+            complete(InternalServerError, s"An error occurred: ${ex.getMessage}")
+          }
+        }
+      } ~
+      pathEndOrSingleSlash {
+        complete(NotFound)
       }
     }
   }
