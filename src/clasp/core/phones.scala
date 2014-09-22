@@ -138,6 +138,9 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
   
+  // Assign a unique ID to each emulator
+  val id = UUID.randomUUID().toString()
+  
   // Emulator ports (each needs two)
   val base_emulator_port = 5555
   val port = base_emulator_port + 2 * id
@@ -162,8 +165,8 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
   val (process, serialID) = build()
 
   override def postStop = {
-    info(s"Halting emulator process ($id,$serialID,$port,${self.path})")
     super.preStart
+    info(s"Halting emulator $this")
     process.destroy
     process.exitValue // block until destroyed
     info(s"Halted emulator process")
@@ -204,7 +207,6 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
     
     implicit val system = context.system
     val boot = future {
-      info(s"Waiting for emulator ($id,$port) to come online")
       if (false == sdk.wait_for_emulator(serialID, 200.second))
         throw new IllegalStateException("Emulator has not booted")
     } 
@@ -227,6 +229,7 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
       info(s"Emulator $port failed to boot. Reported failure at $failTime");
       emanager ! EmulatorFailed(self)
       context.stop(self)
+      info(s"Waiting for emulator $this to come online")
     }
   }
 
@@ -275,8 +278,6 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
 
   // TODO Put this all inside a future
   def build(): (Process, String) = {
-    info(s"Building and starting emulator $id on port $port")
-
     val avds = sdk.get_avd_names
 
     // Give each emulator a unique sdcard.
@@ -284,6 +285,7 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
     //       Putting it here seemed logical (and easy) to me.
     // TODO: Make this work for multiple nodes.
     var hostname = "hostname".!!.stripLineEnd;
+    info(s"Building and starting emulator $this")
 
     val avdName = s"$hostname-$port"
     val target = opts.avdTarget getOrElse "android-18"
@@ -375,6 +377,10 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
 
     // TODO spawn thread to watch for premature exit
     return sdk.start_emulator(avdName, port, opts);
+  }
+  
+  override def toString():String = {
+    return s"[Emulator, id: $id, nodeId: $nodeId, consolePort: $port, path: ${self.path}]"
   }
 
 }
