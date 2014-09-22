@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
+import java.io.FileWriter
 
 class avd(val name: String,
     val target: String,
@@ -33,6 +34,13 @@ class avd(val name: String,
   // Ensure the emulator starts at 0,0
   val emulatorIni = s"${path}/emulator-user.ini"
   Files.write(Paths.get(emulatorIni), "window.x = 0\nwindow.y = 0\n".getBytes(StandardCharsets.UTF_8))
+  
+  // Enable full keyboard inside emulator (append to file)
+  val configIni = s"${path}/config.ini"
+  val fw = new FileWriter(configIni, true)
+  try { fw.write("hw.keyboard=yes\n") } finally fw.close
+  // TODO add hw.gpu.enabled=yes . This causes these errors on non-configured Linux machines
+  // failed to create drawable - Renderer error: failed to create/resize pbuffer
   
   def get_skin_name = {
     skin
