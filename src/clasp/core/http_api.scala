@@ -1,31 +1,34 @@
 package clasp.core
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import Node._
+import NodeManager._
+import EmulatorManager._
 import akka.actor.ActorRef
 import akka.pattern.ask
 import spray.http.HttpMethods._
 import spray.http.StatusCodes.InternalServerError
-import spray.routing._
-import scala.concurrent.duration._
+import spray.httpx.SprayJsonSupport
+import spray.httpx.SprayJsonSupport._
 import spray.httpx.marshalling._
 import spray.http._
+import spray.json._
+import spray.json.DefaultJsonProtocol._
+import spray.json.DefaultJsonProtocol
+import spray.json.JsObject
+import spray.json.JsString
+import spray.json.JsValue
+import spray.json.JsonFormat
+import spray.routing._
+import scala.concurrent.duration._
 import scala.util.Success
 import scala.util.Failure
-import spray.httpx.SprayJsonSupport._
-import spray.json.DefaultJsonProtocol._
-import NodeManager._
-import Node._
-import clasp.Person
-import spray.json.DefaultJsonProtocol
-import spray.json.JsonFormat
-import spray.json.JsValue
-import spray.json.JsArray
-import spray.json.JsObject
-import spray.json.JsNumber
-import spray.json.JsString
-import spray.json._
-import java.awt.Color
-import clasp.core.EmulatorManager.ListEmulators
+import spray.http._
+import spray.httpx.marshalling._
+import spray.http.StatusCodes.NotFound
+import org.slf4j.LoggerFactory
+import clasp.core.EmulatorActor.EmulatorDescription
+
 
 object MyJsonProtocol extends DefaultJsonProtocol {
 
@@ -49,13 +52,19 @@ object MyJsonProtocol extends DefaultJsonProtocol {
   }
 
   implicit val nodeFormat = jsonFormat(NodeDescription, "ip", "name", "emulators", "asOf")
+  
+  implicit val emulatorDescriptionFormat = jsonFormat(EmulatorDescription, "publicip", "consolePort", "vncPort", "wsVncPort", "actorPath")
 }
 
 class HttpApi(val nodeManager: ActorRef,
   val emulatorManger: ActorRef) extends HttpServiceActor {
 
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{ error, debug, info, trace }
+  
+  
   import MyJsonProtocol._
-
+  
   def receive = runRoute {
     path("nodes") {
       get {
@@ -71,7 +80,7 @@ class HttpApi(val nodeManager: ActorRef,
     } ~
     path("emulators") {
       get {
-        onComplete(emulatorManger.ask(ListEmulators())(3.seconds).mapTo[List[ActorRef]]) {
+        onComplete(emulatorManger.ask(ListEmulators())(3.seconds).mapTo[List[EmulatorDescription]]) {
           case Success(value) => {
             complete(value)
           }

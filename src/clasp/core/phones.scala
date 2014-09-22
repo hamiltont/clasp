@@ -7,46 +7,49 @@ package clasp.core
 import java.util.UUID
 import scala.collection.immutable.Map
 import scala.collection.mutable.ListBuffer
-import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import scala.concurrent.Promise
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.future
 import scala.language.postfixOps
-import scala.sys.process._
 import scala.sys.process.Process
+import scala.sys.process.ProcessLogger
+import scala.sys.process.stringToProcess
 import scala.util.Failure
 import scala.util.Success
 import org.slf4j.LoggerFactory
-import akka.actor._
-import akka.dispatch.OnFailure
-import akka.dispatch.OnSuccess
-import clasp.modules.Personas
+import akka.actor.Actor
+import akka.actor.ActorRef
+import akka.actor.Cancellable
+import akka.actor.PoisonPill
+import akka.actor.actorRef2Scala
 import clasp.Emulator
-import clasp.core.sdktools.sdk
 import clasp.core.sdktools.EmulatorOptions
 import clasp.core.sdktools.avd
-
+import clasp.core.sdktools.sdk
+import clasp.modules.Personas
 import clasp.utils.ActorLifecycleLogging
 import EmulatorManager._
-  
+import EmulatorActor._
 import clasp.utils.ActorLifecycleLogging
 object EmulatorManager {
-  case class EmulatorReady(emu: ActorRef)
-  case class EmulatorFailed(emu: ActorRef)
-  case class EmulatorCrashed(emu: ActorRef)
-  case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
-  case class QueueEmulatorTask(function: Emulator => Map[String, Any], promise: Promise[Map[String, Any]])
-
-  // TODO can I make Any require serializable? 
-  case class TaskSuccess(taskId: String, data: Map[String, Any],
-    emulator: ActorRef, emulatorObj: Emulator, node: ActorRef)
-  case class TaskFailure(taskId: String, err: Exception, emulator: ActorRef)
+  case class EmulatorReady(emu: EmulatorDescription)
+  case class EmulatorFailedBoot(actor: ActorRef)
+  case class EmulatorCrashed(emu: EmulatorDescription)
+  
+  // Used to send commands to manager
   case class ListEmulators()
+  
+  // TODO move to task manager
+  case class QueueEmulatorTask(function: Emulator => Map[String, Serializable], promise: Promise[Map[String, Serializable]])
+  case class TaskSuccess(taskId: String, data: Map[String, Serializable], emulator: EmulatorDescription)
+  case class TaskFailure(taskId: String, reason: Throwable, emulator: EmulatorDescription)
 }
 class EmulatorManager extends Actor with ActorLifecycleLogging {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
-
-  val emulators = ListBuffer[ActorRef]()
+ 
+  val emulators = ListBuffer[EmulatorDescription]()
 
   // Tasks that have been delivered but not fulfilled
   val outstandingTasks: scala.collection.mutable.Map[String, Promise[Map[String, Any]]] = scala.collection.mutable.Map()
@@ -54,9 +57,9 @@ class EmulatorManager extends Actor with ActorLifecycleLogging {
   // Contains tasks that need to be delivered to workers
   val undeliveredTasks: scala.collection.mutable.Queue[EmulatorTask] = scala.collection.mutable.Queue()
 
-  def sendTask(to: ActorRef) = {
+  def sendTask(to: EmulatorDescription) = {
     if (undeliveredTasks.length != 0) {
-      info(s"Dequeuing task for ${to.path}")
+      info(s"Dequeuing task for $to")
       // Only works because the remote system has the same classpath loaded, 
       // so all anonymous functions exist on both systems. If we want this to 
       // work in a dynamic manner we would have to serialize the class that's 
@@ -65,24 +68,24 @@ class EmulatorManager extends Actor with ActorLifecycleLogging {
       // See http://doc.akka.io/docs/akka/snapshot/scala/serialization.html#serialization-scala
       // See http://www.scala-lang.org/node/10566
       // Alternatively, just copy all *.class files
-      to ! undeliveredTasks.dequeue
+      to.actor ! undeliveredTasks.dequeue
     } else
       error("Emulator came online, but no work was available.")
   }
 
   def receive = {
-    case EmulatorReady(emu) => {
-      emulators += emu
-      info(s"${emulators.length} emulators awake: ${emu.path}")
-      sendTask(emu)
+    case EmulatorReady(emulator) => {
+      emulators += emulator
+      info(s"Emulator ready: ${emulator}")
+      info(s"${emulators.length} emulators awake")
+      sendTask(emulator)
     }
-    case EmulatorFailed(emu) => {
-      emulators -= emu
-      info(s"Emulator failed to boot: ${emu.path}")
+    case EmulatorFailedBoot(actor) => {
+      info(s"Emulator failed to boot: $actor")
     }
-    case EmulatorCrashed(emu) => {
-      emulators -= emu
-      info(s"Emulator crashed: ${emu.path}")
+    case EmulatorCrashed(emulator) => {
+      info(s"Emulator crashed: $emulator")
+      emulators -= emulator
     }
     case _: ListEmulators => sender ! emulators.toList
     case QueueEmulatorTask(task, promise) => {
@@ -96,7 +99,7 @@ class EmulatorManager extends Actor with ActorLifecycleLogging {
       // Currently there's little danger of that, but still....
       undeliveredTasks.enqueue(new EmulatorTask(id, task))
     }
-    case TaskSuccess(id, data, emu, emuObj, node) => {
+    case TaskSuccess(id, data, emulator) => {
       info(s"Task $id has completed")
       val promise_option = outstandingTasks remove id
       promise_option.get success data
@@ -107,12 +110,14 @@ class EmulatorManager extends Actor with ActorLifecycleLogging {
       } else {
         sendTask(emu)
       }
+      sendTask(emulator)
     }
-    case TaskFailure(id, err, emu) => {
+    case TaskFailure(id, reason, emulator) => {
       info(s"Task $id has failed")
       val promise_option = outstandingTasks remove id
-      promise_option.get failure err
-      sendTask(emu)
+      promise_option.get failure reason
+      sendTask(emulator)
+    }
     }
     case unknown => error(s"Received unknown message from ${sender.path}: $unknown")
   }
@@ -120,9 +125,22 @@ class EmulatorManager extends Actor with ActorLifecycleLogging {
 
 
 object EmulatorActor {
+  
+  // Used to send commands to emulators
+  case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
+  
+  // Used to hold static reference to emulator
+  // publicip - publically routable IP address intended for direct communication from clasp-external 
+  // nodes, such as web browsers. This will commonly equal the master node's IP address, and the 
+  // master node will act as a TCP proxy directly to the servers the emulator is running (mainly VNC) 
+  case class EmulatorDescription(publicip: String, port: Int, vncPort: Int, wsVncPort: Int, actor: ActorRef)
+  
+  // Used internally to update status
+  case class BootSuccess()
+  case class BootFailure()
   case class EmulatorHeartbeat()
+  
 }
-import EmulatorActor._
 
 // An always-on presence for a single emulator process. 
 //  - Monitors process state (STARTED, READY, etc)
@@ -157,6 +175,9 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
   // Emulator manager reference
   val emanager = context.system.actorFor(s"akka.tcp://clasp@${node.masterip}:2552/user/emulatormanager")
 
+  // Static description of this emulator
+  var description: Option[EmulatorDescription] = None
+  
   // Processes for display management on X11 based system
   var XvfbProcess: Option[Process] = None
   var x11vncProcess: Option[Process] = None
@@ -212,47 +233,25 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
     
     implicit val system = context.system
     val boot = future {
-      if (false == sdk.wait_for_emulator(serialID, 200.second))
-        throw new IllegalStateException("Emulator has not booted")
-    } 
-    
-    boot onSuccess { case _ =>
-      val bootTime = System.currentTimeMillis
-      info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}")
-
-      // Apply all personas
-      Personas.applyAll(serialID, opts)
-
-      // Start the heartbeats
-      heartbeatSchedule = system.scheduler.schedule(0.seconds, 1.seconds, self, EmulatorHeartbeat)
-
-      emanager ! EmulatorReady(self)
-    } 
-    
-    boot onFailure { case _ =>
-      val failTime = System.currentTimeMillis
-      info(s"Emulator $port failed to boot. Reported failure at $failTime");
-      emanager ! EmulatorFailed(self)
-      context.stop(self)
       info(s"Waiting for emulator $this to come online")
+      if (sdk.wait_for_emulator(serialID, 200.second))
+        self ! BootSuccess()
+      else
+        self ! BootFailure()
     }
   }
 
   def receive = {
-    case EmulatorHeartbeat => {
-      // This heartbeat is sent every second and is initiated
-      // once the emulator has booted.
-      //
-      // Executing a command on the emulator shell provides a better
-      // mechanism to determine if the device is online
-      // than just making sure the process is alive.
-      info(s"Sending heartbeat to $serialID.")
+    case _ : EmulatorHeartbeat => {
+      // Executing a command on the emulator to ensure it's 
+      // alive and responding
+      debug(s"Sending heartbeat to $serialID.")
       val ret = future { sdk.remote_shell(serialID, "echo alive", 5.seconds) }
       ret onComplete {
         case Success(out) => {
           if (out.isEmpty) {
             error(s"Emulator $serialID heartbeat failed. Destroying.")
-            emanager ! EmulatorCrashed(self)
+            emanager ! EmulatorCrashed(description.get)
             context.stop(self)
           }
         }
