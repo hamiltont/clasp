@@ -25,8 +25,10 @@ import clasp.core.sdktools.sdk
 import clasp.core.sdktools.EmulatorOptions
 import clasp.core.sdktools.avd
 
+import clasp.utils.ActorLifecycleLogging
 import EmulatorManager._
   
+import clasp.utils.ActorLifecycleLogging
 object EmulatorManager {
   case class EmulatorReady(emu: ActorRef)
   case class EmulatorFailed(emu: ActorRef)
@@ -40,7 +42,7 @@ object EmulatorManager {
   case class TaskFailure(taskId: String, err: Exception, emulator: ActorRef)
   case class ListEmulators()
 }
-class EmulatorManager extends Actor {
+class EmulatorManager extends Actor with ActorLifecycleLogging {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
@@ -130,8 +132,8 @@ import EmulatorActor._
 // others to interface with the EmulatorActor without having to understand its 
 // interface
 // TODO make EmulatorActor a FSM with states Booted, Booting, and Not Booted
-class EmulatorActor(val id: Int, val opts: EmulatorOptions,
-  val node: NodeDetails) extends Actor {
+class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
+  val node: NodeDetails) extends Actor with ActorLifecycleLogging {
   
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
@@ -161,6 +163,7 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
 
   override def postStop = {
     info(s"Halting emulator process ($id,$serialID,$port,${self.path})")
+    super.preStart
     process.destroy
     process.exitValue // block until destroyed
     info(s"Halted emulator process")
@@ -197,6 +200,8 @@ class EmulatorActor(val id: Int, val opts: EmulatorOptions,
   }
 
   override def preStart() {
+    super.preStart
+    
     implicit val system = context.system
     val boot = future {
       info(s"Waiting for emulator ($id,$port) to come online")

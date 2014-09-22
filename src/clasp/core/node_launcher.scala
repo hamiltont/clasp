@@ -34,6 +34,11 @@ import akka.remote.RemotingShutdownEvent
 import akka.remote.ShutDownAssociation
 import akka.remote.transport.AssociationHandle.Disassociated
 import akka.dispatch.Foreach
+import clasp.utils.ActorLifecycleLogging
+import clasp.utils.ActorLifecycleLogging
+import clasp.utils.ActorLifecycleLogging
+import clasp.utils.ActorLifecycleLogging
+import clasp.utils.ActorLifecycleLogging
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
@@ -47,7 +52,7 @@ object NodeManager {
   case class NodeBootExpected(nodeip: String) extends NM_Message
   case class NodeList() extends NM_Message
 }
-class NodeManager(val conf: ClaspConf) extends Actor {
+class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
   import NodeManager._
@@ -178,7 +183,8 @@ class NodeManager(val conf: ClaspConf) extends Actor {
 
   override def postStop = {
     info("NodeManager halted. Triggering full ActorSystem shutdown")
-    context.system.shutdown()
+    context.system.shutdown
+    super.postStop
   }
 
   def boot_any = {
@@ -236,7 +242,7 @@ object Node {
 }
 class Node(val ip: String, val serverip: String,
   val emuOpts: EmulatorOptions, val numEmulators: Int)
-  extends Actor {
+  extends Actor with ActorLifecycleLogging {
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
@@ -272,6 +278,8 @@ class Node(val ip: String, val serverip: String,
     }
 
     context.system.shutdown
+    
+    super.postStop
   }
 
   // Wait until we are connected to the nodemanager with an ActorRef
