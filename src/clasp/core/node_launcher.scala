@@ -1,57 +1,58 @@
 
 package clasp.core
 
+import scala.collection.JavaConverters.asScalaBufferConverter
+import scala.collection.TraversableOnce.flattenTraversableOnce
+import scala.collection.mutable.ArrayStack
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.MutableList
-import scala.collection.mutable.ArrayStack
-import scala.collection.JavaConverters._
-import scala.util.Random
-import scala.collection.immutable.StringOps
-import org.slf4j.LoggerFactory
-import clasp.core.sdktools.sdk
-import clasp.core.sdktools.EmulatorOptions
-import akka.actor._
-import akka.pattern.Patterns.ask
-import scala.sys.process._
-import java.io.BufferedWriter
-import java.io.File
-import java.io.FileWriter
-import java.io.IOException
-import java.util.concurrent.atomic.AtomicInteger
-import com.typesafe.config.ConfigFactory
-import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.future
 import scala.language.postfixOps
+import scala.sys.process.Process
+import scala.sys.process.ProcessLogger
+import scala.sys.process.stringToProcess
 import scala.util.Random
-import System.currentTimeMillis
-import scala.concurrent.duration._
-import ExecutionContext.Implicits.global
+
+import org.slf4j.LoggerFactory
+import com.typesafe.config.ConfigFactory
+
+import akka.actor.Actor
+import akka.actor.ActorIdentity
+import akka.actor.ActorInitializationException
+import akka.actor.ActorKilledException
+import akka.actor.ActorRef
+import akka.actor.ActorSelection.toScala
+import akka.actor.Identify
+import akka.actor.OneForOneStrategy
+import akka.actor.PoisonPill
+import akka.actor.Props
+import akka.actor.SupervisorStrategy.Escalate
+import akka.actor.SupervisorStrategy.Stop
+import akka.actor.Terminated
+import akka.actor.actorRef2Scala
 import clasp.ClaspConf
-import akka.actor.SupervisorStrategy._
-import akka.remote.RemotingLifecycleEvent
-import akka.remote.DisassociatedEvent
-import akka.remote.RemotingShutdownEvent
-import akka.remote.RemotingShutdownEvent
-import akka.remote.ShutDownAssociation
-import akka.remote.transport.AssociationHandle.Disassociated
-import akka.dispatch.Foreach
-import clasp.utils.ActorLifecycleLogging
-import clasp.utils.ActorLifecycleLogging
-import clasp.utils.ActorLifecycleLogging
-import clasp.utils.ActorLifecycleLogging
 import clasp.core.sdktools.EmulatorOptions
+import clasp.core.sdktools.sdk
 import clasp.utils.ActorLifecycleLogging
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
 
 object NodeManager {
-  sealed trait NM_Message
-  case class Shutdown(ifempty: Boolean = false) extends NM_Message
-  case class NodeUp(description: Node.NodeDescription) extends NM_Message
-  case class BootNode() extends NM_Message
-  case class NodeStartError(nodeip: String, debuglog: String) extends NM_Message
-  case class NodeBootExpected(nodeip: String) extends NM_Message
-  case class NodeList() extends NM_Message
+  // External commands 
+  case class Shutdown(ifempty: Boolean = false)
+  case class BootNode()
+  case class NodeList()
+  case class FindNodesForLaunch(count: Int = 1)
+  
+  // Responses from Node
+  case class NodeUp(description: Node.NodeDescription)
+  case class NodeStartError(nodeip: String, debuglog: String)
+  
+  // Internal usage
+  case class NodeBootExpected(nodeip: String)
 }
 class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging {
   lazy val log = LoggerFactory.getLogger(getClass())
@@ -113,7 +114,7 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
         debug(s"Ignoring boot timeout message for $nodeip, reply already received")
     }
     case _: NodeList => { sender ! nodes.toList }
-    case _: BootNode => boot_any
+    case _: BootNode => boot_node
     case Shutdown(ifempty: Boolean) => {
       debug(s"Received Shutdown request, with force=${!ifempty}")
       if (nodes.isEmpty && outstandingList.isEmpty) {
@@ -192,7 +193,7 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
     super.postStop
   }
 
-  def boot_any = {
+  def boot_node = {
     info(s"Node boot requested (by ${sender.path})")
     if (pool.length == 0)
       error("Node boot request failed - worker pool is empty")
@@ -322,6 +323,7 @@ class Node(val ip: String, val serverip: String, val numEmulators: Int)
       self ! Node.Shutdown
     }
     case Node.LaunchEmulator(count) => {
+      info(s"Emulator launch requested by $sender")
       for (_ <- 1 to count)
         devices += bootEmulator()
     }
