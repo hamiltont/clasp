@@ -17,6 +17,9 @@ import akka.actor.ActorSystem
 import akka.pattern.ask
 import java.nio.file.Files
 import java.nio.file.Paths
+import clasp.utils.FancyFuture._
+import scala.util.Failure
+import scala.util.Success
 
 /**
  * The entire SDK tool facade!
@@ -34,51 +37,91 @@ object sdk extends AndroidProxy
     super[AndroidProxy].valid && super[EmulatorProxy].valid
   }
 
-  //val adb:String = sdk_config.config.getString(sdk_config.adb_config)
-  
-  // Blocking call, but guaranteed to return within max_wait.
-  // Will report if emulator is both booted and showing up in adb.
-  // If result is false there's no way to know what went wrong
+  /**
+   * Blocking method that will periodically check if emulator is
+   * registered with adb and reporting boot is complete
+   */
   def wait_for_emulator(serialID: String,
-      max_wait: FiniteDuration = 35.second)
-      (implicit system:ActorSystem) : Boolean = {
-    val a = actor(new Act {
-        // TODO create get_property method in proxy_adb, and create separate parser functions for each property
-        val command:String = s"$adb -s $serialID shell getprop dev.bootcomplete"
-        val command2 = s"$adb -s $serialID shell getprop sys.boot_completed" 
-        //val command3 = s"$adb -s $serialID shell getprop init.svc.bootanim"
-        val timeout = system.scheduler.scheduleOnce(max_wait, self,
-          "timeout")
-        var resultActor: ActorRef = null
+    max_wait: FiniteDuration = 35.second)(implicit system: ActorSystem): Boolean = {
 
-        def retry = {
-          val outbuffer = new StringBuilder("")
-          val logger = ProcessLogger(out => outbuffer.append(out),
-            err => outbuffer.append(err))
-          Process(command).!(logger)
-          Process(command2).!(logger)
-          //Process(command3).!(logger)
-          val out = outbuffer.toString
+    /**
+     * Will be run on background thread
+     */
+    def poll_adb(command: String): Boolean = {
+      // Capture out and err
+      val outbuffer = new StringBuilder("")
+      val logger = ProcessLogger(
+        out => {
+          debug(s"ADB reported '$out' for '$command'")
+          outbuffer.append(out)
+        },
+        err => {
+          debug(s"ADB reported '$err' for '$command'")
+          outbuffer.append(err)
+        })
 
-          if (out.contains("1")) {
-            timeout.cancel
-            resultActor ! true
-          } else 
-            system.scheduler.scheduleOnce(1.second, self, "retry")
+      val proc = Process(command).run(logger)
+      proc.exitValue
+
+      debug(s"ADB poll  returning ${outbuffer.toString.startsWith("1")}")
+      outbuffer.toString.startsWith("1")
+    }
+
+    /**
+     * Evaluates the passed expression on a background thread, and 
+     * then returns the results on the foreground thread. Returns 
+     * false if there was a timeout anywhere
+     */
+    def run_with_cancel_and_timeout(what: => Boolean): Boolean = {
+      val (fut, cancel) = CancelableFuture(what)
+      try {
+        Await.ready(fut, 25.seconds)
+      } catch {
+        case _: TimeoutException => {}
+        case _: InterruptedException => {}
+      }
+
+      // Force cancel, as we've waited long enough
+      val wasCancelled = cancel()
+      
+      // Return the result
+      try {
+        return Await.result(fut, 5.seconds)
+      } catch {
+        case any:Throwable => {
+          debug(s"Returning ADB result failed with $any")
+          false
         }
+      }
+    }
 
-        become {
-          case "result"  => { resultActor = sender; retry }
-          case "timeout" => resultActor ! false
-          case "retry"   => retry
-        }
-      })
+    // Until time is up or the system is online, 
+    val end_time = System.currentTimeMillis() + max_wait.toMillis
+    while (System.currentTimeMillis() < end_time) {
 
-    val result = a.ask("result")(max_wait)
-    val realResult = Await.result(result, max_wait).asInstanceOf[Boolean]
-    realResult
+      def one = poll_adb(s"$adb -s $serialID shell getprop dev.bootcomplete")
+
+      if (run_with_cancel_and_timeout(one)) {
+        debug("Emulator online success")
+        return true
+      }
+
+      // Sleep before hitting ADB again
+      Thread.sleep(1000)
+
+      def two = poll_adb(s"$adb -s $serialID shell getprop sys.boot_completed")
+      if (run_with_cancel_and_timeout(two)) {
+        debug("Emulator online success")
+        return true
+      }
+
+      // Sleep before hitting ADB again
+      Thread.sleep(2000)
+    }
+
+    error("Waiting on emulator timed out")
+    false
   }
-
 }
 
 object sdk_config {
