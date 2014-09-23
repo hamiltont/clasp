@@ -100,6 +100,10 @@ trait AdbProxy {
     Command.run(command, timeout)
   }
   
+  def send_keyevent(serial: String, key: AndroidKey) {
+    sdk.remote_shell(serial, s"input keyevent ${key.key}")
+  }
+  
   /**
    * Run an emulator console command.
    */

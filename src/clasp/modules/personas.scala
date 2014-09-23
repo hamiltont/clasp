@@ -4,11 +4,10 @@ package clasp.modules
 import java.text.DecimalFormat
 import java.util.Random
 import java.util.UUID
-
 import org.slf4j.LoggerFactory
-
 import clasp.core.sdktools.EmulatorOptions
 import clasp.core.sdktools.sdk
+import clasp.core.sdktools.AndroidKeys
 
 // TODO: Because Android changes so much between versions, and
 // because configuring personas with adb isn't very well documented

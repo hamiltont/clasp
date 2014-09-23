@@ -24,14 +24,14 @@ import scala.util.Success
 /**
  * The entire SDK tool facade!
  */
-object sdk extends AndroidProxy 
-              with EmulatorProxy
-              with AdbProxy
-              with TelnetProxy
-              with AaptProxy {
+object sdk extends AndroidProxy
+  with EmulatorProxy
+  with AdbProxy
+  with TelnetProxy
+  with AaptProxy {
   lazy val log = LoggerFactory.getLogger(getClass())
-  import log.{error, debug, info, trace}
-  
+  import log.{ error, debug, info, trace }
+
   // TODO extend to all
   override def valid = {
     super[AndroidProxy].valid && super[EmulatorProxy].valid
@@ -126,13 +126,13 @@ object sdk extends AndroidProxy
 
 object sdk_config {
 
-  val aapt_config     = "sdk.aapt"
-  val adb_config      = "sdk.adb"
-  val android_config  = "sdk.android"
+  val aapt_config = "sdk.aapt"
+  val adb_config = "sdk.adb"
+  val android_config = "sdk.android"
   val emulator_config = "sdk.emulator"
   val mksdcard_config = "sdk.mksdcard"
-  val config: Config  = ConfigFactory.load()
-  
+  val config: Config = ConfigFactory.load()
+
   // TODO make this return the proper class at runtime.
   // Currently only returns clasp.core.sdk_config
   lazy val log = LoggerFactory.getLogger(getClass())

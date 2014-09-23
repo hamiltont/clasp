@@ -119,14 +119,12 @@ trait AndroidProxy {
     }
 
     val targetIndex = get_target_index(target)
-    debug(s"Found index `${targetIndex}` for target `$target`")
     if (targetIndex.isEmpty) {
       error(s"Unable to create AVD `$name`, target `$target` not found")
       return false
     }
 
     val abis = get_target_ABIs(targetIndex.get)
-    debug(s"Found ABIs `${abis.mkString(" ")}` for $targetIndex")
 
     breakable {
       for (abi <- abis) {

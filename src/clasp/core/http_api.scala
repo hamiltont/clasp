@@ -60,9 +60,8 @@ object MyJsonProtocol extends DefaultJsonProtocol {
 
   implicit object booleanFormat extends JsonFormat[Boolean] {
     def write(b: Boolean) = {
-        JsObject(Map(
-            "result" -> JsBoolean(b)
-        ))
+      JsObject(Map(
+        "result" -> JsBoolean(b)))
     }
 
     def read(value: JsValue) =
@@ -92,10 +91,9 @@ class HttpApi(val nodeManager: ActorRef,
 
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
-  
-  
+
   import MyJsonProtocol._
-  
+
   def receive = runRoute {
     path("nodes") {
       get {

@@ -13,7 +13,7 @@ object Command {
 
   def run(command: String, timeout: FiniteDuration = 0 seconds,
       killSignal: Int = 9): Option[String] = {
-    info(s"Executing '$command'")
+    debug(s"Executing '$command'")
     val out = new StringBuilder
     val logger = ProcessLogger(
       (o: String) => out.append(o),
@@ -23,7 +23,7 @@ object Command {
       } else {
         command ! logger
       }
-    info(s"Finished executing'$command'")
+    debug(s"Finished executing'$command'")
     if (ret != 0) {
       return None
     } else {

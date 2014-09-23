@@ -32,6 +32,9 @@ import clasp.utils.ActorLifecycleLogging
 import EmulatorManager._
 import EmulatorActor._
 import clasp.utils.ActorLifecycleLogging
+import akka.pattern.ask
+
+
 object EmulatorManager {
   case class EmulatorReady(emu: EmulatorDescription)
   case class EmulatorFailedBoot(actor: ActorRef)
@@ -46,7 +49,7 @@ object EmulatorManager {
   case class TaskSuccess(taskId: String, data: Map[String, Serializable], emulator: EmulatorDescription)
   case class TaskFailure(taskId: String, reason: Throwable, emulator: EmulatorDescription)
 }
-class EmulatorManager extends Actor with ActorLifecycleLogging {
+class EmulatorManager(val nodeManager: ActorRef) extends Actor with ActorLifecycleLogging {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
  
@@ -158,8 +161,10 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   val uuid = UUID.randomUUID().toString()
   
   // Emulator ports (each needs two)
-  val base_emulator_port = 5555
-  val port = base_emulator_port + 2 * nodeId
+  // WARNING: consolePort must be an even integer
+  val base_emulator_port = 5554
+  val consolePort = base_emulator_port + 2 * nodeId
+  val adbPort = consolePort + 1
   
   // Display port (1 is 5901, 99 is 5999)
   val base_display_num = 1
@@ -276,7 +281,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
     case GetOptions(sendTo) => sendTo ! opts
     case _ : BootSuccess => {
       val bootTime = System.currentTimeMillis
-      info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}")
+      info(s"Emulator $consolePort is awake at $bootTime, took ${bootTime - buildTime}")
 
       // Apply all personas
       Personas.applyAll(serialID, opts)
@@ -304,9 +309,9 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
 
     // Give each emulator a unique name and SDcard
     val hostname = "hostname".!!.stripLineEnd;
-    val avdName = s"$hostname-$port"
-    val target = opts.avdTarget getOrElse "android-18"
-    val abi = opts.abiName getOrElse "x86"
+    val avdName = s"$hostname-$consolePort"
+    val target = opts.clasp.avdTarget getOrElse "android-18"
+    val abi = opts.clasp.abiName getOrElse "x86"
     
     info(s"Building AVD `$avdName` for ABI `$abi` target `$target`")
     // TODO we must lookup the eabi for the target or this will likely fail
@@ -320,7 +325,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
     s"mkdir -p $workspaceDir" !!
 
     // Create SD card
-    val sdcardName = s"$workspaceDir/sdcard-$hostname-$port.img"
+    val sdcardName = s"$workspaceDir/sdcard-$hostname-$consolePort.img"
     info(s"Creating sdcard: $sdcardName")
     sdk.mksdcard("9MB", sdcardName)
     if (opts.disk.sdcard.isDefined)
@@ -342,10 +347,10 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
            
           // Start a virtual frame buffer
           val screen = avd.get_skin_dimensions
-          val xvfbCommand = s"Xvfb :${nodeId} -screen 0 ${screen}x16"
+          val xvfbCommand = s"Xvfb :${display_number} -screen 0 ${screen}x16"
           val xvfbProcess = Process(xvfbCommand)
-          val xvfbLogger = ProcessLogger ( line => info(s"xvfb:${nodeId}:out: $line"), 
-          		line => error(s"xvfb:${nodeId}:err: $line") )
+          val xvfbLogger = ProcessLogger ( line => info(s"xvfb:${display_number}:out: $line"), 
+          		line => error(s"xvfb:${display_number}:err: $line") )
           debug(s"Running Xvfb using: $xvfbCommand")
           val xvfb = xvfbProcess.run(xvfbLogger)
           XvfbProcess = Some(xvfb)
@@ -354,10 +359,10 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
           Thread.sleep(850)
           
           // Start a VNC server for the frame buffer
-          val xvncCommand = s"x11vnc -display :${nodeId} -nopw -listen 0.0.0.0 -forever -shared -rfbport $display_port -xkb"
+          val xvncCommand = s"x11vnc -display :${display_number} -nopw -listen 0.0.0.0 -forever -shared -rfbport $display_port -xkb"
           val xvncProcess = Process(xvncCommand)
-          val xvncLogger = ProcessLogger ( line => info(s"x11vnc:${nodeId}:out: $line"), 
-          		line => error(s"x11vnc:${nodeId}:err: $line") )
+          val xvncLogger = ProcessLogger ( line => info(s"x11vnc:${display_number}:out: $line"), 
+          		line => error(s"x11vnc:${display_number}:err: $line") )
           debug(s"Running x11vnc using: $xvncCommand")
           val xvnc = xvncCommand.run(xvncLogger)
           x11vncProcess = Some(xvnc)
@@ -371,8 +376,8 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
           // Start a TCP<-->WebSocket proxy
           val webpCommand = s"./lib/noVNC/utils/websockify $ws_display_port 127.0.0.1:$display_port"
           val webpProcess = Process(webpCommand)
-          val webpLogger = ProcessLogger ( line => info(s"websockify:${nodeId}:out: $line"), 
-          		line => error(s"websockify:${nodeId}:err: $line") )
+          val webpLogger = ProcessLogger ( line => info(s"websockify:${display_number}:out: $line"), 
+          		line => error(s"websockify:${display_number}:err: $line") )
           debug(s"Running websockify using: $webpCommand")
           val webp = webpCommand.run(webpLogger)
           websockifyProcess = Some(webp)
@@ -398,7 +403,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   }
   
   override def toString():String = {
-    return s"[Emulator, id: $id, nodeId: $nodeId, consolePort: $port, path: ${self.path}]"
+    return s"[Emulator, id: $uuid, serialId: $serialID, nodeId: $nodeId, consolePort: $consolePort, path: ${self.path}]"
   }
 
 }
