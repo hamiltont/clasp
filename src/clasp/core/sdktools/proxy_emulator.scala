@@ -29,94 +29,27 @@ trait EmulatorProxy {
   /**
    * Start an emulator with the given options.
    */
-  def start_emulator(avd_name: String, port: Int, opts: EmulatorOptions = null): (Process, String) = {
-    var command = s"$emulator -ports $port,${port + 1} @$avd_name"
-    if (opts != null) {
-      if (opts.sysdir != null) command += s" -sysdir ${opts.sysdir}"
-      if (opts.system != null) command += s" -system ${opts.system}"
-      if (opts.datadir != null) command += s" -datadir ${opts.datadir}"
-      if (opts.kernel != null) command += s" -kernel ${opts.kernel}"
-      if (opts.ramdisk != null) command += s" -ramdisk ${opts.ramdisk}"
-      if (opts.image != null) command += s" -image ${opts.image}"
-      if (opts.data != null) command += s" -datadir ${opts.data}"
-      if (opts.partitionSize != null) command += s" -partition-size ${opts.partitionSize}"
-      if (opts.cache != null) command += s" -cache ${opts.cache}"
-      if (opts.cacheSize != null) command += s" -cache-size ${opts.cacheSize}"
-      if (opts.sdCard != null) command += s" -sdcard ${opts.sdCard}"
-      if (opts.snapStorage != null) command += s" -snapstorage ${opts.snapStorage}"
-      if (opts.snapShot != null) command += s" -snapshot ${opts.snapShot}"
-      if (opts.skinDir != null) command += s" -skindir ${opts.skinDir}"
-      if (opts.skin != null) command += s" -skin ${opts.skin}"
-      if (opts.memory != null) command += s" -memory ${opts.memory}"
-      if (opts.netSpeed != null) command += s" -netspeed ${opts.netSpeed}"
-      if (opts.netDelay != null) command += s" -netfast ${opts.netDelay}"
-      if (opts.trace != null) command += s" -trace ${opts.trace}"
-      if (opts.logcatTags != null) command += s" -logcat ${opts.logcatTags}"
-      if (opts.audioBackend != null) command += s" -audio ${opts.audioBackend}"
-      if (opts.radio != null) command += s" -radio ${opts.radio}"
-      if (opts.onion != null) command += s" -onion ${opts.onion}"
-      if (opts.onionAlpha != null) command += s" -onion-alpha ${opts.onionAlpha}"
-      if (opts.scale != null) command += s" -scale ${opts.scale}"
-      if (opts.dpiDevice != null) command += s" -dpi-device ${opts.dpiDevice}"
-      if (opts.httpProxy != null) command += s" -http-proxy ${opts.httpProxy}"
-      if (opts.timeZone != null) command += s" -timezone ${opts.timeZone}"
-      if (opts.dnsServer != null) command += s" -dns-server ${opts.dnsServer}"
-      if (opts.cpuDelay != null) command += s" -cpu-delay ${opts.cpuDelay}"
-      if (opts.reportConsoleSocket != null) command += s" -report-console ${opts.reportConsoleSocket}"
-      if (opts.gpsDevice != null) command += s" -gps ${opts.gpsDevice}"
-      if (opts.keysetName != null) command += s" -keyset ${opts.keysetName}"
-      if (opts.shellSerial != null) command += s" -shell-serial ${opts.shellSerial}"
-      if (opts.tcpDump != null) command += s" -tcpdump ${opts.tcpDump}"
-      if (opts.bootChartTimeout != null) command += s" -bootchart ${opts.bootChartTimeout}"
-      if (opts.charmapFile != null) command += s" -charmap ${opts.charmapFile}"
-      if (opts.propNameVal != null) command += s" -prop ${opts.propNameVal}"
-      if (opts.sharedNetID != null) command += s" -shared-net-id ${opts.sharedNetID}"
-      if (opts.nandLimits != null) command += s" -nand-limits ${opts.nandLimits}"
-      if (opts.memCheckFlags != null) command += s" -memcheck ${opts.memCheckFlags}"
-      if (opts.gpuMode != null) command += s" -gpu ${opts.gpuMode}"
-      if (opts.cameraBackMode != null) command += s" -camera-back ${opts.cameraBackMode}"
-      if (opts.cameraFrontMode != null) command += s" -camera-front ${opts.cameraFrontMode}"
-      if (opts.screenMode != null) command += s" -screen ${opts.screenMode}"
-      if (opts.qemuArgs != null) command += s" -qemu ${opts.qemuArgs}"
-
-      if (opts.noCache) command += s" -no-cache"
-      if (opts.noSnapStorage) command += s" -no-snapstorage"
-      if (opts.noSnapShot) command += s" -no-snapshot"
-      if (opts.noSnapShotSave) command += s" -no-snapshot-save"
-      if (opts.noSnapShotLoad) command += s" -no-snapshot-load"
-      if (opts.noSnapShotUpdateTime) command += s" -no-snapshot-update-time"
-      if (opts.wipeData) command += s" -wipe-data"
-      if (opts.noSkin) command += s" -no-skin"
-      if (opts.dynamicSkin) command += s" -dynamic-skin"
-      if (opts.netFast) command += s" -netfast"
-      if (opts.showKernel) command += s" -show-kernel"
-      if (opts.shell) command += s" -shell"
-      if (opts.noJni) command += s" -no-jni"
-      if (opts.noAudio) command += s" -no-audio"
-      if (opts.rawKeys) command += s" -raw-keys"
-      if (opts.noBootAnim) command += s" -no-boot-anim"
-      if (opts.noWindow) command += s" -no-window"
-      if (opts.force32Bit) command += s" -force-32bit"
-      if (opts.verbose) command += s" -verbose"
-    }
+  def start_emulator(opts: EmulatorOptions = new EmulatorOptions()): (Process, String) = {
+    
+    // Add all the conventional arguments into the command
+    
+    // options.avdName = Some(avd_name)
+    var command = opts.applyToCommand(emulator)
 
     var builder = Process(command)
-    if (!opts.display.isEmpty) {
-      info(s"emulator_start command: DISPLAY=:${opts.display.get} bash -c '$command'")
-      builder = Process(Seq("bash", "-c", command), None, "DISPLAY" -> s":${opts.display.get}") 
+    if (opts.clasp.displayNumber.isDefined) {
+      info(s"Emulator launch command: DISPLAY=:${opts.clasp.displayNumber.get} bash -c '$command'")
+      builder = Process(Seq("bash", "-c", command), None, "DISPLAY" -> s":${opts.clasp.displayNumber.get}")
     } else
-      info(s"emulator_start command: $command")
+      info(s"Emulator launch command: $command")
 
-    val serial = "emulator-" + port
+    val serial = "emulator-" + opts.network.consolePort.getOrElse("XX")
     val logger = ProcessLogger(line => info(serial + ":out: " + line),
       line => info(serial + ":err: " + line))
     val process = builder.run(logger)
-
-    info("Process started")
-
+    info("Emulator process started")
+    
     return (process, serial)
-
-    // TODO - read in the output and ensure that the emulator actually started
   }
 
   /**
@@ -151,21 +84,235 @@ trait EmulatorProxy {
   // TODO rmsdcard
 }
 
+
+
+
 /**
- * Contains various settings and flags for the emulator.
+ * Everything needed to launch the Android emulator process, including flags for 
+ * the binary command and Clasp-specific settings
+ *
+ * <p>When using, it is helpful to realize that case classes come with a
+ * nice copy operator for changing one value</p>
+ *
+ * <code>
+ * val newDiskImageOptions = existingDiskImageOptions.copy(data = "/foo/path)
+ * </code>
+ *
+ * <code>
+ * val x: EmulatorOptions = opts.copy(network = opts.network.copy(consolePort = Some(port)))
+ * </code>
  */
-class EmulatorOptions {
-  // Command-line flags.
-  var sysdir, system, datadir, kernel, ramdisk, image, data, partitionSize, cache, cacheSize, sdCard, snapStorage, snapShot, skinDir, skin, memory, netSpeed, netDelay, trace, logcatTags, audioBackend, radio, onion, onionAlpha, scale, dpiDevice, httpProxy, timeZone, dnsServer, cpuDelay, reportConsoleSocket, gpsDevice, keysetName, shellSerial, tcpDump, bootChartTimeout, charmapFile, propNameVal, sharedNetID, nandLimits, memCheckFlags, gpuMode, cameraBackMode, cameraFrontMode, screenMode, qemuArgs: String = null
+// TODO consider making each flag it's own class, which would enable much more powerful 
+// syntax trees (e.g. Android 1.6 flags vs 3.0, etc)
+// TODO add flags for snapshot options, dynamicSkin, etc
+case class EmulatorOptions(
+    avdName: Option[String] = None,
+    clasp: ClaspOptions = ClaspOptions(),
+    disk: DiskImageOptions = DiskImageOptions(), 
+    debug: DebugOptions = DebugOptions(), 
+    media: MediaOptions = MediaOptions(), 
+    network: NetworkOptions = NetworkOptions(), 
+    ui: UIoptions = UIoptions(),
+    system: SystemOptions = SystemOptions()) extends UpdateCommandString {
+  
+  override def applyToCommand(command: String): String = {
+    /* Debugging if you need :-)
+    println(disk.applyToCommand(command)) 
+    println(debug.applyToCommand(command)) 
+    println(media.applyToCommand(command))
+    println(network.applyToCommand(command)) 
+    println(ui.applyToCommand(command)) 
+    println(system.applyToCommand(command))
+    */
+    
+    return command + 
+      update(avdName, "-avd") +   
+      disk.applyToCommand(command) + 
+      debug.applyToCommand(command) + 
+      media.applyToCommand(command) + 
+      network.applyToCommand(command) + 
+      ui.applyToCommand(command) + 
+      // System needs to be last for QEMU args
+      system.applyToCommand(command)
+  }
 
-  var noCache, noSnapStorage, noSnapShot, noSnapShotSave, noSnapShotLoad, noSnapShotUpdateTime, wipeData, noSkin, dynamicSkin, netFast, showKernel, shell, noJni, noAudio, rawKeys, noBootAnim, noWindow, force32Bit, verbose = false
-
-  // AVD and initialization options.
-  var avdTarget, abiName: Option[String] = None
-  var randomContacts, randomCalendar: Int = 0
-
-  // Clasp-specific options
-
-  // X11 display variable, e.g. DISPLAY=:1
-  var display: Option[Int] = None
 }
+
+  trait UpdateCommandString {
+    def update[T](option: Option[T], flagName: String): String = {
+      if (option.isEmpty)
+        return ""
+      else if (option.get.isInstanceOf[Boolean] && option.get.asInstanceOf[Boolean])
+        return s" $flagName"
+      else if (option.get.isInstanceOf[Int])
+        return s" $flagName ${option.get.asInstanceOf[Int].toString}"
+      else if (option.get.isInstanceOf[String])
+        return s" $flagName ${option.get.asInstanceOf[String]}"
+      return ""
+    }
+    
+    def applyToCommand(command: String): String = {
+      return ""
+    }
+  }
+
+  /**
+   * Static class to hold clasp options
+   * 
+   * @param randomContacts number of contacts to be injected
+   * @param displayNumber X11 display variable, e.g. DISPLAY=:1
+   */
+  case class ClaspOptions(randomContacts: Option[Int] = None,
+      randomCalendarEvents: Option[Int] = None,
+      displayNumber: Option[Int] = None, 
+      avdTarget: Option[String] = None,
+      abiName: Option[String] = None) 
+
+  /**
+   * @param nocache If true, -no-cache will be passed to the emulator
+   * @param wipedata If true,  -wipe-data will be passed
+   */
+  case class DiskImageOptions(cache: Option[String] = None,
+    data: Option[String] = None,
+    initdata: Option[String] = None,
+    nocache: Option[Boolean] = Some(false),
+    ramdisk: Option[String] = None,
+    sdcard: Option[String] = None,
+    wipeData: Option[Boolean] = Some(false)) extends UpdateCommandString {
+
+    override def applyToCommand(command: String): String = {
+      return update(cache, "-cache") + 
+      update(data, "-data") + 
+      update(initdata, "-initdata") + 
+      update(nocache, "-nocache") +
+      update(ramdisk, "-ramdisk") +
+      update(sdcard, "-sdcard") +
+      update(wipeData, "-wipe-data")
+    }
+  }
+
+  /**
+   * Note: -debug-tag and -debug-no-tag are not supported
+   *
+   * @param debug A string of the format expected by -debug <tags>
+   * @param logcat A string of the format expected by -logcat <logtags>
+   */
+  case class DebugOptions(debug: Option[String] = None,
+    logcat: Option[String] = None,
+    shell: Option[Boolean] = None,
+    shellSerial: Option[String] = None,
+    showKernel: Option[String] = None,
+    trace: Option[String] = None,
+    verbose: Option[Boolean] = Some(true)) extends UpdateCommandString {
+    
+    override def applyToCommand(command: String): String = {
+      return update(debug, "-debug") +
+      update(logcat, "-logcat") + 
+      update(shell, "-shell") + 
+      update(shellSerial, "-shell-serial") + 
+      update(showKernel, "-show-kernel") + 
+      update(trace, "-trace") + 
+      update(verbose, "-verbose")
+    }
+  }
+
+  case class MediaOptions(audio: Option[String] = None,
+    audioIn: Option[String] = None,
+    audioOut: Option[String] = None,
+    noaudio: Option[Boolean] = Some(true),
+    radio: Option[String] = None,
+    useAudio: Option[Boolean] = Some(false)) extends UpdateCommandString {
+   
+    override def applyToCommand(command: String): String = {
+      return update(audio, "-audio") + 
+      update(audioIn, "-audio-in") + 
+      update(audioOut, "-audio-out") + 
+      update(noaudio, "-noaudio") + 
+      update(radio, "-radio") + 
+      update(useAudio, "-useaudio")
+   }
+  }
+
+  case class NetworkOptions(dnsServer: Option[String] = Some("8.8.8.8"),
+    httpProxy: Option[String] = None,
+    netDelay: Option[String] = None,
+    netFast: Option[Boolean] = Some(true),
+    netSpeed: Option[String] = None,
+    consolePort: Option[Int] = None,
+    adbPort: Option[Int] = None,
+    reportConsole: Option[String] = None) extends UpdateCommandString { 
+   
+    override def applyToCommand(command: String): String = {
+      var ports: Option[String] = Some("")
+      
+      if (consolePort.isDefined && adbPort.isDefined)
+        ports = Some(s"${consolePort.get},${adbPort.get}")
+      else if (consolePort.isDefined && adbPort.isEmpty)
+        ports = Some(consolePort.get.toString)
+      else
+        ports = None
+      
+      var portCommand = if (ports.getOrElse("").contains(",")) "-ports" else "-port"
+        
+      return update(dnsServer, "-dns-server") + 
+      update(httpProxy, "-http-proxy") + 
+      update(netDelay, "-netdelay") + 
+      update(netFast, "-netfast") +
+      update(netSpeed, "-netspeed") +
+      update(ports, portCommand) + 
+      update(reportConsole, "-report-console")
+    }
+  }
+    
+  /**
+   * @param qemu <b>Important: Must be last option specified</b>
+   */
+  case class SystemOptions(cpuDelay: Option[Int] = None,
+      gpsDevice: Option[String] = None,
+      noJNI: Option[Boolean] = None,
+      useGPU: Option[Boolean] = None,
+      radio: Option[String] = None,
+      timezone: Option[String] = None,
+      memory: Option[Int] = None,
+      qemu: Option[String] = None) extends UpdateCommandString { 
+    
+    override def applyToCommand(command: String): String = {
+      return update(cpuDelay, "-cpu-delay") + 
+      update(gpsDevice, "-gps")  +
+      update(noJNI, "-nojni") + 
+      update(useGPU, "-gpu on") + 
+      update(radio, "-radio") + 
+      update(timezone, "-timezone") +
+      update(memory, "-memory") +
+      update(qemu, "-qemu")
+    }
+  }
+      
+  case class UIoptions(dpiDevice: Option[Int] = None,
+      noBootAnim: Option[Boolean] = Some(false),
+      noWindow: Option[Boolean] = Some(false),
+      scale: Option[String] = None,
+      rawKeys: Option[Boolean] = None,
+      noSkin: Option[Boolean] = None,
+      keySet: Option[String] = None,
+      onion: Option[String] = None,
+      onionAlpha: Option[Int] = None,
+      onionRotation: Option[Int] = None,
+      skin: Option[String] = None,
+      skinDir: Option[String] = None) extends UpdateCommandString { 
+     
+    override def applyToCommand(command: String): String = {
+        return update(dpiDevice, "-dpi-device") + 
+        update(noBootAnim, "-no-boot-anim") + 
+        update(noWindow, "-no-window") + 
+        update(scale, "-scale") + 
+        update(rawKeys, "-raw-keys") + 
+        update(noSkin, "-noskin") + 
+        update(keySet, "-keyset") + 
+        update(onion, "-onion") + 
+        update(onionAlpha, "-onion-alpha") + 
+        update(onionRotation, "-onion-rotation") + 
+        update(skin, "-skin") + 
+        update(skinDir, "-skindir")
+      }
+    }

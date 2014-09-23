@@ -39,6 +39,7 @@ object EmulatorManager {
   
   // Used to send commands to manager
   case class ListEmulators()
+  case class GetEmulatorOptions(uuid: String)
   
   // TODO move to task manager
   case class QueueEmulatorTask(function: Emulator => Map[String, Serializable], promise: Promise[Map[String, Serializable]])
@@ -79,6 +80,9 @@ class EmulatorManager extends Actor with ActorLifecycleLogging {
       info(s"Emulator ready: ${emulator}")
       info(s"${emulators.length} emulators awake")
       sendTask(emulator)
+    }
+    case GetEmulatorOptions(uuid) => {
+      emulators.filter(description => description.uuid.equals(uuid)).head.actor ! GetOptions(sender)
     }
     case EmulatorFailedBoot(actor) => {
       info(s"Emulator failed to boot: $actor")
@@ -121,12 +125,13 @@ object EmulatorActor {
   
   // Used to send commands to emulators
   case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
+  case class GetOptions(sendTo: ActorRef)
   
   // Used to hold static reference to emulator
   // publicip - publically routable IP address intended for direct communication from clasp-external 
   // nodes, such as web browsers. This will commonly equal the master node's IP address, and the 
   // master node will act as a TCP proxy directly to the servers the emulator is running (mainly VNC) 
-  case class EmulatorDescription(publicip: String, port: Int, vncPort: Int, wsVncPort: Int, actor: ActorRef)
+  case class EmulatorDescription(publicip: String, port: Int, vncPort: Int, wsVncPort: Int, actor: ActorRef, uuid: String)
   
   // Used internally to update status
   case class BootSuccess()
@@ -143,14 +148,14 @@ object EmulatorActor {
 // others to interface with the EmulatorActor without having to understand its 
 // interface
 // TODO make EmulatorActor a FSM with states Booted, Booting, and Not Booted
-class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
+class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   val node: NodeDetails) extends Actor with ActorLifecycleLogging {
   
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
   
   // Assign a unique ID to each emulator
-  val id = UUID.randomUUID().toString()
+  val uuid = UUID.randomUUID().toString()
   
   // Emulator ports (each needs two)
   val base_emulator_port = 5555
@@ -268,6 +273,7 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
         }
       }
     }
+    case GetOptions(sendTo) => sendTo ! opts
     case _ : BootSuccess => {
       val bootTime = System.currentTimeMillis
       info(s"Emulator $port is awake at $bootTime, took ${bootTime - buildTime}")
@@ -278,7 +284,7 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
       // Start the heartbeats
       heartbeatSchedule = context.system.scheduler.schedule(0.seconds, 10.seconds, self, EmulatorHeartbeat())
 
-      description = Some(EmulatorDescription(node.nodeip, port, display_port, ws_display_port, self))
+      description = Some(EmulatorDescription(node.nodeip, consolePort, display_port, ws_display_port, self, uuid))
       emanager ! EmulatorReady(description.get) 
     }
     case _ : BootFailure => {
@@ -317,12 +323,12 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
     val sdcardName = s"$workspaceDir/sdcard-$hostname-$port.img"
     info(s"Creating sdcard: $sdcardName")
     sdk.mksdcard("9MB", sdcardName)
-    if (opts.sdCard != null)
+    if (opts.disk.sdcard.isDefined)
       // TODO: What should be done in this case?
       info("Warning: Overriding provided sdcard option.")
     
-    opts.sdCard = sdcardName
-    opts.verbose = true
+    opts = opts.copy(disk = opts.disk.copy(sdcard = Some(sdcardName)))
+    opts = opts.copy(debug = opts.debug.copy(verbose = Some(true)))
     
     // Determine display type
     node.ostype match {
@@ -331,8 +337,8 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
         val xvfb = "which Xvfb".! == 0
         val x11vnc = "which x11vnc".! == 0
         if (xvfb && x11vnc) {
-          debug(s"Found, will run emulator in graphical mode using DISPLAY=:$nodeId")
-          opts.noWindow = false
+          debug(s"Found, will run emulator in graphical mode using DISPLAY=:$display_number")
+          opts = opts.copy(ui = opts.ui.copy(noWindow = Some(false)))
            
           // Start a virtual frame buffer
           val screen = avd.get_skin_dimensions
@@ -357,7 +363,7 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
           x11vncProcess = Some(xvnc)
           
           // Set the DISPLAY variable used when starting the emulator
-          opts.display = Some(nodeId)
+          opts = opts.copy(clasp = opts.clasp.copy(displayNumber = Some(display_number)))
           
           // Ensure x11vnc is started before being used
           Thread.sleep(850)
@@ -373,11 +379,11 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
           
           // Toss out the extra stuff and force a framebuffer 
           // that's exactly the size we want
-          opts.skin = screen 
-          opts.scale = "1"
+          opts = opts.copy(ui = opts.ui.copy(skin = Some(screen)))
+          opts = opts.copy(ui = opts.ui.copy(scale = Some("1")))
         } else {
           debug("Not found, running emulator headless")
-          opts.noWindow = true
+          opts = opts.copy(ui = opts.ui.copy(noWindow = Some(true)))
         }
       }
       case _ => {
@@ -386,7 +392,9 @@ class EmulatorActor(val nodeId: Int, val opts: EmulatorOptions,
       }
     } 
 
-    return sdk.start_emulator(avdName, port, opts);
+    opts = opts.copy(network = opts.network.copy(consolePort = Some(consolePort)))
+    opts = opts.copy(avdName = Some(avdName))
+    return sdk.start_emulator(opts);
   }
   
   override def toString():String = {

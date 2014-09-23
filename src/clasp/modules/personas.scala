@@ -37,10 +37,10 @@ object Personas {
   def applyContacts(serialID: String, emuOpts: EmulatorOptions) {
     goHome(serialID) // Go home to clear anything on the screen.
 
-    if (emuOpts.randomContacts > 0) {
+    if (emuOpts.clasp.randomContacts.getOrElse(0) > 0) {
       val df3 = new DecimalFormat("000")
       val df4 = new DecimalFormat("0000")
-      for (i <- 0 to emuOpts.randomContacts) {
+      for (i <- 0 to emuOpts.clasp.randomContacts.get) {
         val num1 = rand.nextInt(743)
         val num2 = rand.nextInt(10000)
         val name = UUID.randomUUID().toString()
@@ -62,8 +62,8 @@ object Personas {
   def applyCalendar(serialID: String, emuOpts: EmulatorOptions) {
     goHome(serialID) // Go home to clear anything on the screen.
 
-    if (emuOpts.randomCalendar > 0) {
-      for (i <- 0 to emuOpts.randomCalendar) {
+    if (emuOpts.clasp.randomCalendarEvents.getOrElse(0) > 0) {
+      for (i <- 0 to emuOpts.clasp.randomCalendarEvents.get) {
         val title = UUID.randomUUID().toString()
         val begin = System.currentTimeMillis() +
           rand.nextInt(10*24*60*60) - 5*24*60*60

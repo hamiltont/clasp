@@ -38,6 +38,7 @@ import clasp.utils.ActorLifecycleLogging
 import clasp.utils.ActorLifecycleLogging
 import clasp.utils.ActorLifecycleLogging
 import clasp.utils.ActorLifecycleLogging
+import clasp.core.sdktools.EmulatorOptions
 import clasp.utils.ActorLifecycleLogging
 
 // Main actor for managing the entire system
@@ -250,8 +251,9 @@ object Node {
   case object Shutdown
   case class NodeDescription(val ip: String, val actor: ActorRef, val onlineEmulators: Int, val asOf: Long = System.currentTimeMillis)
 }
-class Node(val ip: String, val serverip: String,
-  val emuOpts: EmulatorOptions, val numEmulators: Int)
+// TODO push updated NodeDescriptions to NodeManager whenever our internal state changes
+// TODO combine NodeDescription and NodeDetails
+class Node(val ip: String, val serverip: String, val numEmulators: Int)
   extends Actor with ActorLifecycleLogging {
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
@@ -340,11 +342,14 @@ class Node(val ip: String, val serverip: String,
 
   private def bootEmulator(): ActorRef = {
     val me = NodeDetails(ip, get_os_type, serverip, self)
-    current_emulator_ID = current_emulator_ID + 1
     debug(s"Booting new emulator with ID $current_emulator_ID")
-    context.actorOf(
+    // TODO allow this to be passed in
+    val emuOpts = new EmulatorOptions
+    val result = context.actorOf(
       Props(new EmulatorActor(current_emulator_ID, emuOpts, me)),
-      s"emulator-${5555 + 2 * current_emulator_ID}")
+      s"emulator-${5554 + 2 * current_emulator_ID}")
+    current_emulator_ID = current_emulator_ID + 1
+    result
   }
 
   def get_os_type(): String = {

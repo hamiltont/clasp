@@ -125,11 +125,15 @@ class SDKTest extends AssertionsForJUnit {
     val camList = get_webcam_list(avdName)
     //assert(camList contains "webcam0")
     
-    var emuOpts = new clasp.core.sdktools.EmulatorOptions
-    emuOpts.noBootAnim = true
-    emuOpts.noWindow = true
-    emuOpts.noSnapShotLoad = true
-    val emulatorInfo = start_emulator(avdName, 5554, emuOpts)
+    var opts = new clasp.core.sdktools.EmulatorOptions
+    opts = opts.copy(ui = opts.ui.copy(noBootAnim = Some(true)))
+    opts = opts.copy(ui = opts.ui.copy(noWindow = Some(true)))
+    // Unsupported: 
+    // emuOpts.noSnapShotLoad = true    
+    
+    opts = opts.copy(network = opts.network.copy(consolePort = Some(5554)))
+    opts = opts.copy(avdName = Some(avdName))
+    val emulatorInfo = start_emulator(opts)
     val proc = emulatorInfo._1
     val serial = emulatorInfo._2
     
@@ -166,12 +170,16 @@ class SDKTest extends AssertionsForJUnit {
     val avdName = "clasp-test"
     assert(create_avd(avdName, "android-17", "armeabi-v7a", true))
     
-    var emuOpts = new clasp.core.sdktools.EmulatorOptions
-    emuOpts.noBootAnim = true
-    emuOpts.noWindow = true
-    emuOpts.noSnapShotLoad = true
+    var opts = new clasp.core.sdktools.EmulatorOptions
+    opts = opts.copy(ui = opts.ui.copy(noBootAnim = Some(true)))
+    opts = opts.copy(ui = opts.ui.copy(noWindow = Some(true)))
+    // Unsupported: 
+    // emuOpts.noSnapShotLoad = true    
+
     val port = 5554
-    val emulatorInfo = start_emulator(avdName, port, emuOpts)
+    opts = opts.copy(network = opts.network.copy(consolePort = Some(port)))
+    opts = opts.copy(avdName = Some(avdName))
+    val emulatorInfo = start_emulator(opts)
     val proc = emulatorInfo._1
     val serial = emulatorInfo._2
     

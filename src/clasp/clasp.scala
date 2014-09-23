@@ -44,13 +44,12 @@ object ClaspRunner extends App {
   // (who then uses those options to setup the EmulatorOptions), 
   // can we just serialize EmulatorOptions on master and deliver 
   // then entire object? Would there be any benefit?!
-  val opts = new EmulatorOptions
-
+  
   // Create a new instance of the framework. There should be at least one
   // instance of Clasp started per computer in your cluster, although you
   // should probably let the master handle starting all of the workers.
   if (conf.client())
-    new ClaspClient(conf, opts)
+    new ClaspClient(conf)
   else {
     var clasp = new ClaspMaster(conf)
 
@@ -81,7 +80,7 @@ object ClaspRunner extends App {
 /* TODO make it possible to support sending EmulatorOptions across the
  * network and starting emulators with different options
  */
-class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
+class ClaspClient(val conf: ClaspConf) {
   val ip = conf.ip()
   val clientConf = ConfigFactory
     .parseString(s"""akka.remote.netty.tcp.hostname="$ip"""")
@@ -138,9 +137,7 @@ class ClaspClient(val conf: ClaspConf, val emuOpts: EmulatorOptions) {
   }
 
   val masterip = conf.mip().stripLineEnd
-  var n = system.actorOf(Props(new Node(ip,
-    masterip,
-    emuOpts,
+  var n = system.actorOf(Props(new Node(ip,masterip,
     conf.numEmulators.apply)), name = s"node-$ip")
   info(s"Created Node for $ip")
   
@@ -272,7 +269,7 @@ class ClaspMaster(val conf: ClaspConf) {
   var manager = system.actorOf(Props(new NodeManager(conf)), name = "nodemanager")
   info("Created NodeManager")
 
-  val emanager = system.actorOf(Props[EmulatorManager], name = "emulatormanager")
+  val emanager = system.actorOf(Props(new EmulatorManager(manager)), name = "emulatormanager")
   info("Created EmulatorManager")
 
   var httpApi = system.actorOf(Props(new HttpApi(manager, emanager)), name = "httpApi")
