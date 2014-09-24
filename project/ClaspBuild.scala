@@ -30,7 +30,9 @@ object ClaspBuild extends Build {
         Libraries.spray,
         Libraries.sprayRouting,
         Libraries.sprayJson,
-        Libraries.sprayHttpx
+        Libraries.sprayHttpx,
+        Libraries.sprayClient,
+        Libraries.sprayCan
       )
     )
     .settings(

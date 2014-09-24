@@ -118,11 +118,14 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
     case Shutdown(ifempty: Boolean) => {
       debug(s"Received Shutdown request, with force=${!ifempty}")
       if (nodes.isEmpty && outstandingList.isEmpty) {
+        sender ! true
+        
         // Terminate if there are no nodes or outstanding requests 
         info("No nodes active, terminating")
         self ! PoisonPill
-        sender ! true
       } else if (!ifempty) {
+        sender ! true
+        
         // Otherwise, reap the nodes
 
         // 1. Register to watch all nodes.
@@ -136,10 +139,11 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
         // 3. Ask all of our nodes to stop.
         nodes.foreach(n => n.actor ! PoisonPill)
         info("Pill sent to all nodes")
-        sender ! true
       } else {
-        debug("Nodes active, ignoring shutdown")
         sender ! false
+        debug("Nodes active, ignoring shutdown")
+      }
+    }
       }
     }
     case unknown => error(s"Received unknown message from ${sender.path}: $unknown")

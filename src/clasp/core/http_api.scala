@@ -1,46 +1,69 @@
 package clasp.core
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
+import scala.sys.process.Process
+import scala.sys.process.ProcessLogger
+import scala.sys.process.stringToProcess
+import org.slf4j.LoggerFactory
+import EmulatorManager._
 import Node._
 import NodeManager._
-import EmulatorManager._
 import akka.actor.ActorRef
 import akka.pattern.ask
+import clasp.core.EmulatorActor.EmulatorDescription
+import clasp.core.sdktools.ClaspOptions
+import clasp.core.sdktools.DebugOptions
+import clasp.core.sdktools.DiskImageOptions
+import clasp.core.sdktools.EmulatorOptions
+import clasp.core.sdktools.MediaOptions
+import clasp.core.sdktools.NetworkOptions
+import clasp.core.sdktools.SystemOptions
+import clasp.core.sdktools.UIoptions
+import clasp.utils.LinuxProcessUtils._
+import spray.http._
+import spray.http._
+import spray.client.pipelining.Get
+import spray.client
 import spray.http.HttpMethods._
 import spray.http.StatusCodes.InternalServerError
+import spray.http.StatusCodes.NotFound
 import spray.httpx.SprayJsonSupport
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.marshalling._
-import spray.http._
+import spray.httpx.marshalling._
 import spray.json._
 import spray.json.DefaultJsonProtocol._
-import spray.json.DefaultJsonProtocol
 import spray.json.JsObject
 import spray.json.JsString
 import spray.json.JsValue
 import spray.json.JsonFormat
 import spray.routing._
-import scala.concurrent.duration._
-import scala.util.Success
-import scala.util.Failure
-import spray.http._
-import spray.httpx.marshalling._
-import spray.http.StatusCodes.NotFound
-import org.slf4j.LoggerFactory
-import clasp.core.sdktools.EmulatorOptions
-import clasp.core.sdktools.ClaspOptions
-import clasp.core.sdktools.DiskImageOptions
-import clasp.core.sdktools.DebugOptions
-import clasp.core.sdktools.MediaOptions
-import clasp.core.sdktools.NetworkOptions
-import clasp.core.sdktools.SystemOptions
-import clasp.core.sdktools.UIoptions
-import clasp.core.EmulatorActor.EmulatorDescription
+import akka.actor.Props
+import akka.io.IO
+import spray.can.Http
+import clasp.core.sdktools._
+import spray.http.HttpHeaders.Authorization
+
+// If we ever want to have simpler JSON objects than domain objects, 
+// this is a neat trick
+// case class User(id: Long, name: String)
+// case class JUser(id: Option[Long], first_name: String)
+// object UserImplicits {
+//  implicit def domainToJUser(x: User): JUser = { User(x = Some(x.id), first_name = name)}
+//  implicit def jUserToDomain(x:JUser): User  = { JUser(id = x.id.getOrElse(-1), name = x.first_name) }
+// }
 
 object MyJsonProtocol extends DefaultJsonProtocol {
 
+  lazy val log = LoggerFactory.getLogger(getClass())
+  import log.{ error, debug, info, trace }
+
   // Teach Spray how we want to marshal an ActorRef
-  implicit object actorFormat extends JsonFormat[ActorRef] {
+  implicit object actorFormat extends RootJsonFormat[ActorRef] {
     def write(d: ActorRef) = {
       if (d == null)
         JsNull
@@ -58,16 +81,51 @@ object MyJsonProtocol extends DefaultJsonProtocol {
       }
   }
 
-  implicit object booleanFormat extends JsonFormat[Boolean] {
-    def write(b: Boolean) = {
-      JsObject(Map(
-        "result" -> JsBoolean(b)))
+  //  implicit object failFormat extends RootJsonFormat[scala.util.Failure[Nothing]] {
+  //    def write(b: Failure[Nothing]) = {
+  //      JsObject(Map(
+  //        "status" -> JsString("failure"),
+  //        "reason" -> JsString(b.exception.getMessage())))
+  //    }
+  //    def read(value: JsValue) =
+  //      value.asJsObject.getFields("status", "reason") match {
+  //        case Seq(JsBoolean(value), JsString(reason)) => Failure(new Exception(reason))
+  //        case _ => deserializationError("Failure[Throwable] expected")
+  //      }
+  //  }
+
+  implicit object booleanFormat extends RootJsonFormat[Boolean] {
+    def write(d: Boolean) = {
+      JsObject(Map("value" -> JsBoolean(d)))
     }
 
     def read(value: JsValue) =
-      value.asJsObject.getFields("result") match {
-        case Seq(JsBoolean(value)) =>
-          value
+      value.asJsObject.getFields("value") match {
+        case Seq(JsBoolean(value)) => value
+        case _ => deserializationError("Boolean expected")
+      }
+  }
+
+  implicit object tryFormat extends RootJsonFormat[Try[Boolean]] {
+    def write(b: Try[Boolean]) = {
+      debug(s"Asked to write a try[boolean] of $b")
+      b match {
+        case Success(value) => {
+          JsObject(Map(
+            "status" -> (if (value) JsString("success") else JsString("failure"))))
+        }
+        case Failure(reason) => {
+          JsObject(Map(
+            "status" -> JsString("failure"),
+            "reason" -> JsString(reason.getMessage())))
+        }
+      }
+    }
+
+    def read(value: JsValue) =
+      value.asJsObject.getFields("status", "reason") match {
+        case Seq(JsBoolean(value), JsNull) => Success(value)
+        case Seq(JsBoolean(value), JsString(reason)) => Failure(new Exception(reason))
         case _ => deserializationError("Boolean expected")
       }
   }
@@ -75,7 +133,7 @@ object MyJsonProtocol extends DefaultJsonProtocol {
   implicit val nodeFormat = jsonFormat(NodeDescription, "ip", "name", "emulators", "asOf")
 
   implicit val emulatorDescriptionFormat = jsonFormat(EmulatorDescription, "publicip", "consolePort", "vncPort", "wsVncPort", "actorPath", "uuid")
-  
+
   implicit val claspOptionsFormat = jsonFormat(ClaspOptions, "seedContacts", "seedCalendar", "display", "avdTarget", "abiName")
   implicit val diskOptionsFormat = jsonFormat(DiskImageOptions, "cache", "data", "initData", "nocache", "ramdisk", "sdcard", "wipeData")
   implicit val debugOptionsFormat = jsonFormat(DebugOptions, "debug", "logcat", "shell", "shellSerial", "showKernel", "trace", "verbose")
@@ -94,83 +152,122 @@ class HttpApi(val nodeManager: ActorRef,
 
   import MyJsonProtocol._
 
-  def receive = runRoute {
-    path("nodes") {
-      get {
-        onComplete(nodeManager.ask(NodeList())(3.seconds).mapTo[List[NodeDescription]]) {
-          case Success(value) => {
-            complete(value)
-          }
-          case Failure(ex) => {
-            complete(InternalServerError, s"An error occurred: ${ex.getMessage}")
-          }
-        }
-      }
-    } ~
-    pathPrefix("emulators") {
-      path(JavaUUID) { uuid =>
-        info(s"Matched a UUID, cool! $uuid")
-          onComplete(emulatorManger.ask(GetEmulatorOptions(uuid.toString()))(10.seconds).mapTo[EmulatorOptions]) {
-            case Success(value) => {
-              complete(value)
-            }
-            case Failure(ex) => {
-              complete(InternalServerError, s"An error occurred: ${ex.getMessage}")
-            }
-          }
-        
-      } ~
-      pathEndOrSingleSlash {
-          onComplete(emulatorManger.ask(ListEmulators())(3.seconds).mapTo[List[EmulatorDescription]]) {
-            case Success(value) => {
-              complete(value)
-            }
-            case Failure(ex) => {
-              complete(InternalServerError, s"An error occurred: ${ex.getMessage}")
-            }
-          }
-        }
-    } ~
-    pathPrefix("nodemanager") {
-        // TODO send reply before shutting down. Current approach means no reply is sent
-        path("shutdown") {
-          onComplete(nodeManager.ask(NodeManager.Shutdown())(3.seconds).mapTo[Boolean]) {
-            case Success(value) => {
-              debug(s"Shutdown request received")
-              complete(value.toString)
-            }
-            case Failure(ex) => {
-              complete(InternalServerError, s"An error occurred: ${ex.getMessage}")
-            }
-          }
-        }
-      } ~
-      pathPrefix("emulatormanager") {
-        // TODO send reply before shutting down. Current approach means no reply is sent
-        path("launch") {
-          onComplete(emulatorManger.ask(EmulatorManager.LaunchEmulator())(3.seconds).mapTo[Boolean]) {
-            case Success(value) => {
-              complete(value.toString)
-            }
-            case Failure(ex) => {
-              complete(InternalServerError, s"An error occurred: ${ex.getMessage}")
-            }
-          }
-        }
-      } ~
-      path("test" / JavaUUID) { uuid =>
-        info(s"Matched a UUID, cool! $uuid")
-        val e = new EmulatorOptions
-        complete("")
-      } ~
-      path("test2") { 
-        val e = new EmulatorOptions
-        complete(e)
-      } ~
-      pathEndOrSingleSlash {
-        complete(NotFound)
-      }
+  val timeout = 15.seconds
 
+  val nodeProcess = {
+    val env = "PATH" -> appendToEnv("PATH", "/usr/local/bin")
+    val findNode = Process("which node", None, env)
+    if (findNode.! == 0) {
+      debug(s"Running NodeJS on localhost:9090")
+      val nodeLogger = ProcessLogger(line => info(s"nodejs:out: $line"),
+        line => error(s"nodejs:err: $line"))
+      val node = Process(s"${findNode.!!} www/app.js", None, env).run(nodeLogger)
+      Some(node)
+    } else {
+      debug("NodeJS not found, not launching dashboard")
+      None
+    }
+  }
+
+  val nodeCommand = s"node www/app.js"
+
+  /**
+   * Handles common HTTP response case when a HTTP request generates an
+   * ActorRef.ask
+   */
+  def askToComplete[T: ToResponseMarshaller](who: ActorRef, message: Any)(implicit tag: scala.reflect.ClassTag[T]) = {
+    onComplete(who.ask(message)(15.seconds).mapTo[T]) {
+      case Success(value) =>
+        {
+          complete(value)
+        }
+      case Failure(reason) =>
+        {
+          error("Failed to complete")
+          complete(InternalServerError, s"Error occurred: ${reason.getMessage}")
+        }
+    }
+  }
+
+  // Handles 
+  // ROOT/nodes
+  val nodes = pathPrefix("nodes") {
+    pathEndOrSingleSlash {
+      askToComplete[List[NodeDescription]](nodeManager, NodeManager.NodeList())
+    }
+  }
+
+  // Handles 
+  // ROOT/emulators
+  // ROOT/emulators/<UUID>
+  // ROOT/emulators/launch
+  val emulators = pathPrefix("emulators") {
+    path(JavaUUID) { uuid =>
+      askToComplete[EmulatorOptions](emulatorManger, GetEmulatorOptions(uuid.toString))
+    } ~
+      path("launch") {
+        askToComplete[Try[Boolean]](emulatorManger, EmulatorManager.LaunchEmulator())
+      } ~
+      pathEndOrSingleSlash {
+        askToComplete[List[EmulatorDescription]](emulatorManger, ListEmulators())
+      }
+  }
+
+  // Handles
+  // ROOT /system/shutdown
+  val system = pathPrefix("system") {
+    path("shutdown") {
+      // TODO not guaranteed to complete. Should we go ahead and 
+      // return without an ask?
+      askToComplete[Boolean](nodeManager, NodeManager.Shutdown())
+    }
+  }
+
+  // Handles
+  // ROOT -> proxy to localhost:9090 
+  // Unresolved -> 404
+  val static =
+    path("testing") {
+      complete("Youre testing")
+    } ~
+      noop {
+        if (nodeProcess.isEmpty)
+          complete("Root static page")
+        else
+          requestUri { uri =>
+            val wsUri = uri.withPort(9090)
+            implicit val system = context.system
+            implicit val timeout: akka.util.Timeout = 5.second
+            val foo = BasicHttpCredentials("brandon", "clasp")
+            val outbound = HttpRequest(GET, wsUri, List(Authorization(foo)))
+
+            val response = IO(Http).ask(outbound).mapTo[HttpResponse]
+            debug("Requested dash")
+            response.onComplete {
+              case Success(value) => {
+                debug("successful dash request")
+              }
+              case Failure(reason) => {
+                debug("failed proxy request")
+              }
+            }
+
+            complete(response)
+          }
+      } ~ complete(NotFound)
+
+  def receive = runRoute {
+    logRequestResponse("api", akka.event.Logging.InfoLevel) {
+      nodes ~
+        emulators ~
+        system ~
+        static
+    }
+  }
+
+  override def postStop = {
+    nodeProcess.getOrElse(Process("which echo").run).destroy
+    super.postStop
   }
 
 }

@@ -25,5 +25,8 @@ object Dependencies {
     val sprayRouting = "io.spray" % "spray-routing" % sprayVersion
     val sprayJson = "io.spray" %%  "spray-json" % "1.2.6"
     val sprayHttpx = "io.spray" % "spray-httpx" % sprayVersion
+    val sprayClient = "io.spray" % "spray-client" % sprayVersion
+    val sprayCan = "io.spray" % "spray-can" % sprayVersion
+
   }
 }
