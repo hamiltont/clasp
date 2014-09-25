@@ -6,6 +6,7 @@ block activePageBlock
 
 block content
   script(src='/scripts/handlebars.js')
+  script(src='/scripts/dashboard.js' type='text/javascript')
   script(id='server-item',type='text/x-handlebars-template')
     tr(id='worker-{{ ip }}')
       td: {{ ip }}
