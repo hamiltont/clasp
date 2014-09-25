@@ -1,19 +1,17 @@
 package clasp
 
 import java.io.File
-
 import scala.Array.canBuildFrom
 import scala.collection.immutable.StringOps
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.promise
+import spray.can.server.UHttp
+
 import scala.sys.process.stringToProcess
-
 import org.slf4j.LoggerFactory
-
 import com.typesafe.config.ConfigFactory
-
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
@@ -25,6 +23,8 @@ import core.NodeManager
 import core.sdktools.EmulatorOptions
 import core.sdktools.sdk
 import spray.can.Http
+import clasp.core.WebSocketWorker
+import clasp.core.WebSocketServer
 
 /* Used to launch Clasp from the command line */
 object ClaspRunner extends App {
@@ -273,8 +273,8 @@ class ClaspMaster(val conf: ClaspConf) {
   info("Created EmulatorManager")
 
   var httpApi = system.actorOf(Props(new HttpApi(manager, emanager)), name = "httpApi")
-  info("Created HttpApi")
-  IO(Http) ! Http.Bind(httpApi, interface = "localhost", port = 8080)
+  val server = system.actorOf(Props(new WebSocketServer(httpApi)), "websocket")
+  IO(UHttp) ! Http.Bind(server, "localhost", port=8080)
 
   // When a new emulator is ready to be used, the provided function will 
   // be transported to the node that emulator runs on and then executed
