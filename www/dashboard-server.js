@@ -1,6 +1,11 @@
 (function() {
   var exec = require('child_process').exec;
   var pidRegex = null;
+  var api = ""
+  
+  module.exports.setAPIRoot = function(root) {
+    api = root
+  }
 
   module.exports.setPidRegex = function(names) {
     regexStr = "([0-9]+) (" + names.join("|") + ")";
@@ -38,7 +43,7 @@
           socket.emit('serverEmu', {'server': server, 'emu': numEmus});
       });
     } catch (err) {
-      console.log("Error caught.");
+      console.log("Error caught:");
       console.log(err);
     }
   }

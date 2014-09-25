@@ -5,16 +5,45 @@
 // Brandon Amos
 // 2013.09.22
 
-var socket = io.connect('http://ataack.ece.vt.edu:9090')
+var connection = new WebSocket('ws://localhost:8080');
+
+connection.onopen = function () {
+  connection.send('Ping'); // Send the message 'Ping' to the server
+    
+  var timer = window.setInterval(function() {
+    connection.send('my message');
+  }, 10*1000);
+    
+  connection.onclose = function(close) {
+    console.log('Connection closed');
+    window.clearInterval(timer);
+  };
+
+  connection.onerror = function (error) {
+    console.log('WebSocket Error ' + error);
+  };
+
+  connection.onmessage = function (e) {
+    console.log('Server: ' + e.data);
+  };
+};
+
+
+/*
+// Leaving this all in for later copypaste, but we are no longer using 
+// socket.io
+var socket = io.connect('http://localhost:9090')
 var servers = {}
 
 function refresh() {
   socket.emit('refresh', null);
+  console.log('skipping refresh');
 }
 
+console.log('loading dashboard.js');
 window.setInterval(function() {
   refresh()
-}, 10000);
+}, 30*1000);
 
 socket.on('serverRegister', function(serverName) {
   servers[serverName] = {'name': serverName};
@@ -137,3 +166,5 @@ $(function() {
     }
   });
 });
+
+*/

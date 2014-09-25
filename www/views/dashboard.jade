@@ -45,8 +45,8 @@ block content
           Antimalware
     {{/if}}
   script(type='text/javascript')
-    serverTmpl = Handlebars.compile($('#server-item').html())
-    modalTmpl = Handlebars.compile($('#modal-body').html())
+    | var serverTmpl = Handlebars.compile($('#server-item').html())
+    | var modalTmpl = Handlebars.compile($('#modal-body').html())
   div.container
     h1 Clasp Dashboard
     ul
@@ -58,8 +58,6 @@ block content
         | | 
         a(onclick='killAllEmu(); return false;',href='#') Kill all Emulators
     div(id='server-table')
-  script(src='/socket.io/socket.io.js')
-  script(src='/scripts/dashboard.js')
   script(type='text/javascript').
     Handlebars.registerHelper('ifOn', function(v1, options) {
       if (v1 === 'Yes') {

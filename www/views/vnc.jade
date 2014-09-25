@@ -5,6 +5,7 @@ block activePageBlock
 
 block content
   div.container
+    script(src='scripts/noVNC/util.js')
     h1 VNC Test
     p Testing noVNC connection to 10.0.0.2:6080
     div#noVNC_screen
@@ -35,8 +36,6 @@ block content
                });
           rfb.connect(host, port, password, path);
       };
-
-
 
 
 
