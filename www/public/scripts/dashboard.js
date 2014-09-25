@@ -9,6 +9,9 @@ var root = 'localhost:8080';
 var connection = new WebSocket('ws://' + root);
 
 var servers = []
+var emulators = []
+
+
 
 $.ajax('http://' + root + '/nodes/all')
   .done(function( data ) {
@@ -29,19 +32,10 @@ $.ajax('http://' + root + '/nodes/all')
 //  "status": "Booting",
 //  "asOf": 1411625429517
 //}, {
-//  "ip": "10.0.0.5",
-//  "status": "Booting",
-//  "asOf": 1411625429531
-//}, {
-//  "ip": "10.0.2.5",
-//  "status": "Booting",
-//  "asOf": 1411625429543
-//}, {
 //  "ip": "10.0.34.5",
-//  "status": "Booting",
+//  "status": "Failed",
 //  "asOf": 1411625429562
 //}]
-
 function redraw() {
   var newHtml =
     '<table id="servers" class="table table-condensed table-hover">' +
@@ -57,6 +51,42 @@ function redraw() {
 
   newHtml += '</table>';
   $('#server-table').html(newHtml);
+}
+
+
+function refreshEmulatorList() {
+    $.ajax('http://' + root + '/emulators')
+      .done(function( data ) {
+        redraw_emulator_list(data);
+      }).fail(function( jqXHR, textStatus, errorThrown ) {
+        console.log( "Server request failed: " + data );
+      });    
+}
+
+//[{
+//  "publicip": "10.0.0.2",
+//  "consolePort": 5556,
+//  "vncPort": 5902,
+//  "wsVncPort": 6082,
+//  "actorPath": "Actor[akka.tcp://clasp@10.0.0.2:2553/user/node-10.0.0.2/emulator-5554#1224132290]",
+//  "uuid": "0308c4bf-4f0f-4b9f-8ea6-60cc814820a1"
+//}]
+function redraw_emulator_list(emulators) {
+  var newHtml =
+    '<table id="emulators" class="table table-condensed table-hover">' +
+    "<tr>" +
+      "<td><b>UUID</b></td>" +
+      "<td><b>VNC</b></td>" +
+      "<td><b>ADB</b></td>" +
+      "<td><b>Actor</b></td>" +
+    "</tr>";
+  
+  $.each(emulators, function(i, item) {
+    newHtml += emulatorTmpl(item);
+  });
+
+  newHtml += '</table>';
+  $('#emulator-table').html(newHtml);
 }
 
 connection.onopen = function () {

@@ -11,6 +11,13 @@ block content
       td: {{ ip }}
       td(class='{{status}}'): {{ status }}
       td: {{ asOf }}
+  script(id='emulator-item',type='text/x-handlebars-template')
+    tr(id='emulator-{{ uuid }}')
+      td: {{ uuid }}
+      td: a(href='vnc?host={{ publicip }}&port={{ wsVncPort }}').
+          {{ publicip }}:{{ wsVncPort }}
+      td: {{ consolePort }}
+      td: {{ actorPath }}
   script(id='modal-body',type='text/x-handlebars-template')
     b Master:
     | {{ server }}
@@ -40,6 +47,7 @@ block content
   script(type='text/javascript')
     | var serverTmpl = Handlebars.compile($('#server-item').html())
     | var modalTmpl = Handlebars.compile($('#modal-body').html())
+    | var emulatorTmpl = Handlebars.compile($('#emulator-item').html())
   div.container
     h1 Clasp Dashboard
     ul
@@ -47,10 +55,11 @@ block content
       li
         a(onclick='refresh(); return false;',href='#') Refresh
         | | 
-        a(onclick='killAllClasp(); return false;',href='#') Kill all Clasp
+        a(onclick='refreshEmulatorList(); return false;',href='#') Refresh Emulator List
         | | 
         a(onclick='killAllEmu(); return false;',href='#') Kill all Emulators
     div(id='server-table')
+    div(id='emulator-table')
   script(type='text/javascript').
     Handlebars.registerHelper('ifOn', function(v1, options) {
       if (v1 === 'Yes') {
