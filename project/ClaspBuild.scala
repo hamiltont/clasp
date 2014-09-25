@@ -1,7 +1,7 @@
 import sbt._
-import Keys._
+import sbt.Keys._
 
-object ClaspBuild extends Build {
+object ClaspBuild extends sbt.Build {
 
   import Dependencies._
   import BuildSettings._
@@ -14,8 +14,8 @@ object ClaspBuild extends Build {
 
   // Define our project, with basic project information and library dependencies
   lazy val project = Project("clasp", file("."))
-    .settings(buildSettings: _*)
     .settings(SbtStartScript.startScriptForClassesSettings: _*)
+    .settings(basicSettings: _*)
     .settings(
       libraryDependencies ++= Seq(
         Libraries.scalaActors,
@@ -32,21 +32,17 @@ object ClaspBuild extends Build {
         Libraries.sprayJson,
         Libraries.sprayHttpx,
         Libraries.sprayClient,
-        Libraries.sprayCan
-      )
-    )
+        Libraries.sprayCan,
+        Libraries.sprayWebsocket))
     .settings(
       unmanagedJars in Compile ++= Seq(
         file("lib/commons-net-3.2/commons-net-3.2.jar") // For proxy_telnet
-      )
-    )
+        ))
     .settings(
       unmanagedJars in Test ++= Seq(
         file("lib/akka-2.1.4/lib/config-1.0.0.jar"),
         file("lib/akka-2.1.4/lib/akka-testkit_2.10-2.1.4.jar"),
-        file("lib/commons-io-2.4/commons-io-2.4.jar")
-      )
-    )
+        file("lib/commons-io-2.4/commons-io-2.4.jar")))
     .settings(scalaSource in Compile <<= baseDirectory(_ / "src"))
     .settings(scalaSource in Test <<= baseDirectory(_ / "test"))
     .settings(resourceDirectory in Test <<= baseDirectory(_ / "src"))
