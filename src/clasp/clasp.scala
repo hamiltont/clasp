@@ -179,7 +179,7 @@ class ClaspClient(val conf: ClaspConf) {
       debug(s"Sending message to akka.tcp://clasp@$masterip:2552/user/nodemanager")
       val manager = temp.actorFor(s"akka.tcp://clasp@$masterip:2552/user/nodemanager")
 
-      manager ! NodeManager.NodeStartError(ip, message.get)
+      manager ! NodeManager.NodeUpdate(Node.NodeDescription(ip, None, Node.Status.Failed)) 
 
       debug("Waiting 10 seconds for the message to be delivered")
       Thread.sleep(10000)

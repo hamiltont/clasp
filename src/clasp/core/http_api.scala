@@ -130,7 +130,18 @@ object MyJsonProtocol extends DefaultJsonProtocol {
       }
   }
 
-  implicit val nodeFormat = jsonFormat(NodeDescription, "ip", "name", "emulators", "asOf")
+  def jsonEnum[T <: Enumeration](enu: T) = new JsonFormat[T#Value] {
+    def write(obj: T#Value) = JsString(obj.toString)
+
+    def read(json: JsValue) = json match {
+      case JsString(txt) => enu.withName(txt)
+      case something => throw new DeserializationException(s"Expected a value from enum $enu instead of $something")
+    }
+  }
+
+  implicit val nodeStatusFormat = jsonEnum(Node.Status)
+
+  implicit val nodeFormat = jsonFormat(NodeDescription, "ip", "name", "status", "emulators", "asOf")
 
   implicit val emulatorDescriptionFormat = jsonFormat(EmulatorDescription, "publicip", "consolePort", "vncPort", "wsVncPort", "actorPath", "uuid")
 
@@ -191,10 +202,18 @@ class HttpApi(val nodeManager: ActorRef,
 
   // Handles 
   // ROOT/nodes
+  // ROOT/nodes/all
+  // ROOT/nodes/launch
   val nodes = pathPrefix("nodes") {
-    pathEndOrSingleSlash {
-      askToComplete[List[NodeDescription]](nodeManager, NodeManager.NodeList())
-    }
+    path("all") {
+      complete(nodeManager.ask(NodeList(false))(timeout).mapTo[List[NodeDescription]])
+    } ~
+      path("launch") {
+        complete(nodeManager.ask(BootNode())(timeout).mapTo[Boolean])
+      } ~
+      pathEndOrSingleSlash {
+        askToComplete[List[NodeDescription]](nodeManager, NodeList())
+      }
   }
 
   // Handles 
@@ -217,9 +236,12 @@ class HttpApi(val nodeManager: ActorRef,
   // ROOT /system/shutdown
   val system = pathPrefix("system") {
     path("shutdown") {
-      // TODO not guaranteed to complete. Should we go ahead and 
-      // return without an ask?
-      askToComplete[Boolean](nodeManager, NodeManager.Shutdown())
+      // Need a second to finish responding
+      complete {
+        debug(s"scheduling shutdown")
+        context.system.scheduler.scheduleOnce(3.seconds)(nodeManager ! NodeManager.Shutdown())
+        true
+      }
     }
   }
 
