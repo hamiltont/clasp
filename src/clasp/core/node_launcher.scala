@@ -191,13 +191,14 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
       val client_ip = client.ip
       nodeUpdate(client.stampedCopy(status = Node.Status.Booting))
 
-      future {
+      val deploy_and_boot = future {
         val directory: String = "pwd".!!.stripLineEnd
         val username = "whoami".!!.stripLineEnd
         val workspaceDir = s"/tmp/clasp/$username"
 
         val mkdir = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'mkdir -p $workspaceDir'"
-        mkdir.!!
+        if (mkdir.! != 0) 
+          throw new Exception("Connection to remote node failed, aborting boot")
 
         val copy = s"rsync --verbose --archive --exclude='.git/' --exclude='*.class' . $client_ip:$workspaceDir"
         info(s"Deploying using $copy")
@@ -229,6 +230,12 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
         // Check that we've heard back
         context.system.scheduler.scheduleOnce(30 seconds, self, NodeBootExpected(client))
       }
+      
+      deploy_and_boot onFailure { case reason => 
+        log.error(s"Node failed to boot : $reason")
+        self ! NodeUpdate(client.stampedCopy(status = Node.Status.Failed))
+      }
+      
       true
     }
   }

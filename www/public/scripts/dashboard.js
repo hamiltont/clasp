@@ -5,7 +5,59 @@
 // Brandon Amos
 // 2013.09.22
 
-var connection = new WebSocket('ws://localhost:8080');
+var root = 'localhost:8080';
+var connection = new WebSocket('ws://' + root);
+
+var servers = []
+
+$.ajax('http://' + root + '/nodes/all')
+  .done(function( data ) {
+    console.log( "Server data received: " + data );
+    servers = data
+      
+    $.each(data, function(i, item) {
+      console.log(item);
+    });
+    
+    redraw();
+  }).fail(function( jqXHR, textStatus, errorThrown ) {
+    console.log( "Server request failed: " + data );
+  });
+
+//[{
+//  "ip": "10.0.0.2",
+//  "status": "Booting",
+//  "asOf": 1411625429517
+//}, {
+//  "ip": "10.0.0.5",
+//  "status": "Booting",
+//  "asOf": 1411625429531
+//}, {
+//  "ip": "10.0.2.5",
+//  "status": "Booting",
+//  "asOf": 1411625429543
+//}, {
+//  "ip": "10.0.34.5",
+//  "status": "Booting",
+//  "asOf": 1411625429562
+//}]
+
+function redraw() {
+  var newHtml =
+    '<table id="servers" class="table table-condensed table-hover">' +
+    "<tr>" +
+      "<td><b>Server</b></td>" +
+      "<td><b>Status</b></td>" +
+      "<td><b>asOf</b></td>" +
+    "</tr>";
+  
+  $.each(servers, function(i, item) {
+    newHtml += serverTmpl(item);
+  });
+
+  newHtml += '</table>';
+  $('#server-table').html(newHtml);
+}
 
 connection.onopen = function () {
   connection.send('Ping'); // Send the message 'Ping' to the server

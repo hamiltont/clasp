@@ -7,17 +7,10 @@ block activePageBlock
 block content
   script(src='/scripts/handlebars.js')
   script(id='server-item',type='text/x-handlebars-template')
-    tr(class='{{status}}',id='{{ name }}')
-      td: {{ name }}
-      td: {{ ping }}
-      td: {{ ssh }}
-      td: {{ clasp }} 
-        | {{#ifOn clasp }}
-        font(size='-2') (
-          a(onclick="killClasp('{{ name }}'); return false;",href="#") Kill?
-          | )
-        | {{/ifOn}}
-      td: {{ emu }} 
+    tr(id='worker-{{ ip }}')
+      td: {{ ip }}
+      td(class='{{status}}'): {{ status }}
+      td: {{ asOf }}
   script(id='modal-body',type='text/x-handlebars-template')
     b Master:
     | {{ server }}

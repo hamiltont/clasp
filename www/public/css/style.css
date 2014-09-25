@@ -1,0 +1,15 @@
+.Booting {
+    color: orange
+}
+
+.Online {
+    color: green
+}
+
+.Failed {
+    color: red
+}
+
+.Offline {
+    color: blue
+}
