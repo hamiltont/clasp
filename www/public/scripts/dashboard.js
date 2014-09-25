@@ -12,6 +12,12 @@ var servers = []
 var emulators = []
 
 
+function shutdown() {
+    $.ajax('http://' + root + '/system/shutdown')
+    .done(function( data ) {
+        console.log('Shutting down');
+    });
+}
 
 $.ajax('http://' + root + '/nodes/all')
   .done(function( data ) {
@@ -62,6 +68,7 @@ function refreshEmulatorList() {
         console.log( "Server request failed: " + data );
       });    
 }
+refreshEmulatorList()
 
 //[{
 //  "publicip": "10.0.0.2",
@@ -109,6 +116,14 @@ connection.onopen = function () {
     console.log('Server: ' + e.data);
   };
 };
+
+$(function() {
+  $('#server-table').on('click', 'tr', function() {
+      $('#controlModal .modal-body').html('Testing');
+      $('#controlModal').modal('show')
+  });
+});
+
 
 
 /*
@@ -238,15 +253,5 @@ function runAntimalware(serverName) {
   $('#controlModal').modal('hide');
 }
 
-$(function() {
-  $('#server-table').on('click', 'tr', function() {
-    var server = servers[$(this)[0].id];
-    if (server['status'] == 'success') {
-      $('#controlModal .modal-body').html(
-        modalTmpl({'server': server['name']}))
-      $('#controlModal').modal('show')
-    }
-  });
-});
 
 */

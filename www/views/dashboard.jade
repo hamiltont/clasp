@@ -51,13 +51,10 @@ block content
   div.container
     h1 Clasp Dashboard
     ul
-      li Start Clasp by clicking on a row.
       li
-        a(onclick='refresh(); return false;',href='#') Refresh
-        | | 
+        a(href="#shutdownModal",onclick='shutdown(); return false;',data-keyboard="true",data-toggle="modal") Shutdown
+        |  | 
         a(onclick='refreshEmulatorList(); return false;',href='#') Refresh Emulator List
-        | | 
-        a(onclick='killAllEmu(); return false;',href='#') Kill all Emulators
     div(id='server-table')
     div(id='emulator-table')
   script(type='text/javascript').
@@ -76,3 +73,13 @@ block content
     div(class="modal-body",style='height: 300px')
     div(class="modal-footer")
       button(class="btn",data-dismiss="modal") Close
+  div(id="shutdownModal",class="modal hide fade",tabindex='-1')
+    div(class="modal-header")
+      butten(type="button",class="close",data-dismiss="modal",
+        aria-hidden="true") &times
+      h3 Shutdown Warning
+    div(class="modal-body")
+      p.red This website will stop working shortly. It typically takes 10-15 seconds for the system to finish shutting down
+    div(class="modal-footer")
+      button(class="btn",data-dismiss="modal") Close
+
