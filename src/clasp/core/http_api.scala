@@ -47,6 +47,7 @@ import akka.io.IO
 import spray.can.Http
 import clasp.core.sdktools._
 import spray.http.HttpHeaders.Authorization
+import spray.can.server.UHttp
 
 // If we ever want to have simpler JSON objects than domain objects, 
 // this is a neat trick
@@ -57,6 +58,9 @@ import spray.http.HttpHeaders.Authorization
 //  implicit def jUserToDomain(x:JUser): User  = { JUser(id = x.id.getOrElse(-1), name = x.first_name) }
 // }
 
+/**
+ * Provides clasp-specific JSON marshalling and unmarshalling
+ */
 object MyJsonProtocol extends DefaultJsonProtocol {
 
   lazy val log = LoggerFactory.getLogger(getClass())
@@ -155,6 +159,14 @@ object MyJsonProtocol extends DefaultJsonProtocol {
   implicit val emulatorOptionsFormat = jsonFormat(EmulatorOptions, "avd", "clasp", "disk", "debug", "media", "network", "ui", "system")
 }
 
+/**
+ * Defines HTTP REST API for Clasp. Called for HTTP messages that 
+ * {@link WebSocketWorker} decides are not for WebSocket handling. 
+ * 
+ * Any  HTTP requests not resolved by our REST API are forwarded to
+ * the NodeJS server running the web interface, allowing us to 
+ * neatly hide the REST API from most clients. 
+ */
 class HttpApi(val nodeManager: ActorRef,
   val emulatorManger: ActorRef) extends HttpServiceActor {
 
@@ -257,35 +269,24 @@ class HttpApi(val nodeManager: ActorRef,
           complete("Root static page")
         else
           requestUri { uri =>
-            val wsUri = uri.withPort(9090)
             implicit val system = context.system
-            implicit val timeout: akka.util.Timeout = 5.second
-            val foo = BasicHttpCredentials("brandon", "clasp")
-            val outbound = HttpRequest(GET, wsUri, List(Authorization(foo)))
-
-            val response = IO(Http).ask(outbound).mapTo[HttpResponse]
-            debug("Requested dash")
-            response.onComplete {
-              case Success(value) => {
-                debug("successful dash request")
-              }
-              case Failure(reason) => {
-                debug("failed proxy request")
-              }
-            }
-
+            implicit val timeout: akka.util.Timeout = this.timeout
+            val dashUri = uri.withPort(9090)
+            val auth = BasicHttpCredentials("brandon", "clasp")
+            val outbound = HttpRequest(GET, dashUri, List(Authorization(auth)))
+            val response = IO(UHttp).ask(outbound).mapTo[HttpResponse]
             complete(response)
           }
       } ~ complete(NotFound)
 
-  def receive = runRoute {
-    logRequestResponse("api", akka.event.Logging.InfoLevel) {
-      nodes ~
-        emulators ~
-        system ~
-        static
+    def receive = runRoute {
+      logRequestResponse("api", akka.event.Logging.InfoLevel) {
+        nodes ~
+          emulators ~
+          system ~
+          static
+      }
     }
-  }
 
   override def postStop = {
     nodeProcess.getOrElse(Process("which echo").run).destroy
