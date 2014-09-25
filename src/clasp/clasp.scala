@@ -72,8 +72,6 @@ object ClaspRunner extends App {
     f onFailure {
       case t => error(s"Future failed due to ${t.getMessage}")
     }
-    Thread.sleep(600000)
-    clasp.kill
   } // End of clasp master logic
 }
 
@@ -163,8 +161,10 @@ class ClaspClient(val conf: ClaspConf) {
 
 
   def shutdown(exitcode: Int = 0, message: Option[String] = None) = {
-    system.shutdown
-    system.awaitTermination(30.second)
+    if (system != null) {
+      system.shutdown
+      system.awaitTermination(30.second)
+    }
 
     // Do our best to preemptively notify the master that we're done
     if (!message.isEmpty) {
