@@ -272,9 +272,8 @@ class ClaspMaster(val conf: ClaspConf) {
   val emanager = system.actorOf(Props(new EmulatorManager(manager)), name = "emulatormanager")
   info("Created EmulatorManager")
 
-  var httpApi = system.actorOf(Props(new HttpApi(manager, emanager)), name = "httpApi")
-  val server = system.actorOf(Props(new WebSocketServer(httpApi)), "websocket")
-  IO(UHttp) ! Http.Bind(server, "localhost", port=8080)
+  val server = system.actorOf(Props(new WebSocketServer(manager, emanager)), "websocket")
+  IO(UHttp) ! Http.Bind(server, "0.0.0.0", port=8080)
 
   // When a new emulator is ready to be used, the provided function will 
   // be transported to the node that emulator runs on and then executed

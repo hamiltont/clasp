@@ -38,6 +38,7 @@ import clasp.core.sdktools.sdk
 import clasp.utils.ActorLifecycleLogging
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.FiniteDuration
+import clasp.core.WebSocketChannelManager._
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
@@ -102,7 +103,16 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
   // Start in monitor mode.
   def receive = monitoring
 
+  // For dynamic websocket-based messaging to web clients
+  var channelManager: Option[ActorRef] = None
+
   def monitoring: Receive = {
+    case ActorIdentity(WebSocketChannelManager, Some(manager)) =>
+      {
+        channelManager = Some(manager)
+        channelManager.foreach { x => x ! RegisterChannel("/nodemanager", self) }
+        context.system.scheduler.schedule(2.second, 4.second){channelManager.foreach(x => x ! Message("/nodemanager", "testing", self))}
+      }
     case NodeUpdate(update) => nodeUpdate(update)
     case NodeBootExpected(node) => (nodesOnline.filter(n => n.ip == node.ip).isEmpty) match {
       case true => nodeUpdate(node.stampedCopy(status = Node.Status.Failed))
