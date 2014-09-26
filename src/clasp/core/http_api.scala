@@ -160,12 +160,12 @@ object MyJsonProtocol extends DefaultJsonProtocol {
 }
 
 /**
- * Defines HTTP REST API for Clasp. Called for HTTP messages that 
- * {@link WebSocketWorker} decides are not for WebSocket handling. 
- * 
+ * Defines HTTP REST API for Clasp. Called for HTTP messages that
+ * {@link WebSocketWorker} decides are not for WebSocket handling.
+ *
  * Any  HTTP requests not resolved by our REST API are forwarded to
- * the NodeJS server running the web interface, allowing us to 
- * neatly hide the REST API from most clients. 
+ * the NodeJS server running the web interface, allowing us to
+ * neatly hide the REST API from most clients.
  */
 class HttpApi(val nodeManager: ActorRef,
   val emulatorManger: ActorRef) extends HttpServiceActor {
@@ -279,14 +279,20 @@ class HttpApi(val nodeManager: ActorRef,
           }
       } ~ complete(NotFound)
 
-    def receive = runRoute {
-      logRequestResponse("api", akka.event.Logging.InfoLevel) {
+  val corsHeaders = List(HttpHeaders.`Access-Control-Allow-Origin`(AllOrigins),
+    HttpHeaders.`Access-Control-Allow-Methods`(GET, POST, OPTIONS, DELETE),
+    HttpHeaders.`Access-Control-Allow-Headers`("Origin, X-Requested-With, Content-Type, Accept, Accept-Encoding, Accept-Language, Host, Referer, User-Agent"))
+    
+  def receive = runRoute {
+    logRequestResponse("api", akka.event.Logging.InfoLevel) {
+      respondWithHeaders(corsHeaders) {
         nodes ~
           emulators ~
           system ~
           static
       }
     }
+  }
 
   override def postStop = {
     nodeProcess.getOrElse(Process("which echo").run).destroy
