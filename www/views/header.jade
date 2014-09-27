@@ -1,27 +1,24 @@
-div.navbar.navbar-inverse.navbar-fixed-top
-  div.navbar-inner
-    div.container
-      a.btn.btn-navbar(data-toggle="collapse",
-          data-target=".nav-collapse")
-        span.icon-bar
-        span.icon-bar
-        span.icon-bar
-      a.brand(href="/") Clasp
-      div.nav-collapse.collapse
-        ul.nav
-          block activePageBlock
-          li(class=(activePage == 'home') ? 'active' : '')
-            a(href="/") Home
-          li(class=(activePage == 'dashboard') ? 'active' : '')
-            a(href="dashboard") Dashboard
-          li(class=(activePage == 'vnc') ? 'active' : '')
-            a(href="vnc") VNC
-          li(class=(activePage == 'doc') ? 'active' : '')
-            a(href="doc") Documentation
-          li: a(href="scaladoc") ScalaDoc
-          li
-            a(href="#aboutModal",data-keyboard="true",data-toggle="modal")
-              | About
+nav.navbar.navbar-inverse.navbar-static-top
+  div.container-fluid
+    div.navbar-header
+      button.navbar-toggle.collapsed(data-toggle="collapse",data-target="#clasp-navbar")
+        span.glyphicon.glyphicon-list.white
+      a.navbar-brand(href="/") Clasp
+    div.collapse.nav-collapse.in#clasp-navbar
+      ul.nav.navbar-nav
+        block activePageBlock
+        li(class=(activePage == 'home') ? 'active' : '')
+          a(href="/") Home
+        li(class=(activePage == 'dashboard') ? 'active' : '')
+          a(href="dashboard") Dashboard
+        li(class=(activePage == 'vnc') ? 'active' : '')
+          a(href="vnc") VNC
+        li(class=(activePage == 'doc') ? 'active' : '')
+          a(href="doc") Documentation
+        li: a(href="scaladoc") ScalaDoc
+        li
+          a(href="#aboutModal",data-keyboard="true",data-toggle="modal")
+            | About
 
 div(id="aboutModal",class="modal hide fade",tabindex='-1')
   div(class="modal-header")

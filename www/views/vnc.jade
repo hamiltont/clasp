@@ -4,132 +4,130 @@ block activePageBlock
   -var activePage = 'home'
 
 block content
-  include ../public/vnc_content.html
-  //
-      div.container
-        script(src='scripts/noVNC/util.js')
-        h1 VNC 
-        button(type='button',class='btn btn-primary',
-          onclick='rfbPressEsc(); return false;') Back
-        button(type='button',class='btn btn-primary',
-          onclick='rfbPressHome(); return false;') Home
-        button(type='button',class='btn btn-primary',
-          onclick='rfbPressMenu(); return false;') Menu
-        button(type='button',class='btn btn-primary',
-          onclick='rfbPressPower(); return false;') Power
-        button(type='button',class='btn btn-primary',
-          onclick='rfbPressVolumeUp(); return false;') Volume Up
-        button(type='button',class='btn btn-primary',
-          onclick='rfbPressVolumeDown(); return false;') Volume Down
-        button(type='button',class='btn btn-primary',
-          onclick='rfbPressCamera(); return false;') Camera
-        button(type='button',class='btn btn-primary',
-          onclick='rfbPressOrientation(); return false;') Rotation
-        button(type='button',class='btn btn-primary',
-          onclick='vncUpdateScale(-0.05); return false;') Zoom Out
-        button(type='button',class='btn btn-primary',
-          onclick='vncUpdateScale(0.05); return false;') Zoom In
-        div#noVNC_screen
-          canvas#noVNC_canvas
-            p Canvas not supported
-        script.
-          INCLUDE_URI="scripts/noVNC/";
-          // Load supporting scripts
-          Util.load_scripts(["webutil.js", "base64.js", "websock.js", "des.js",
-                               "keysymdef.js", "keyboard.js", "input.js", "display.js",
-                               "jsunzip.js", "rfb.js"]);
-          var rfb;
+  div.container
+    script(src='scripts/noVNC/util.js')
+    h1 VNC 
+    button(type='button',class='btn btn-primary',
+      onclick='rfbPressEsc(); return false;') Back
+    button(type='button',class='btn btn-primary',
+      onclick='rfbPressHome(); return false;') Home
+    button(type='button',class='btn btn-primary',
+      onclick='rfbPressMenu(); return false;') Menu
+    button(type='button',class='btn btn-primary',
+      onclick='rfbPressPower(); return false;') Power
+    button(type='button',class='btn btn-primary',
+      onclick='rfbPressVolumeUp(); return false;') Volume Up
+    button(type='button',class='btn btn-primary',
+      onclick='rfbPressVolumeDown(); return false;') Volume Down
+    button(type='button',class='btn btn-primary',
+      onclick='rfbPressCamera(); return false;') Camera
+    button(type='button',class='btn btn-primary',
+      onclick='rfbPressOrientation(); return false;') Rotation
+    button(type='button',class='btn btn-primary',
+      onclick='vncUpdateScale(-0.05); return false;') Zoom Out
+    button(type='button',class='btn btn-primary',
+      onclick='vncUpdateScale(0.05); return false;') Zoom In
+    div#noVNC_screen
+      canvas#noVNC_canvas
+        p Canvas not supported
+    script.
+      INCLUDE_URI="scripts/noVNC/";
+      // Load supporting scripts
+      Util.load_scripts(["webutil.js", "base64.js", "websock.js", "des.js",
+                           "keysymdef.js", "keyboard.js", "input.js", "display.js",
+                           "jsunzip.js", "rfb.js"]);
+      var rfb;
 
-          window.onscriptsload = function () {
-              var host, port, password, path, token;
-              WebUtil.init_logging(WebUtil.getQueryVar('logging', 'debug'));
+      window.onscriptsload = function () {
+          var host, port, password, path, token;
+          WebUtil.init_logging(WebUtil.getQueryVar('logging', 'debug'));
 
-              host = WebUtil.getQueryVar('host', 'localhost');
-              port = WebUtil.getQueryVar('port', '6080');
+          host = WebUtil.getQueryVar('host', 'localhost');
+          port = WebUtil.getQueryVar('port', '6080');
 
-              console.log('noVNC: Connecting to ' + host + ':' + port);
+          console.log('noVNC: Connecting to ' + host + ':' + port);
 
-              password = WebUtil.getQueryVar('password', '');
-              path = WebUtil.getQueryVar('path', 'websockify');
+          password = WebUtil.getQueryVar('password', '');
+          path = WebUtil.getQueryVar('path', 'websockify');
 
-              rfb = new RFB({'target':       $D('noVNC_canvas'),
-                   'encrypt':      WebUtil.getQueryVar('encrypt', false),
-                   'repeaterID':   WebUtil.getQueryVar('repeaterID', ''),
-                   'true_color':   WebUtil.getQueryVar('true_color', true),
-                   'local_cursor': WebUtil.getQueryVar('cursor', false),
-                   'shared':       WebUtil.getQueryVar('shared', true),
-                   'view_only':    WebUtil.getQueryVar('view_only', false)
-                   });
-              rfb.connect(host, port, password, path);
-          };
+          rfb = new RFB({'target':       $D('noVNC_canvas'),
+               'encrypt':      WebUtil.getQueryVar('encrypt', false),
+               'repeaterID':   WebUtil.getQueryVar('repeaterID', ''),
+               'true_color':   WebUtil.getQueryVar('true_color', true),
+               'local_cursor': WebUtil.getQueryVar('cursor', false),
+               'shared':       WebUtil.getQueryVar('shared', true),
+               'view_only':    WebUtil.getQueryVar('view_only', false)
+               });
+          rfb.connect(host, port, password, path);
+      };
 
-          // Translates RFB keypresses into Android emulator actions
-          // These are probably dependant on my mac keyboard, not sure how to 
-          // map to others at the moment
-          // See http://developer.android.com/tools/help/emulator.html
-          function rfbPressEsc() {
-            rfbPressKey(27);
-          }
-          function rfbPressHome() {
-            rfbPressKey(65360);
-          }
-          function rfbPressMenu() {
-            rfbPressKey(65471);
-          }
-          function rfbPressPower() {
-            rfbPressKey(65476);
-          }
-          function rfbPressKey(key) {
-            rfb.sendKey(key);
-          }
-          function rfbPressCamera() {
-            // control + Keypad 5
-            rfb._handleKeyPress( 0xFFE3 , true);
-            rfb._handleKeyPress( 65461  , true);
-            rfb._handleKeyPress( 65461  , false);
-            rfb._handleKeyPress( 0xFFE3 , false);
-          }
-          function rfbPressVolumeUp() {
-            // control + F5
-            rfb._handleKeyPress( 0xFFE3 , true);
-            rfb._handleKeyPress( 65474  , true);
-            rfb._handleKeyPress( 65474  , false);
-            rfb._handleKeyPress( 0xFFE3 , false);
-          }
-          function rfbPressOrientation() {
-            rfb._handleKeyPress( 0xFFE3 , true);
-            rfb._handleKeyPress( 65481  , true);
-            rfb._handleKeyPress( 65481  , false);
-            rfb._handleKeyPress( 0xFFE3 , false);
-          }
-          function rfbPressVolumeDown() {
-            // control + F6
-            rfb._handleKeyPress( 0xFFE3 , true);
-            rfb._handleKeyPress( 65475  , true);
-            rfb._handleKeyPress( 65475  , false);
-            rfb._handleKeyPress( 0xFFE3 , false);
-          }
-          function vncUpdateScale(amount) {
-            var origscale = rfb.get_display()._scale;
-            var origx = rfb.get_display().absX(0);
-            var origy = rfb.get_display().absY(0);
+      // Translates RFB keypresses into Android emulator actions
+      // These are probably dependant on my mac keyboard, not sure how to 
+      // map to others at the moment
+      // See http://developer.android.com/tools/help/emulator.html
+      function rfbPressEsc() {
+        rfbPressKey(27);
+      }
+      function rfbPressHome() {
+        rfbPressKey(65360);
+      }
+      function rfbPressMenu() {
+        rfbPressKey(65471);
+      }
+      function rfbPressPower() {
+        rfbPressKey(65476);
+      }
+      function rfbPressKey(key) {
+        rfb.sendKey(key);
+      }
+      function rfbPressCamera() {
+        // control + Keypad 5
+        rfb._handleKeyPress( 0xFFE3 , true);
+        rfb._handleKeyPress( 65461  , true);
+        rfb._handleKeyPress( 65461  , false);
+        rfb._handleKeyPress( 0xFFE3 , false);
+      }
+      function rfbPressVolumeUp() {
+        // control + F5
+        rfb._handleKeyPress( 0xFFE3 , true);
+        rfb._handleKeyPress( 65474  , true);
+        rfb._handleKeyPress( 65474  , false);
+        rfb._handleKeyPress( 0xFFE3 , false);
+      }
+      function rfbPressOrientation() {
+        rfb._handleKeyPress( 0xFFE3 , true);
+        rfb._handleKeyPress( 65481  , true);
+        rfb._handleKeyPress( 65481  , false);
+        rfb._handleKeyPress( 0xFFE3 , false);
+      }
+      function rfbPressVolumeDown() {
+        // control + F6
+        rfb._handleKeyPress( 0xFFE3 , true);
+        rfb._handleKeyPress( 65475  , true);
+        rfb._handleKeyPress( 65475  , false);
+        rfb._handleKeyPress( 0xFFE3 , false);
+      }
+      function vncUpdateScale(amount) {
+        var origscale = rfb.get_display()._scale;
+        var origx = rfb.get_display().absX(0);
+        var origy = rfb.get_display().absY(0);
 
-            var update = origscale + amount;
-            rfb.get_display().set_scale(update);
-            var newScale = rfb.get_display()._scale;
-            console.log('Updated display scale from ' + origscale + ' to ' + newScale);
+        var update = origscale + amount;
+        rfb.get_display().set_scale(update);
+        var newScale = rfb.get_display()._scale;
+        console.log('Updated display scale from ' + origscale + ' to ' + newScale);
 
-            // Update mouse to reflect new scale
-            var origMscale = rfb.get_mouse().get_scale();
-            rfb.get_mouse().set_scale(newScale);
-            var newMscale = rfb.get_mouse().get_scale();
-            console.log('Updated mouse scale from ' + origMscale  + ' to ' + newMscale);
+        // Update mouse to reflect new scale
+        var origMscale = rfb.get_mouse().get_scale();
+        rfb.get_mouse().set_scale(newScale);
+        var newMscale = rfb.get_mouse().get_scale();
+        console.log('Updated mouse scale from ' + origMscale  + ' to ' + newMscale);
 
-            // Fix CSS properties
-            var target = rfb.get_target();
-            $(target).css( "transform", 'scale(' + newScale + ')');
-            $(target).css( "transform-origin", 'top left' );
-          }
+        // Fix CSS properties
+        var target = rfb.get_target();
+        $(target).css( "transform", 'scale(' + newScale + ')');
+        $(target).css( "transform-origin", 'top left' );
+      }
 
 
 
@@ -138,3 +136,5 @@ block content
 
 
 
+
+  // include ../public/vnc_content.html
