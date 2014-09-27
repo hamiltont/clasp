@@ -284,14 +284,14 @@ class HttpApi(val nodeManager: ActorRef,
     HttpHeaders.`Access-Control-Allow-Headers`("Origin, X-Requested-With, Content-Type, Accept, Accept-Encoding, Accept-Language, Host, Referer, User-Agent"))
     
   def receive = runRoute {
-    logRequestResponse("api", akka.event.Logging.InfoLevel) {
+    // logRequestResponse("api", akka.event.Logging.InfoLevel) {
       respondWithHeaders(corsHeaders) {
         nodes ~
           emulators ~
           system ~
           static
       }
-    }
+    // }
   }
 
   override def postStop = {
