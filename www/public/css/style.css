@@ -21,3 +21,8 @@
 .white {
     color: white
 }
+
+/*Used in test.html*/
+.accordianRow {
+    padding: 0 !important;
+}
