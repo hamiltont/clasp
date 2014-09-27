@@ -60,11 +60,6 @@
       
     <div class="container">
       <h1>Clasp Dashboard</h1>
-      <ul>
-          <li><a href="#shutdownModal" onclick="shutdown(); return false;" data-keyboard="true" data-toggle="modal">Shutdown</a> </li>
-            
-        <li><a onclick="refreshEmulatorList(); return false;" href="#">Refresh Emulator List</a></li>
-      </ul>
       <div id="server-table"></div>
       <div id="emulator-table"></div>
     </div>
@@ -86,6 +81,8 @@
         <ul class="dropdown-menu" role="menu">
           <li><a href="#metrics" role="tab" data-toggle="tab">Metrics</a></li>
           <li><a href="#settings" role="tab" data-toggle="tab">Settings</a></li>
+          <li><a href="#" role="tab" onclick="refresh()" data-toggle="tab">Force Refresh</a></li>
+          <li><a href="#shutdownModal" data-keyboard="true" data-toggle="modal">Shutdown</a></li>
         </ul>
       </li>
       
@@ -198,17 +195,18 @@
       
     <div id="shutdownModal" tabindex="-1" class="modal fade">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-content panel-danger">
+                <div class="modal-header panel-heading">
                 <button type="button" data-dismiss="modal" class="close">&times</button>
-                <h4 class="modal-title">Shutdown Warning</h4>
+                <h4 class="modal-title">Are You Sure?</h4>
               </div>
               <div class="modal-body">
-                <p class="text-danger">This website will stop working shortly, as it is part of the Clasp system. It typically takes 10-15 seconds for the system to finish shutting down, so you have about enough time to 
-                  read this message. </p>
+                <p class="text-danger">This will shut down all emulators, all nodes, and the 
+                    website will stop working</p>
               </div>
               <div class="modal-footer">
-                <button data-dismiss="modal" class="btn">Close</button>
+                <button data-dismiss="modal" class="btn">Get Me Out of Here!</button>
+                <button data-dismiss="modal" onclick="shutdown(); return false;" class="btn btn-danger">Yes, Shutdown</button>
               </div>
         </div>
       </div>
