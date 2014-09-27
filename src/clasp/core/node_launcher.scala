@@ -264,9 +264,6 @@ class NodeManager(val conf: ClaspConf)
   }
 }
 
-// Used to pass a bunch of static node information to each EmulatorActor
-case class NodeDetails(nodeip: String, ostype: String, masterip: String, node: ActorRef)
-
 // Manages the running of the framework on a single node
 object Node {
   case class LaunchEmulator(count: Int = 1)
@@ -279,7 +276,7 @@ object Node {
   case class NodeDescription(val ip: String,
     val actor: Option[ActorRef] = None,
     val status: Status = Offline,
-    val onlineEmulators: Option[Int] = None,
+    val onlineEmulators: Int = 0,
     val asOf: Long = System.currentTimeMillis) {
 
     def stamp = copy(asOf = System.currentTimeMillis)
@@ -296,10 +293,11 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int)
   import log.{ error, debug, info, trace }
 
   val managerId = "manager"
-  context.actorSelection(s"akka.tcp://clasp@$serverip:2552/user/nodemanager") ! Identify(managerId)
+  context.actorSelection(s"akka.tcp://clasp@$masterip:2552/user/nodemanager") ! Identify(managerId)
 
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
   var current_emulator_ID = 0
+  def description(status: Node.Status.Status = Node.Status.Online) = Node.NodeDescription(ip, Some(self), status, current_emulator_ID)
 
   // Restart ADB with the node
   sdk.kill_adb
@@ -340,7 +338,7 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int)
       context.watch(manager)
 
       info(s"Node online: ${self.path}")
-      manager ! NodeManager.NodeUpdate(Node.NodeDescription(ip, Some(self), Node.Status.Online, Some(0)))
+      manager ! description()
       context.become(wrapReceive(active(manager)))
 
       // Launch initial emulators
@@ -379,13 +377,15 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int)
   }
 
   private def bootEmulator(): ActorRef = {
-    val me = NodeDetails(ip, get_os_type, serverip, self)
+
+    val me = description()
+
     debug(s"Booting new emulator with ID $current_emulator_ID")
     // TODO allow this to be passed in
     val emuOpts = new EmulatorOptions
     val result = context.actorOf(
-      Props(new EmulatorActor(current_emulator_ID, emuOpts, me)),
       s"emulator-${5554 + 2 * current_emulator_ID}")
+      Props(new EmulatorActor(current_emulator_ID, emuOpts, this)),
     current_emulator_ID = current_emulator_ID + 1
     result
   }
