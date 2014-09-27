@@ -100,67 +100,62 @@
                   <h3 class="panel-title">Node Summary</h3>
               </div>
               
-              <table class="table table-striped table-hover">
+              <table class="table table-condensed" style="border-collapse:collapse;">
                   <tr>
-                      <th class="col-md-1">&nbsp;</th>
+                      <th class="col-md-1">&#35;</th>
                       <th class="col-md-6">IP</th>
                       <th class="col-md-3">Status</th>
                       <th class="col-md-2">Last Update</th>
                   </tr>
-                  <tr>
-                    <td> <!-- Show details for this row -->
-                        <button type="button" class="btn btn-sm" data-toggle="collapse" data-target="#nodedetails1">
-                            <span class="glyphicon glyphicon-list white"></span>
-                        </button>
-                    </td>                        
+                  
+                  <tr data-toggle="collapse" data-target="#nodedetails1" class="accordion-toggle">
+                    <td>1</td>
                     <td>{{ ip }}</td>
                     <td class="Booting">{{ status }}</td>
                     <td>{{ asOf }}</td>
                   </tr>
-                  <tr class="collapse" id="nodedetails1">
-                    <td colspan="4"> new detail data </td>
-                  </tr>
                   <tr>
-                    <td> <!-- Show details for this row -->
-                        <button type="button" class="btn" data-toggle="collapse" data-target="#nodedetails2">
-                            <span class="glyphicon glyphicon-expand white"></span>
-                        </button>
-                    </td>
+                      <td colspan="4" class="accordianRow" >
+                          <div class="accordian-body collapse" id="nodedetails1">Node Details</div>
+                      </td>
+                  </tr>
+                  
+                  <tr data-toggle="collapse" data-target="#nodedetails2" class="accordion-toggle">
+                    <td>1</td>
                     <td>{{ ip }}</td>
                     <td class=".Booting">{{ status }}</td>
                     <td>{{ asOf }}</td>
                   </tr>
-                  <tr class="collapse" id="nodedetails2">
-                    <td colspan="4"> new detail data </td>
-                  </tr>
                   <tr>
-                    <td> <!-- Show details for this row -->
-                        <button type="button" class="btn" data-toggle="collapse" data-target="#nodedetails3">
-                            <span class="glyphicon glyphicon-list white"></span>
-                        </button>
-                    </td>
+                      <td colspan="4" class="accordianRow" >
+                          <div class="accordian-body collapse" id="nodedetails2">Node Details</div>
+                      </td>
+                  </tr>
+                  
+                  <tr data-toggle="collapse" data-target="#nodedetails3" class="accordion-toggle">
+                    <td>3</td>
                     <td>{{ ip }}</td>
                     <td class=".Booting">{{ status }}</td>
                     <td>{{ asOf }}</td>
                   </tr>
-                  <tr class="collapse" id="nodedetails3">
-                    <td colspan="4"> new detail data </td>
+                  <tr data-toggle="collapse" data-target="#nodedetails4" class="accordion-toggle">
+                      <td colspan="4" class="accordianRow" >
+                          <div class="accordian-body collapse" id="nodedetails3">Node Details</div>
+                      </td>
                   </tr>
-                  <tr>
-                    <td> <!-- Show details for this row -->
-                        <button type="button" class="btn" data-toggle="collapse" data-target="#nodedetails4">
-                            <span class="glyphicon glyphicon-list white"></span>
-                        </button>
-                    </td>
-
+                  
+                  <tr data-toggle="collapse" data-target="#nodedetails4" class="accordion-toggle">
+                    <td>4</td>
                     <td>{{ ip }}</td>
                     <td class=".Booting">{{ status }}</td>
                     <td>
                         original data
                     </td>
                   </tr>
-                 <tr class="collapse" id="nodedetails4">
-                    <td colspan="4"> new detail data </td>
+                  <tr class="accordianRow">
+                      <td colspan="4" class="accordianRow" >
+                          <div class="accordian-body collapse" id="nodedetails4">Node Details</div>
+                      </td>
                   </tr>
 
               </table>
