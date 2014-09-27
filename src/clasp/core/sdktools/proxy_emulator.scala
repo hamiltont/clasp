@@ -8,6 +8,9 @@ import scala.sys.process.ProcessLogger
 import sdk_config.log.info
 import java.nio.file.Files
 import java.nio.file.Paths
+import clasp.core.EmulatorActor
+import clasp.core.EmulatorLogger
+import akka.actor.ActorRef
 
 /**
  * Provides an interface to the
@@ -29,11 +32,9 @@ trait EmulatorProxy {
   /**
    * Start an emulator with the given options.
    */
-  def start_emulator(opts: EmulatorOptions = new EmulatorOptions()): (Process, String) = {
-    
+  def start_emulator(opts: EmulatorOptions = new EmulatorOptions(), logger: Option[ActorRef] = None): Process = {
+
     // Add all the conventional arguments into the command
-    
-    // options.avdName = Some(avd_name)
     var command = opts.applyToCommand(emulator)
 
     var builder = Process(command)
@@ -43,13 +44,18 @@ trait EmulatorProxy {
     } else
       info(s"Emulator launch command: $command")
 
-    val serial = "emulator-" + opts.network.consolePort.getOrElse("XX")
-    val logger = ProcessLogger(line => info(serial + ":out: " + line),
-      line => info(serial + ":err: " + line))
-    val process = builder.run(logger)
+    val procLogger: ProcessLogger =
+      if (logger.isDefined)
+        ProcessLogger(line => logger.get ! EmulatorLogger.StdOut(line),
+          line => logger.get ! EmulatorLogger.StdErr(line))
+      else
+        ProcessLogger(line => info(s"emulator:out:$line"),
+          line => info(s"emulator:err:$line"))
+
+    val process = builder.run(procLogger)
     info("Emulator process started")
-    
-    return (process, serial)
+
+    return process
   }
 
   /**

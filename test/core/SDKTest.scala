@@ -133,10 +133,8 @@ class SDKTest extends AssertionsForJUnit {
     
     opts = opts.copy(network = opts.network.copy(consolePort = Some(5554)))
     opts = opts.copy(avdName = Some(avdName))
-    val emulatorInfo = start_emulator(opts)
-    val proc = emulatorInfo._1
-    val serial = emulatorInfo._2
-    
+    val proc = start_emulator(opts)
+    val serial = "emulator-5554"
 
     val tmpFileStr = sys.env("HOME") + "/clasp-temp-file"
     val backupStr = sys.env("HOME") + "/clasp-backup"
@@ -179,9 +177,8 @@ class SDKTest extends AssertionsForJUnit {
     val port = 5554
     opts = opts.copy(network = opts.network.copy(consolePort = Some(port)))
     opts = opts.copy(avdName = Some(avdName))
-    val emulatorInfo = start_emulator(opts)
-    val proc = emulatorInfo._1
-    val serial = emulatorInfo._2
+    val proc = start_emulator(opts)
+    val serial = "emulator-5554"
     
     val cdmaDump = sys.env("HOME") + "/cdma-dump"
     val networkDump = sys.env("HOME") + "/network-dump"

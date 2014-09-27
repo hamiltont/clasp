@@ -166,6 +166,8 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   val consolePort = base_emulator_port + 2 * nodeId
   val adbPort = consolePort + 1
   
+  opts = opts.copy(network = opts.network.copy(consolePort = Some(consolePort), adbPort = Some(adbPort)))
+  val serialID = s"emulator-$consolePort"
   // Display port (1 is 5901, 99 is 5999)
   val base_display_num = 1
   val display_number = base_display_num + nodeId
@@ -175,6 +177,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   val base_wsDisplay_port = 6080
   val ws_display_port = base_wsDisplay_port + display_number
   
+  val logger = context.actorOf(Props(new EmulatorLogger(serialID, node)), s"logger")
   // Emulator manager reference
   val emanager = context.system.actorFor(s"akka.tcp://clasp@${node.masterip}:2552/user/emulatormanager")
 
@@ -191,7 +194,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   // Build sdcard, avd, and start emulator
   var avd:avd = null
   val buildTime = System.currentTimeMillis
-  val (process, serialID) = build()
+  val process = build()
 
   override def postStop = {
     super.preStart
@@ -304,7 +307,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   }
 
   // TODO Put this all inside a future
-  def build(): (Process, String) = {
+  def build(): Process = {
     info(s"Building and starting emulator $this")
 
     // Give each emulator a unique name and SDcard
@@ -336,7 +339,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
     opts = opts.copy(debug = opts.debug.copy(verbose = Some(true)))
     
     // Determine display type
-    node.ostype match {
+    node.get_os_type match {
       case "linux" => {
         debug("Running on Linux, assuming headless. Searching for Xvfb and x11vnc")
         val xvfb = "which Xvfb".! == 0
@@ -399,13 +402,46 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
 
     opts = opts.copy(network = opts.network.copy(consolePort = Some(consolePort)))
     opts = opts.copy(avdName = Some(avdName))
-    return sdk.start_emulator(opts);
+    return sdk.start_emulator(opts, Some(logger));
   }
   
   override def toString():String = {
     return s"[Emulator, id: $uuid, serialId: $serialID, nodeId: $nodeId, consolePort: $consolePort, path: ${self.path}]"
   }
 
+/**
+ * Handles sending emulator output logs to console and to websocket channels
+ */
+object EmulatorLogger {
+  case class StdOut(line: String)
+  case class StdErr(line: String)
+}
+class EmulatorLogger(val serialID: String, val node: Node)
+  extends Actor
+  with ActorLogging
+  with ChannelServer
+  with ActorStack
+  with Slf4jLoggingStack {
+
+  // channelIdentifyMaster(node.masterip)
+  context.actorSelection(s"akka.tcp://clasp@${node.masterip}:2552/user/channelManager") ! Identify(channelManagerId)
+  var channelManager: Option[ActorRef] = None
+  val channelName = "/emulatorlogs"
+
+  def wrappedReceive = {
+    case StdOut(line) => {
+      log.debug(s"$serialID:out: $line")
+      channelManager.foreach(c => c ! Message(channelName, line, self))
+    }
+    case StdErr(line) => {
+      log.debug(s"$serialID:err: $line")
+      channelManager.foreach(c => c ! Message(channelName, line, self))
+    }
+    case ActorIdentity(`channelManagerId`, Some(manager)) => {
+      channelManager = Some(manager)
+      manager ! RegisterChannel(channelName, self)
+    }
+  }
 }
 
 /* Physical hardware */
