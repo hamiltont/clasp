@@ -178,7 +178,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   
   // Emulator ports (each needs two)
   // WARNING: consolePort must be an even integer
-  val base_emulator_port = 5554
+  val base_emulator_port = 5556
   val consolePort = base_emulator_port + 2 * nodeId
   val adbPort = consolePort + 1
   

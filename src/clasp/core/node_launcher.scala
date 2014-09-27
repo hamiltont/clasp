@@ -384,8 +384,8 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int)
     // TODO allow this to be passed in
     val emuOpts = new EmulatorOptions
     val result = context.actorOf(
-      s"emulator-${5554 + 2 * current_emulator_ID}")
       Props(new EmulatorActor(current_emulator_ID, emuOpts, this)),
+      s"emulator-${5556 + 2 * current_emulator_ID}")
     current_emulator_ID = current_emulator_ID + 1
     result
   }
