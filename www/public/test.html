@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Clasp</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+      <style>
+    body { padding-top: 60px; }
+    </style>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a data-toggle="collapse" data-target=".nav-collapse" class="btn btn-navbar"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></a><a href="/" class="brand">Clasp</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li><a href="/">Home</a></li>
+              <li class="active"><a href="dashboard">Dashboard</a></li>
+              <li><a href="vnc">VNC</a></li>
+              <li><a href="doc">Documentation</a></li>
+              <li><a href="scaladoc">ScalaDoc</a></li>
+              <li><a href="#aboutModal" data-keyboard="true" data-toggle="modal">About</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script id="server-item" type="text/x-handlebars-template">
+      <tr id="worker-{{ ip }}">
+        <td>{{ ip }}</td>
+        <td class="{{status}}">{{ status }}</td>
+        <td>{{ asOf }}</td>
+      </tr>
+    </script>
+    
+    <script id="emulator-item" type="text/x-handlebars-template">
+      <tr id="emulator-{{ uuid }}">
+        <td>{{ uuid }}</td>
+        <td><a href="vnc?host={{ publicip }}&amp;port={{ wsVncPort }}">{{ publicip }}:{{ wsVncPort }}</a></td>
+        <td>{{ consolePort }}</td>
+        <td>{{ actorPath }}</td>
+      </tr>
+    </script>
+      
+    <div class="container">
+      <h1>Clasp Dashboard</h1>
+      <ul>
+        <li><a href="#shutdownModal" onclick="shutdown(); return false;" data-keyboard="true" data-toggle="modal">Shutdown</a> | <a onclick="refreshEmulatorList(); return false;" href="#">Refresh Emulator List</a></li>
+      </ul>
+      <div id="server-table"></div>
+      <div id="emulator-table"></div>
+    </div>
+
+    <div id="shutdownModal" tabindex="-1" class="modal hide fade">
+      <div class="modal-header">
+        <butten type="button" data-dismiss="modal" aria-hidden="true" class="close">&times</butten>
+        <h3>Shutdown Warning</h3>
+      </div>
+      <div class="modal-body">
+        <p class="text-danger">This website asdfasdfasdf stop working shortly. It typically takes 10-15 seconds for the system to finish shutting down</p>
+      </div>
+      <div class="modal-footer">
+        <button data-dismiss="modal" class="btn">Close</button>
+      </div>
+    </div>
+    <div class="container">
+      <div class="footer">
+        <hr style="margin: 30px 0 10px 0;">
+        <p>&copy;&nbsp;<a href="http://www.magnum.io">Magnum Research asdfasdGroup</a>&nbsp;2013</p>
+      </div>
+    </div>
+    
+    <script src="/scripts/bootstrap.min.js"></script>
+  </body>
+</html>
