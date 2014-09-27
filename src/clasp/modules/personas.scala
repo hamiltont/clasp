@@ -30,7 +30,6 @@ object Personas {
   def applyAll(serialID: String, emuOpts: EmulatorOptions) {
     applyContacts(serialID, emuOpts)
     applyCalendar(serialID, emuOpts)
-    Thread.sleep(100000)
   }
 
   def applyContacts(serialID: String, emuOpts: EmulatorOptions) {
