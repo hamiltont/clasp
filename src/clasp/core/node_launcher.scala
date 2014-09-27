@@ -37,6 +37,13 @@ import clasp.utils.ActorLifecycleLogging
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.FiniteDuration
 import clasp.core.WebSocketChannelManager._
+import clasp.utils.ActorStack
+import clasp.utils.Slf4jLoggingStack
+import clasp.utils.ActorStack
+import clasp.utils.Slf4jLoggingStack
+import clasp.utils.ActorStack
+import clasp.utils.Slf4jLoggingStack
+import clasp.utils.Slf4jLoggingStack
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
@@ -54,7 +61,12 @@ object NodeManager {
   // Internal usage
   case class NodeBootExpected(node: Node.NodeDescription)
 }
-class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging {
+class NodeManager(val conf: ClaspConf)
+  extends Actor
+  with ActorLifecycleLogging 
+  with ActorStack
+  with Slf4jLoggingStack {
+
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
   import NodeManager._
@@ -98,8 +110,8 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
   // Deploy+compile can take some time
   context.system.scheduler.scheduleOnce(10.minutes, self, Shutdown(true))
 
-  def receive = monitoring
   // Start in monitor mode
+  def wrappedReceive = monitoring
 
   // For dynamic websocket-based messaging to web clients
   var channelManager: Option[ActorRef] = None
@@ -130,7 +142,7 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
         nodes.filter(n => n.actor.isDefined).foreach(n => context.watch(n.actor.get))
 
         // 2. Transition our receive loop into a Reaper
-        context.become(reaper)
+        context.become(wrapReceive(reaper))
         info("Transitioned to a reaper")
 
         // 3. Ask all of our nodes to stop.
@@ -275,8 +287,11 @@ object Node {
 }
 // TODO push updated NodeDescriptions to NodeManager whenever our internal state changes
 // TODO combine NodeDescription and NodeDetails
-class Node(val ip: String, val serverip: String, val numEmulators: Int)
-  extends Actor with ActorLifecycleLogging {
+class Node(val ip: String, val masterip: String, val numEmulators: Int)
+  extends Actor 
+  with ActorLifecycleLogging 
+  with ActorStack
+  with Slf4jLoggingStack {
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
@@ -317,7 +332,7 @@ class Node(val ip: String, val serverip: String, val numEmulators: Int)
   }
 
   // Wait until we are connected to the nodemanager with an ActorRef
-  def receive = {
+  def wrappedReceive = {
     case ActorIdentity(`managerId`, Some(manager)) =>
       debug(s"Found ActorRefFor NodeManger of ${manager}")
 
@@ -326,7 +341,7 @@ class Node(val ip: String, val serverip: String, val numEmulators: Int)
 
       info(s"Node online: ${self.path}")
       manager ! NodeManager.NodeUpdate(Node.NodeDescription(ip, Some(self), Node.Status.Online, Some(0)))
-      context.become(active(manager))
+      context.become(wrapReceive(active(manager)))
 
       // Launch initial emulators
       self ! Node.LaunchEmulator(numEmulators)

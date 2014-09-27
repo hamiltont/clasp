@@ -33,7 +33,17 @@ import EmulatorManager._
 import EmulatorActor._
 import clasp.utils.ActorLifecycleLogging
 import akka.pattern.ask
-
+import akka.actor.ActorLogging
+import EmulatorLogger._
+import akka.actor.Props
+import akka.actor.Identify
+import clasp.core.WebSocketChannelManager._
+import clasp.utils.Slf4jLoggingStack
+import clasp.utils.ActorStack
+import clasp.utils.ActorStack
+import clasp.utils.Slf4jLoggingStack
+import clasp.utils.Slf4jLoggingStack
+import akka.actor.ActorIdentity
 
 object EmulatorManager {
   case class EmulatorReady(emu: EmulatorDescription)
@@ -49,7 +59,11 @@ object EmulatorManager {
   case class TaskSuccess(taskId: String, data: Map[String, Serializable], emulator: EmulatorDescription)
   case class TaskFailure(taskId: String, reason: Throwable, emulator: EmulatorDescription)
 }
-class EmulatorManager(val nodeManager: ActorRef) extends Actor with ActorLifecycleLogging {
+class EmulatorManager(val nodeManager: ActorRef)
+  extends Actor
+  with ActorLifecycleLogging
+  with ActorStack
+  with Slf4jLoggingStack {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
@@ -77,7 +91,7 @@ class EmulatorManager(val nodeManager: ActorRef) extends Actor with ActorLifecyc
       error("Emulator came online, but no work was available.")
   }
 
-  def receive = {
+  def wrappedReceive = {
     case EmulatorReady(emulator) => {
       emulators += emulator
       info(s"Emulator ready: ${emulator}")
@@ -151,8 +165,11 @@ object EmulatorActor {
 // interface
 // TODO make EmulatorActor a FSM with states Booted, Booting, and Not Booted
 class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
-  val node: NodeDetails) extends Actor with ActorLifecycleLogging {
-  
+  val node: Node) extends Actor
+  with ActorLifecycleLogging
+  with ActorStack
+  with Slf4jLoggingStack {
+
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
   
@@ -245,7 +262,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
     }
   }
 
-  def receive = {
+  def wrappedReceive = {
     case _: EmulatorHeartbeat => {
       // Executing a command on the emulator to ensure it's 
       // alive and responding
@@ -290,7 +307,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
       // Start the heartbeats
       heartbeatSchedule = context.system.scheduler.schedule(0.seconds, 10.seconds, self, EmulatorHeartbeat())
 
-      description = Some(EmulatorDescription(node.nodeip, consolePort, display_port, ws_display_port, self, uuid))
+      description = Some(EmulatorDescription(node.ip, consolePort, display_port, ws_display_port, self, uuid))
       emanager ! EmulatorReady(description.get)
     }
     case _: BootFailure => {

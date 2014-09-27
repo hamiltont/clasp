@@ -8,22 +8,22 @@ trait ActorLifecycleLogging extends Actor {
   import lifecycle_log.{ error, debug, info, trace }
 
   override def preStart() {
-      debug(s"preStart called for ${self}")
+      debug(s"Calling preStart")
       super.preStart
   }  
   
   override def preRestart(reason: Throwable, message: Option[Any]) {
-    debug(s"preRestart called for ${self}")
+    debug(s"Calling preRestart")
     super.preRestart(reason, message)
   }
   
   override def postRestart(reason: Throwable) {
-    debug(s"postRestart called for ${self}")
+    debug(s"Calling postRestart")
     super.postRestart(reason)
   }
 
   override def postStop() {
-    debug(s"postStop called for ${self}")
+    debug(s"Calling postStop")
     super.postStop
   }
   

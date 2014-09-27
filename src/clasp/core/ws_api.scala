@@ -1,40 +1,40 @@
 package clasp.core
 
-import akka.actor.ActorRefFactory
-import spray.can.websocket.frame.BinaryFrame
-import spray.routing.HttpServiceActor
-import spray.can.websocket.`package`.FrameCommandFailed
-import spray.can.websocket.frame.TextFrame
-import spray.http.HttpRequest
-import akka.actor.ActorRef
-import spray.can.websocket.WebSocketServerWorker
-import akka.actor.actorRef2Scala
-import spray.can.Http
-import akka.actor.Props
-import akka.actor.ActorLogging
-import akka.actor.Actor
-import spray.can.websocket.frame.TextFrameStream
-import akka.io.Tcp
-import java.io.ByteArrayInputStream
-import spray.can.websocket.UpgradedToWebSocket
-import spray.http.HttpResponse
-import spray.http.HttpResponse
-import akka.pattern.ask
+import scala.collection._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import spray.http.HttpResponse
 import scala.util.Failure
 import scala.util.Success
+import WebSocketChannelManager._
+import akka.actor.Actor
+import akka.actor.ActorIdentity
+import akka.actor.ActorLogging
+import akka.actor.ActorRef
+import akka.actor.ActorRefFactory
+import akka.actor.ActorSelection
+import akka.actor.Props
+import akka.actor.Terminated
+import akka.actor.actorRef2Scala
 import akka.dispatch.OnComplete
-import scala.concurrent.ExecutionContext.Implicits.global
-import spray.can.websocket.frame.Frame
-import spray.can.websocket.`package`.FrameCommand
+import akka.io.Tcp
+import akka.pattern.ask
+import spray.can.Http
+import spray.can.websocket.UpgradedToWebSocket
+import spray.can.websocket.WebSocketServerWorker
+import spray.can.websocket.frame.BinaryFrame
+import spray.can.websocket.frame.TextFrame
+import spray.can.websocket.frame.TextFrameStream
+import spray.http.HttpRequest
+import spray.http.HttpResponse
+import spray.http.HttpResponse
+import spray.http.HttpResponse
 import spray.http.HttpResponse
 import spray.http.StatusCodes
-import scala.collection.mutable.ListBuffer
-import scala.collection._
-import akka.actor.Terminated
-import WebSocketChannelManager._
-import akka.actor.ActorIdentity
+import spray.routing.HttpServiceActor
+import akka.actor.ActorContext
+import akka.actor.Identify
+import clasp.utils.ActorStack
+import clasp.utils.Slf4jLoggingStack
 
 /**
  * First line of defense in handling HTTP connections. Creates separate
@@ -162,7 +162,10 @@ object WebSocketChannelManager {
   case class UnRegisterClient(channelName: String, client: ActorRef)
   case class Message(chan: String, data: String, from: ActorRef)
 }
-class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor with ActorLogging {
+class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
+  with ActorLogging
+  with ActorStack
+  with Slf4jLoggingStack {
 
   var subscriptions = Map[Channel, Vector[Client]]()
 
@@ -191,40 +194,37 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor with Acto
   // Tell nodemanager we are ready
   nodeManager ! ActorIdentity(WebSocketChannelManager, Some(self))
 
-  def receive = {
+  def wrappedReceive = {
     case RegisterChannel(name, owner) => {
       getChannel(name) match {
         case Some(deadChannel: DeadChannel) => {
           subscriptions += (RealChannel(name, Server(owner)) -> subscriptions(deadChannel))
           subscriptions -= deadChannel
           context.watch(owner)
-          log.debug(s"Replaced $deadChannel with a real channel $channels")
+          log.debug(s"Replaced $deadChannel with a real channel")
         }
         case Some(realChannel: RealChannel) =>
           log.error(s"Refusing to use RegisterChannel($name, $owner) due to $realChannel")
         case None => {
           subscriptions += (RealChannel(name, Server(owner)) -> Vector())
           context.watch(owner)
-          log.debug(s"Registered a new channel $channels")
+          log.debug(s"Registered a new channel $name")
         }
       }
     }
     case Terminated(dead) => {
       getRole(dead) match {
         case Some(client: Client) => // Remove subscriptions
-          log.debug(s"Received Client Terminated($dead) $client")
           subscriptionsFor(client).foreach { subscription =>
             subscriptions += (subscription._1 -> subscription._2.filterNot(c => c == client))
           }
-        case Some(server: Server) => { // Remove any channels
-          log.debug(s"Received Server Terminated($dead) $server")
+        case Some(server: Server) => // Remove any channels
           channelsBy(server).foreach { realChannel =>
             subscriptions += (DeadChannel(realChannel.name) -> subscriptions(realChannel))
             subscriptions -= realChannel
           }
-        }
         case None =>
-          log.debug(s"Received Terminated($dead) but no channel is registered")
+          log.debug(s"Actor unrecognized as client or server")
       }
     }
     case RegisterClient(chanName, clientRef) => {
@@ -238,7 +238,7 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor with Acto
       context.unwatch(clientRef)
       getChannel(chanName) match {
         case Some(chan) => subscriptions += (chan -> (subscriptions(chan).filterNot(_.actor == clientRef)))
-        case None => log.debug(s"Ignoring UnRegisterClient($chanName, $clientRef) - no such channel")
+        case None => log.debug(s"No such channel $chanName")
       }
     }
     case Message(channel, data, sender) => {
@@ -246,8 +246,8 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor with Acto
         case Some(client: Client) => { // Send to channel server
           getChannel(channel) match {
             case Some(real: RealChannel) => real.owner.actor ! Message(channel, data, self)
-            case Some(dead: DeadChannel) => log.error(s"Discarded Message($channel, $data, $sender) - dead channel")
-            case None => log.error(s"Discarded Message($channel, $data, $sender) - unregistered channel")
+            case Some(dead: DeadChannel) => log.error(s"Discarded Message - dead channel")
+            case None => log.error(s"Discarded Message - unregistered channel")
           }
         }
         case Some(server: Server) => { // Send to all clients
@@ -256,15 +256,23 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor with Acto
               val frame = TextFrame(wsmultiplex.Message(channel, data).write)
               subscriptions(real).foreach { client => client.actor ! frame }
             }
-            case Some(dead: DeadChannel) => log.error(s"Discarded Message($channel, $data, $sender) - sent to dead channel")
-            case None => log.error(s"Discarded Message($channel, $data, $sender) - unregistered channel")
+            case Some(dead: DeadChannel) => log.error(s"Discarded Message - sent to dead channel")
+            case None => log.error(s"Discarded Message - unregistered channel")
           }
         }
-        case None => log.error(s"Discarded Message($channel, $data, $sender) - unknown sender")
+        case None => log.error(s"Discarded Message - unknown sender")
       }
     }
   }
 
+  override def postReceive = {
+    case x: Message => {}
+    case other => {
+      log.info(s"Post Update State: $subscriptions")
+    }
+  }
+
+}
 }
 
 /**
