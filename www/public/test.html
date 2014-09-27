@@ -63,16 +63,21 @@
       <div id="emulator-table"></div>
     </div>
 
-    <div id="shutdownModal" tabindex="-1" class="modal hide fade">
-      <div class="modal-header">
-        <butten type="button" data-dismiss="modal" aria-hidden="true" class="close">&times</butten>
-        <h3>Shutdown Warning</h3>
-      </div>
-      <div class="modal-body">
-        <p class="text-danger">This website asdfasdfasdf stop working shortly. It typically takes 10-15 seconds for the system to finish shutting down</p>
-      </div>
-      <div class="modal-footer">
-        <button data-dismiss="modal" class="btn">Close</button>
+    <div id="shutdownModal" tabindex="-1" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <button type="button" data-dismiss="modal" class="close">&times</button>
+                <h4 class="modal-title">Shutdown Warning</h4>
+              </div>
+              <div class="modal-body">
+                <p class="text-danger">This website will stop working shortly, as it is part of the Clasp system. It typically takes 10-15 seconds for the system to finish shutting down, so you have about enough time to 
+                  read this message. </p>
+              </div>
+              <div class="modal-footer">
+                <button data-dismiss="modal" class="btn">Close</button>
+              </div>
+        </div>
       </div>
     </div>
     <div class="container">
