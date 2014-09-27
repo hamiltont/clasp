@@ -14,10 +14,8 @@ import scala.sys.process.Process
 import scala.sys.process.ProcessLogger
 import scala.sys.process.stringToProcess
 import scala.util.Random
-
 import org.slf4j.LoggerFactory
 import com.typesafe.config.ConfigFactory
-
 import akka.actor.Actor
 import akka.actor.ActorIdentity
 import akka.actor.ActorInitializationException
@@ -100,8 +98,8 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
   // Deploy+compile can take some time
   context.system.scheduler.scheduleOnce(10.minutes, self, Shutdown(true))
 
-  // Start in monitor mode.
   def receive = monitoring
+  // Start in monitor mode
 
   // For dynamic websocket-based messaging to web clients
   var channelManager: Option[ActorRef] = None
@@ -115,7 +113,7 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
       }
     case NodeUpdate(update) => nodeUpdate(update)
     case NodeBootExpected(node) => (nodesOnline.filter(n => n.ip == node.ip).isEmpty) match {
-      case true => nodeUpdate(node.stampedCopy(status = Node.Status.Failed))
+      case true => nodeUpdate(node.copy(status = Node.Status.Failed).stamp)
       case false => debug(s"Ignoring boot timeout message for $node, reply already received")
     }
     case NodeList(onlyOnline) => if (onlyOnline) sender ! nodesOnline.toList else sender ! nodes.toList
@@ -199,7 +197,7 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
       if (client.status == Node.Status.Failed)
         info(s"Warning: Attempting to boot node that previously failed - $client")
       val client_ip = client.ip
-      nodeUpdate(client.stampedCopy(status = Node.Status.Booting))
+      nodeUpdate(client.copy(status = Node.Status.Booting).stamp)
 
       val deploy_and_boot = future {
         val directory: String = "pwd".!!.stripLineEnd
@@ -207,12 +205,13 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
         val workspaceDir = s"/tmp/clasp/$username"
 
         val mkdir = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'mkdir -p $workspaceDir'"
-        if (mkdir.! != 0) 
+        if (mkdir.! != 0)
           throw new Exception("Connection to remote node failed, aborting boot")
 
         val copy = s"rsync --verbose --archive --exclude='.git/' --exclude='*.class' . $client_ip:$workspaceDir"
         info(s"Deploying using $copy")
-        val copyLogger = ProcessLogger(line => info(s"deploy:${client_ip}:out: $line"),
+        val shouldLogDeploy = false
+        val copyLogger = ProcessLogger(line => if (shouldLogDeploy) info(s"deploy:${client_ip}:out: $line"),
           line => error(s"deploy:${client_ip}:err: $line"))
         val copyProc = Process(copy).run(copyLogger)
         copyProc.exitValue
@@ -220,11 +219,12 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
         // val build = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $workspaceDir && sbt -Dsbt.log.noformat=true clean && sbt -Dsbt.log.noformat=true stage'"
         val build = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $workspaceDir && sbt -Dsbt.log.noformat=true stage'"
         info(s"Building using $build")
-        val buildLogger = ProcessLogger(line => info(s"build:${client_ip}:out: $line"),
+        val shouldLogBuild = true
+        val buildLogger = ProcessLogger(line => if (shouldLogBuild) info(s"build:${client_ip}:out: $line"),
           line => error(s"build:${client_ip}:err: $line"))
         val buildProc = Process(build).run(buildLogger)
         buildProc.exitValue
-          		
+
         // TODO use ssh port forwarding to punch connections in any NAT and 
         // ensure connectivity between master and client. PS - nastyyyyy
 
@@ -240,12 +240,13 @@ class NodeManager(val conf: ClaspConf) extends Actor with ActorLifecycleLogging 
         // Check that we've heard back
         context.system.scheduler.scheduleOnce(30 seconds, self, NodeBootExpected(client))
       }
-      
-      deploy_and_boot onFailure { case reason => 
-        log.error(s"Node failed to boot : $reason")
-        self ! NodeUpdate(client.stampedCopy(status = Node.Status.Failed))
+
+      deploy_and_boot onFailure {
+        case reason =>
+          log.error(s"Node failed to boot : $reason")
+          self ! NodeUpdate(client.copy(status = Node.Status.Failed).stamp)
       }
-      
+
       true
     }
   }
@@ -269,9 +270,7 @@ object Node {
     val onlineEmulators: Option[Int] = None,
     val asOf: Long = System.currentTimeMillis) {
 
-    def stampedCopy(ip: String = ip, actor: Option[ActorRef] = actor, status: Status = status,
-      onlineEmulators: Option[Int] = onlineEmulators) =
-      copy(ip, actor, status, onlineEmulators, System.currentTimeMillis)
+    def stamp = copy(asOf = System.currentTimeMillis)
   }
 }
 // TODO push updated NodeDescriptions to NodeManager whenever our internal state changes
@@ -313,7 +312,7 @@ class Node(val ip: String, val serverip: String, val numEmulators: Int)
     }
 
     context.system.shutdown
-    
+
     super.postStop
   }
 

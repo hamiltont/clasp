@@ -67,7 +67,7 @@ trait AndroidProxy {
     if (output.contains("Tag/ABIs")) {
       // New: Tag/ABIs : android-tv/armeabi-v7a, android-tv/x86, default/armeabi-v7a, default/x86
 
-      debug("get_target_ABIs: Using new method")
+      // debug("get_target_ABIs: Using new method")
 
       val regex = "Tag/ABIs : (.*)".r
       val splitR = ".+?/(.+?)".r
@@ -78,16 +78,16 @@ trait AndroidProxy {
         }).toVector
       }
       val res = result.toVector
-      debug(s"get_target_abis: ${res.mkString(" ")}")
+      // debug(s"get_target_abis: ${res.mkString(" ")}")
       res
     } else {
       // Old
-      debug("get_target_ABIs: Using old method")
+      // debug("get_target_ABIs: Using old method")
       val regex = "ABIs : (.*)".r
       val result = for (regex(target) <- regex findAllIn output)
         yield target.split(", ").toVector
       val res = result.toVector
-      debug(s"get_target_abis: ${res.mkString(" ")}")
+      // debug(s"get_target_abis: ${res.mkString(" ")}")
       res
     }
   }

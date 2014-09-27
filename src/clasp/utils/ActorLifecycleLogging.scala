@@ -4,7 +4,7 @@ import org.slf4j.LoggerFactory
 import akka.actor.Actor
 
 trait ActorLifecycleLogging extends Actor {
-  val lifecycle_log = LoggerFactory.getLogger("clasp.utils.ActorLifecycleLogging")
+  val lifecycle_log = LoggerFactory.getLogger(getClass)
   import lifecycle_log.{ error, debug, info, trace }
 
   override def preStart() {

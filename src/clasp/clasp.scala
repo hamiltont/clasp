@@ -1,30 +1,33 @@
 package clasp
 
 import java.io.File
+
 import scala.Array.canBuildFrom
 import scala.collection.immutable.StringOps
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.promise
-import spray.can.server.UHttp
-
 import scala.sys.process.stringToProcess
+
 import org.slf4j.LoggerFactory
+
 import com.typesafe.config.ConfigFactory
+
+import akka.actor.Actor
+import akka.actor.ActorLogging
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
 import akka.io.IO
-import clasp.core.HttpApi
 import clasp.core.Node
+import clasp.core.WebSocketServer
 import core.EmulatorManager
 import core.NodeManager
-import core.sdktools.EmulatorOptions
 import core.sdktools.sdk
 import spray.can.Http
-import clasp.core.WebSocketWorker
-import clasp.core.WebSocketServer
+import spray.can.server.UHttp
+
 
 /* Used to launch Clasp from the command line */
 object ClaspRunner extends App {
@@ -44,7 +47,7 @@ object ClaspRunner extends App {
   // (who then uses those options to setup the EmulatorOptions), 
   // can we just serialize EmulatorOptions on master and deliver 
   // then entire object? Would there be any benefit?!
-  
+
   // Create a new instance of the framework. There should be at least one
   // instance of Clasp started per computer in your cluster, although you
   // should probably let the master handle starting all of the workers.
@@ -135,10 +138,10 @@ class ClaspClient(val conf: ClaspConf) {
   }
 
   val masterip = conf.mip().stripLineEnd
-  var n = system.actorOf(Props(new Node(ip,masterip,
+  var n = system.actorOf(Props(new Node(ip, masterip,
     conf.numEmulators.apply)), name = s"node-$ip")
   info(s"Created Node for $ip")
-  
+
   // If the JVM indicates it's shutting down (via Ctrl-C or a SIGTERM), 
   // then try to cleanup our ActorSystem
   // NOTE: Eclipse uses SIGKILL -- this will not be called if you click the red square
@@ -159,7 +162,6 @@ class ClaspClient(val conf: ClaspConf) {
     System.exit(0)
   }
 
-
   def shutdown(exitcode: Int = 0, message: Option[String] = None) = {
     if (system != null) {
       system.shutdown
@@ -179,7 +181,7 @@ class ClaspClient(val conf: ClaspConf) {
       debug(s"Sending message to akka.tcp://clasp@$masterip:2552/user/nodemanager")
       val manager = temp.actorFor(s"akka.tcp://clasp@$masterip:2552/user/nodemanager")
 
-      manager ! NodeManager.NodeUpdate(Node.NodeDescription(ip, None, Node.Status.Failed)) 
+      manager ! NodeManager.NodeUpdate(Node.NodeDescription(ip, None, Node.Status.Failed))
 
       debug("Waiting 10 seconds for the message to be delivered")
       Thread.sleep(10000)
@@ -266,14 +268,14 @@ class ClaspMaster(val conf: ClaspConf) {
     sdDir.mkdir()
   }
 
-  var manager = system.actorOf(Props(new NodeManager(conf)), name = "nodemanager")
+  val manager = system.actorOf(Props(new NodeManager(conf)), name = "nodemanager")
   info("Created NodeManager")
 
   val emanager = system.actorOf(Props(new EmulatorManager(manager)), name = "emulatormanager")
   info("Created EmulatorManager")
 
   val server = system.actorOf(Props(new WebSocketServer(manager, emanager)), "websocket")
-  IO(UHttp) ! Http.Bind(server, "0.0.0.0", port=8080)
+  IO(UHttp) ! Http.Bind(server, "0.0.0.0", port = 8080)
 
   // When a new emulator is ready to be used, the provided function will 
   // be transported to the node that emulator runs on and then executed

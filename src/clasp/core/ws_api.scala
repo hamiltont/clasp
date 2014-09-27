@@ -44,7 +44,9 @@ import akka.actor.ActorIdentity
  * then by {@link HttpApi} (for REST Api connections), and finally by the nodeJS
  * process that acts as a server for the web interface
  */
-class WebSocketServer(val nodemanager: ActorRef, val emulatormanager: ActorRef) extends Actor with ActorLogging {
+class WebSocketServer(val nodemanager: ActorRef, val emulatormanager: ActorRef) 
+  extends Actor 
+  with ActorLogging {
   var httpApi = context.system.actorOf(Props(new HttpApi(nodemanager, emulatormanager)), name = "httpApi")
   var chanManager = context.system.actorOf(Props(new WebSocketChannelManager(nodemanager)), name = "channelManager")
 
@@ -64,7 +66,8 @@ class WebSocketServer(val nodemanager: ActorRef, val emulatormanager: ActorRef) 
  * handles WebSockets and passes all other HTTP off to {@link HttpApi}
  */
 class WebSocketWorker(val serverConnection: ActorRef, val httpApi: ActorRef, val channelManager: ActorRef)
-  extends HttpServiceActor with WebSocketServerWorker {
+  extends HttpServiceActor
+  with WebSocketServerWorker {
 
   /**
    * Handshaking with auto-call businessLogic if this is a websocket request
@@ -77,7 +80,6 @@ class WebSocketWorker(val serverConnection: ActorRef, val httpApi: ActorRef, val
       requestInstance { request =>
         onComplete(httpApi.ask(request)(15.second).mapTo[HttpResponse]) {
           case Success(response) => {
-            log.debug(s"Received response of $response")
             complete(response)
           }
           case Failure(reason) => {
@@ -189,14 +191,6 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor with Acto
   // Tell nodemanager we are ready
   nodeManager ! ActorIdentity(WebSocketChannelManager, Some(self))
 
-  //      log.info(s"Before Terminated: $channels")
-  //    log.info(s"Before Terminated: $clients")
-  //    log.info(s"Before Terminated: $subscriptions")
-
-  //      log.info(s"Before Terminated: $channels")
-  //    log.info(s"Before Terminated: $clients")
-  //    log.info(s"Before Terminated: $subscriptions")
-
   def receive = {
     case RegisterChannel(name, owner) => {
       getChannel(name) match {
@@ -215,7 +209,6 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor with Acto
         }
       }
     }
-
     case Terminated(dead) => {
       getRole(dead) match {
         case Some(client: Client) => // Remove subscriptions

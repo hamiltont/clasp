@@ -39,11 +39,11 @@ object EmulatorManager {
   case class EmulatorReady(emu: EmulatorDescription)
   case class EmulatorFailedBoot(actor: ActorRef)
   case class EmulatorCrashed(emu: EmulatorDescription)
-  
+
   // Used to send commands to manager
   case class ListEmulators()
   case class GetEmulatorOptions(uuid: String)
-  
+
   // TODO move to task manager
   case class QueueEmulatorTask(function: Emulator => Map[String, Serializable], promise: Promise[Map[String, Serializable]])
   case class TaskSuccess(taskId: String, data: Map[String, Serializable], emulator: EmulatorDescription)
@@ -52,7 +52,7 @@ object EmulatorManager {
 class EmulatorManager(val nodeManager: ActorRef) extends Actor with ActorLifecycleLogging {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
- 
+
   val emulators = ListBuffer[EmulatorDescription]()
 
   // Tasks that have been delivered but not fulfilled
@@ -123,24 +123,23 @@ class EmulatorManager(val nodeManager: ActorRef) extends Actor with ActorLifecyc
   }
 }
 
-
 object EmulatorActor {
-  
+
   // Used to send commands to emulators
   case class EmulatorTask(taskid: String, task: Emulator => Map[String, Any])
   case class GetOptions(sendTo: ActorRef)
-  
+
   // Used to hold static reference to emulator
   // publicip - publically routable IP address intended for direct communication from clasp-external 
   // nodes, such as web browsers. This will commonly equal the master node's IP address, and the 
   // master node will act as a TCP proxy directly to the servers the emulator is running (mainly VNC) 
   case class EmulatorDescription(publicip: String, port: Int, vncPort: Int, wsVncPort: Int, actor: ActorRef, uuid: String)
-  
+
   // Used internally to update status
   case class BootSuccess()
   case class BootFailure()
   case class EmulatorHeartbeat()
-  
+
 }
 
 // An always-on presence for a single emulator process. 
@@ -190,9 +189,9 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   var websockifyProcess: Option[Process] = None
  
   var heartbeatSchedule: Cancellable = null
-  
+
   // Build sdcard, avd, and start emulator
-  var avd:avd = null
+  var avd: avd = null
   val buildTime = System.currentTimeMillis
   val process = build()
 
@@ -202,14 +201,14 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
     process.destroy
     process.exitValue // block until destroyed
     info(s"Halted emulator process")
-    
+
     if (!websockifyProcess.isEmpty) {
       info("Halting websockify")
       websockifyProcess.get.destroy
       websockifyProcess.get.exitValue
       info("Halted websockify")
     }
-    
+
     if (!x11vncProcess.isEmpty) {
       info("Halting x11vnc")
       x11vncProcess.get.destroy
@@ -217,26 +216,25 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
       info("Halted x11vnc")
     }
 
-    
     if (!XvfbProcess.isEmpty) {
       info("Halting Xvfb")
       XvfbProcess.get.destroy
       XvfbProcess.get.exitValue
       info("Halted Xvfb")
     }
-        
+
     info(s"Removing AVD")
     avd.delete
-    
+
     if (heartbeatSchedule != null)
       heartbeatSchedule.cancel
     else
-      debug("Heartbeat schedule was null")    
+      debug("Heartbeat schedule was null")
   }
 
   override def preStart() {
     super.preStart
-    
+
     implicit val system = context.system
     val boot = future {
       info(s"Waiting for emulator $this to come online")
@@ -248,7 +246,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   }
 
   def receive = {
-    case _ : EmulatorHeartbeat => {
+    case _: EmulatorHeartbeat => {
       // Executing a command on the emulator to ensure it's 
       // alive and responding
       debug(s"Sending heartbeat to $serialID.")
@@ -282,7 +280,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
       }
     }
     case GetOptions(sendTo) => sendTo ! opts
-    case _ : BootSuccess => {
+    case _: BootSuccess => {
       val bootTime = System.currentTimeMillis
       info(s"Emulator $consolePort is awake at $bootTime, took ${bootTime - buildTime}")
 
@@ -293,9 +291,9 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
       heartbeatSchedule = context.system.scheduler.schedule(0.seconds, 10.seconds, self, EmulatorHeartbeat())
 
       description = Some(EmulatorDescription(node.nodeip, consolePort, display_port, ws_display_port, self, uuid))
-      emanager ! EmulatorReady(description.get) 
+      emanager ! EmulatorReady(description.get)
     }
-    case _ : BootFailure => {
+    case _: BootFailure => {
       val failTime = System.currentTimeMillis
       info(s"Emulator $this failed to boot. Reported failure at $failTime");
       emanager ! EmulatorFailedBoot(self)
@@ -315,7 +313,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
     val avdName = s"$hostname-$consolePort"
     val target = opts.clasp.avdTarget getOrElse "android-18"
     val abi = opts.clasp.abiName getOrElse "x86"
-    
+
     info(s"Building AVD `$avdName` for ABI `$abi` target `$target`")
     // TODO we must lookup the eabi for the target or this will likely fail
 
@@ -334,10 +332,10 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
     if (opts.disk.sdcard.isDefined)
       // TODO: What should be done in this case?
       info("Warning: Overriding provided sdcard option.")
-    
+
     opts = opts.copy(disk = opts.disk.copy(sdcard = Some(sdcardName)))
     opts = opts.copy(debug = opts.debug.copy(verbose = Some(true)))
-    
+
     // Determine display type
     node.get_os_type match {
       case "linux" => {
@@ -347,40 +345,40 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
         if (xvfb && x11vnc) {
           debug(s"Found, will run emulator in graphical mode using DISPLAY=:$display_number")
           opts = opts.copy(ui = opts.ui.copy(noWindow = Some(false)))
-           
+
           // Start a virtual frame buffer
           val screen = avd.get_skin_dimensions
           val xvfbCommand = s"Xvfb :${display_number} -screen 0 ${screen}x16"
           val xvfbProcess = Process(xvfbCommand)
-          val xvfbLogger = ProcessLogger ( line => info(s"xvfb:${display_number}:out: $line"), 
-          		line => error(s"xvfb:${display_number}:err: $line") )
+          val xvfbLogger = ProcessLogger(line => info(s"xvfb:${display_number}:out: $line"),
+            line => error(s"xvfb:${display_number}:err: $line"))
           debug(s"Running Xvfb using: $xvfbCommand")
           val xvfb = xvfbProcess.run(xvfbLogger)
           XvfbProcess = Some(xvfb)
-          
+
           // Ensure Xvfb is started before being used
           Thread.sleep(850)
-          
+
           // Start a VNC server for the frame buffer
           val xvncCommand = s"x11vnc -display :${display_number} -nopw -listen 0.0.0.0 -forever -shared -rfbport $display_port -xkb"
           val xvncProcess = Process(xvncCommand)
-          val xvncLogger = ProcessLogger ( line => info(s"x11vnc:${display_number}:out: $line"), 
-          		line => error(s"x11vnc:${display_number}:err: $line") )
+          val xvncLogger = ProcessLogger(line => info(s"x11vnc:${display_number}:out: $line"),
+            line => error(s"x11vnc:${display_number}:err: $line"))
           debug(s"Running x11vnc using: $xvncCommand")
           val xvnc = xvncCommand.run(xvncLogger)
           x11vncProcess = Some(xvnc)
-          
+
           // Set the DISPLAY variable used when starting the emulator
           opts = opts.copy(clasp = opts.clasp.copy(displayNumber = Some(display_number)))
-          
+
           // Ensure x11vnc is started before being used
           Thread.sleep(850)
-          
+
           // Start a TCP<-->WebSocket proxy
           val webpCommand = s"./lib/noVNC/utils/websockify $ws_display_port 127.0.0.1:$display_port"
           val webpProcess = Process(webpCommand)
-          val webpLogger = ProcessLogger ( line => info(s"websockify:${display_number}:out: $line"), 
-          		line => error(s"websockify:${display_number}:err: $line") )
+          val webpLogger = ProcessLogger(line => info(s"websockify:${display_number}:out: $line"),
+            line => error(s"websockify:${display_number}:err: $line"))
           debug(s"Running websockify using: $webpCommand")
           val webp = webpCommand.run(webpLogger)
           websockifyProcess = Some(webp)
@@ -408,6 +406,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   override def toString():String = {
     return s"[Emulator, id: $uuid, serialId: $serialID, nodeId: $nodeId, consolePort: $consolePort, path: ${self.path}]"
   }
+}
 
 /**
  * Handles sending emulator output logs to console and to websocket channels
