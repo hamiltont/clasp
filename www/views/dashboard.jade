@@ -1,11 +1,21 @@
 extends layout
 
+//- Add tab-specific scoping
+append scriptOnReady
+  | clasp.dash = {};
+  | clasp.dash.summary = {};
+
+//- Enables fully-hidden table rows
+style(type='text/css')
+  | .accordianRow {
+  |     padding: 0 !important;
+  | }
 
 block content
   // Full width panel is the main container for the dashboard
   div.container-fluid: div.panel.panel-default
     div.panel-heading: h3.panel-title Clasp Dashboard   
-      span.small.pull-right Running 17 devices across 5 nodes
+      span.small.pull-right#runxacrossy: // Will be filled in by t-runxacrossy
     div.panel-body
       // Embedded tabbed interface
       ul.nav.nav-tabs(role="tablist")
@@ -41,98 +51,29 @@ block content
           div.panel.panel-default
             div.panel-heading: h3.panel-title Recently Updated Devices  
               span.small Click any row to get more information
-            table.table.table-condensed.table-hover
+            
+            table.table.table-condensed.table-hover#devicesummary 
+              //- Node rows will come from t-summarydevicerow
               tr
                 th.col-md-1 VNC
                 th.col-md-2 Worker Node
                 th.col-md-2 Update
                 th.col-md-2 Update Time
                 th.col-md-5 UUID
-              tr.accordion-toggle(data-toggle="collapse",data-target="#ndetails1")
-                td: button.btn.btn-xs.btn-primary: span.glyphicon.glyphicon-phone
-                td 10.0.0.2
-                td.Failed Crashed 
-                td 10 seconds ago
-                td 39513296-ef79-4311-8e92-3e6fcf13597c 
-              tr
-                td.accordianRow(colspan="5")
-                  div.accordion-body.collapse#ndetails1 Details for Node 1
-              tr.accordion-toggle(data-toggle="collapse",data-target="#ndetails1")
-                td: button.btn.btn-xs.btn-primary: span.glyphicon.glyphicon-phone
-                td 10.0.20.3
-                td.Failed Task Failed
-                td 12 seconds ago
-                td 591aeb1c-fd43-439e-aafa-0756d0cfb593 
-              tr
-                td.accordianRow(colspan="5")
-                  div.accordion-body.collapse#ndetails1 Details for Node 2
-              tr.accordion-toggle(data-toggle="collapse",data-target="#ndetails1")
-                td: button.btn.btn-xs.btn-primary: span.glyphicon.glyphicon-phone
-                td 127.0.0.1
-                td.Online Task Success
-                td 3 seconds ago
-                td 51459573-c743-4a82-a9a3-86eec3e9783e 
-              tr
-                td.accordianRow(colspan="5")
-                  div.accordion-body.collapse#ndetails1 Details for Node 1
-              tr.accordion-toggle(data-toggle="collapse",data-target="#ndetails1")
-                td: button.btn.btn-xs.btn-primary: span.glyphicon.glyphicon-phone
-                td 10.0.0.2
-                td.Offline Waiting For Task
-                td 6 seconds ago
-                td 82ae6ee8-196e-4b50-af8b-92cb3355a1e2 
-              tr
-                td.accordianRow(colspan="5")
-                  div.accordion-body.collapse#ndetails1 Details for Node 1
 
           // Node Summary
           //- Panel helps to visually separate node summary and emulator summary
           div.panel.panel-default
             div.panel-heading: h3.panel-title Recently Updated Workers   
               span.small Click any row to get more information
-            table.table.table-condensed.table-hover
+            table.table.table-condensed.table-hover#nodesummary
+              //- Node rows will come from t-summarynoderow
               tr
                 th.col-md-1 
                 th.col-md-2 IP
                 th.col-md-2 Status
                 th.col-md-2 Last Update
                 th.col-md-5 UUID
-              tr.accordion-toggle(data-toggle="collapse",data-target="#ndetails1")
-                td: button.btn.btn-xs.btn-info: span.glyphicon.glyphicon-cloud
-                td 10.0.0.2
-                td.Booting Booting
-                td 10 seconds ago
-                td eec0d2cd-ef51-430f-bfc6-fec7e61e8bf6
-              tr
-                td.accordianRow(colspan="5")
-                  div.accordion-body.collapse#ndetails1 Details for Node 1
-              tr.accordion-toggle(data-toggle="collapse",data-target="#ndetails2")
-                td: button.btn.btn-xs.btn-info: span.glyphicon.glyphicon-cloud
-                td 10.0.20.3
-                td.Failed Failed
-                td 1 minute ago
-                td 77a3bc41-0d02-40a4-b68d-339d6b9a0124 
-              tr
-                td.accordianRow(colspan="5")
-                  div.accordion-body.collapse#ndetails2 Details for Node 2
-              tr.accordion-toggle(data-toggle="collapse",data-target="#ndetails3")
-                td: button.btn.btn-xs.btn-info: span.glyphicon.glyphicon-cloud
-                td 127.0.0.1
-                td.Online Online
-                td 3 seconds ago
-                td 62577119-8421-405f-9741-3f8e795ecc83 
-              tr
-                td.accordianRow(colspan="5")
-                  div.accordion-body.collapse#ndetails3 Details for Node 3
-              tr.accordion-toggle(data-toggle="collapse",data-target="#ndetails4")
-                td: button.btn.btn-xs.btn-info: span.glyphicon.glyphicon-cloud
-                td 10.0.20.7
-                td.Offline Offline
-                td 30 seconds ago
-                td 7e0c0daf-b4c9-4330-9335-71ed38311155 
-              tr
-                td.accordianRow(colspan="5")
-                  div.accordion-body.collapse#ndetails4 Details for Node 4
         div.tab-pane#nodes: p Node stuff
         div.tab-pane#emulators: p device stuff
         div.tab-pane#settings: p settings stuff
@@ -140,14 +81,6 @@ block content
 
 
 append modals
-  div#controlModal.modal.hide.fade(tabindex='-1')
-    div(class="modal-header")
-      butten(type="button",class="close",data-dismiss="modal",
-        aria-hidden="true") &times
-      h3 Run Clasp.
-    div(class="modal-body",style='height: 300px')
-    div(class="modal-footer")
-      button(class="btn",data-dismiss="modal") Close
   div#shutdownModal.modal.fade(tabindex='-1')
     div.modal-dialog: div.modal-content
       div.modal-header
@@ -159,50 +92,98 @@ append modals
         button.btn.btn-success(data-dismiss="modal") Get Me Out of Here!
         button.btn.btn-danger(data-dismiss="modal",onclick="shutdown()") Shutdown
 
+
+//- -------------------------------------------------------
+//- 
+//-      Template definitions 
+//- 
+//- -------------------------------------------------------
+
+//- Top right - Running 5 devices across 10 nodes
 append templates
-  script(id='server-item',type='text/x-handlebars-template')
-    tr(id='worker-{{ ip }}')
-      td: {{ ip }}
-      td(class='{{status}}'): {{ status }}
-      td: {{ asOf }}
-  script(id='emulator-item',type='text/x-handlebars-template')
-    tr(id='emulator-{{ uuid }}')
-      td: {{ uuid }}
-      td: a(href='vnc?host={{ publicip }}&port={{ wsVncPort }}').
-          {{ publicip }}:{{ wsVncPort }}
-      td: {{ consolePort }}
-      td: {{ actorPath }}
-  script(id='modal-body',type='text/x-handlebars-template')
-    b Master:
-    | {{ server }}
-    {{#if clients}}
-    br
-    b Clients
-    ul
-      {{#each clients}}
-      li
-        label
-          | {{ clientName }}
-          input(type='checkbox',id='{{ clientName }}',checked)
-      {{/each}}
-    button(type='button',class='btn btn-primary',
-      onclick='run{{ name }}("{{ server }}"); return false;') Run
-    {{else}}
-    div.dropdown
-      a(class='dropdown-toggle',data-toggle='dropdown',href='#')
-        | Select a program
-        b.caret
-      ul(class='dropdown-menu',role='menu')
-        li: a(onclick='stageClaspMain("{{ server }}"); return false;',href='#').
-          Clasp Main
-        li: a(onclick='stageAntimalware("{{ server }}"); return false;',href='#').
-          Antimalware
-    {{/if}}
-
+  script(id='t-runxacrossy',type='text/x-handlebars-template')
+    | Running {{ emulators }} devices across {{ nodes }} nodes
 append compileTemplates
-  | templates.serverTmpl = Handlebars.compile($('#server-item').html());
-  | templates.modalTmpl = Handlebars.compile($('#modal-body').html());
-  | templates.emulatorTmpl = Handlebars.compile($('#emulator-item').html());
+  | templates.runxacrossy = Handlebars.compile($('#t-runxacrossy').html());
+append scriptOnReady
+  | setInterval(function() {
+  |   var target = $('#runxacrossy');
+  |   var context = {emulators: Math.floor((Math.random() * 20) + 1), nodes: "12"};
+  |   var html = templates.runxacrossy(context);
+  |   target.html(html);
+  | }, 2000);
 
+
+//- Summary node row
+append templates
+  script(id='t-summarynoderow',type='text/x-handlebars-template')
+    tr.accordion-toggle(data-toggle="collapse",data-target="#ndetails-{{ uuid }}")
+      td: button.btn.btn-xs.btn-info: span.glyphicon.glyphicon-cloud
+      td {{ ip }}
+      td(class="{{ update }}") {{ update }}
+      td {{ updateTime }}
+      td {{ uuid }}
+    tr
+      td.accordianRow(colspan="5")
+        div.accordion-body.collapse(id="ndetails-{{ uuid }}") Details for Node {{ uuid }}
+append compileTemplates
+  | templates.summarynoderow = Handlebars.compile($('#t-summarynoderow').html());
+append scriptOnReady
+  | clasp.dash.summary.add_node = function(context) {
+  |   var target = $('#nodesummary tr:last');
+  |   var html = templates.summarynoderow(context);
+  |   target.after(html);
+  | };
+  | 
+  | var nsummary1 = {ip: "10.0.0.2", update: "Booting", 
+  |                  updateTime: "10 seconds ago", uuid: "eec0d2cd-ef51-430f-bfc6-fec7e61e8bf6"};
+  | var nsummary2 = {ip: "10.0.20.3", update: "Failed", 
+  |                  updateTime: "1 minute ago", uuid: "77a3bc41-0d02-40a4-b68d-339d6b9a0124"};
+  | var nsummary3 = {ip: "127.0.0.1", update: "Online", 
+  |                  updateTime: "3 seconds ago", uuid: "62577119-8421-405f-9741-3f8e795ecc83"};
+  | var nsummary4 = {ip: "10.0.20.7", update: "Offline", 
+  |                  updateTime: "23 seconds ago", uuid: "7e0c0daf-b4c9-4330-9335-71ed38311155"};
+  | clasp.dash.summary.add_node(nsummary1);
+  | clasp.dash.summary.add_node(nsummary2);
+  | clasp.dash.summary.add_node(nsummary3);
+  | clasp.dash.summary.add_node(nsummary4);
+  
+  
+  
+//- Summary device row
+append templates
+  script(id='t-summarydevicerow',type='text/x-handlebars-template')
+    tr.accordion-toggle(data-toggle="collapse",data-target="#dev-details-{{ uuid }}")
+      td: button.btn.btn-xs.btn-primary: span.glyphicon.glyphicon-phone
+      td {{ ip }}
+      td {{ update }}
+      td {{ updateTime }}
+      td {{ uuid }}
+    tr
+      td.accordianRow(colspan="5")
+        div.accordion-body.collapse(id="dev-details-{{ uuid }}") Details for Device {{ uuid }}
+append compileTemplates
+  | templates.summarydevicerow = Handlebars.compile($('#t-summarydevicerow').html());
+append scriptOnReady
+  | clasp.dash.summary.add_device = function(context) {
+  |   var target = $('#devicesummary tr:last');
+  |   var html = templates.summarydevicerow(context);
+  |   target.after(html);
+  | };
+  | var dsummary1 = {ip: "10.0.0.2", update: "Crashed", 
+  |                  updateTime: "10 seconds ago", uuid: "39513296-ef79-4311-8e92-3e6fcf13597c"};
+  | var dsummary2 = {ip: "10.0.20.3", update: "Task Failed", 
+  |                  updateTime: "1 minute ago", uuid: "591aeb1c-fd43-439e-aafa-0756d0cfb593"};
+  | var dsummary3 = {ip: "127.0.0.1", update: "Task Success", 
+  |                  updateTime: "22 seconds ago", uuid: "51459573-c743-4a82-a9a3-86eec3e9783e"};
+  | var dsummary4 = {ip: "10.0.20.7", update: "Waiting For Task", 
+  |                  updateTime: "23 seconds ago", uuid: "82ae6ee8-196e-4b50-af8b-92cb3355a1e2"};
+  | clasp.dash.summary.add_device(dsummary1);
+  | clasp.dash.summary.add_device(dsummary2);
+  | clasp.dash.summary.add_device(dsummary3);
+  | clasp.dash.summary.add_device(dsummary4);
+
+//- Used in header.jade to mark current page active
 block activePageBlock
   -var activePage = 'dashboard'
+

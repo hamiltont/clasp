@@ -36,7 +36,13 @@ html(lang="en")
       script(src='/scripts/bootstrap.min.js')
       script(src='/scripts/handlebars.min.js')
       | <script type='text/javascript'>
+      //- Global variables for adding top-level data and functions
+      //- Note all pages can (potentially) share the DOM, so it's 
+      //- important to use these (and even scope further e.g. 
+      //- clasp.pageName.myVar) to avoid conflicts
+      //- Also, it makes it hella easy to find clasp-specific stuff
       | var templates = {};
+      | var clasp = {};
       | $(document).ready(function() {
       |   console.log('Compiling Handlebars templates');
       //- Compile Handlebar templates once the DOM is finished
@@ -47,8 +53,17 @@ html(lang="en")
       //- Tip: Avoid declaring extra vars, you might conflict
       block compileTemplates
       //-
-      //- Convenience block for running a script when the DOM is 
-      //- ready
+      //- Convenience block for running a script when the DOM is ready
+      //- 
+      //- Use functions to scope variable names. Perferrably use 
+      //- anonymous functions to even avoid function variable name
+      //- conflicts. For example: 
+      //-   | (function() {
+      //-   |  var target = $('#runxacrossy');
+      //-   |   var context = {emulators: Math.floor((Math.random() * 20) + 1), nodes: "12"};
+      //-   |   var html = templates.runxacrossy(context);
+      //-   |   target.html(html);
+      //-   | })();
       block scriptOnReady
       | });
       | </script>
