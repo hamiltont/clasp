@@ -32,9 +32,6 @@ html(lang="en")
     //- You can append to block scriptOnReady in this case
     //- Append to this if you have page-specific JS
     block externalScripts
-      script(src='http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js ' type='text/javascript')
-      script(src='/scripts/bootstrap.min.js')
-      script(src='/scripts/handlebars.min.js')
       | <script type='text/javascript'>
       //- Global variables for adding top-level data and functions
       //- Note all pages can (potentially) share the DOM, so it's 
@@ -43,29 +40,39 @@ html(lang="en")
       //- Also, it makes it hella easy to find clasp-specific stuff
       | var templates = {};
       | var clasp = {};
-      | $(document).ready(function() {
-      |   console.log('Compiling Handlebars templates');
-      //- Compile Handlebar templates once the DOM is finished
-      //- You need to define them like this:
-      //- append templateCompile
-      //-   | templates.foobar = Handlebars.compile(...);
-      //- 
-      //- Tip: Avoid declaring extra vars, you might conflict
-      block compileTemplates
-      //-
-      //- Convenience block for running a script when the DOM is ready
-      //- 
-      //- Use functions to scope variable names. Perferrably use 
-      //- anonymous functions to even avoid function variable name
-      //- conflicts. For example: 
-      //-   | (function() {
-      //-   |  var target = $('#runxacrossy');
-      //-   |   var context = {emulators: Math.floor((Math.random() * 20) + 1), nodes: "12"};
-      //-   |   var html = templates.runxacrossy(context);
-      //-   |   target.html(html);
-      //-   | })();
-      block scriptOnReady
-      | });
+      | clasp.dash = {};
+      | clasp.dash.summary = {};
+      | clasp.dash.vnc = {};
       | </script>
+      script(src='http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js ' type='text/javascript')
+      script(src='/scripts/bootstrap.min.js')
+      script(src='/scripts/handlebars.min.js')
       script(src='http://cdn.sockjs.org/websocket-multiplex-0.1.js')
       
+    //- Javascript to run after the document is fully ready
+    | <script type='text/javascript'>
+    | $(document).ready(function() {
+    |   console.log('Compiling Handlebars templates');
+    //- Compile Handlebar templates once the DOM is finished
+    //- You need to define them like this:
+    //- append templateCompile
+    //-   | templates.foobar = Handlebars.compile(...);
+    //- 
+    //- Tip: Avoid declaring extra vars, you might conflict
+    block compileTemplates
+    //-
+    //- Convenience block for running a script when the DOM is ready
+    //- 
+    //- Use functions to scope variable names. Perferrably use 
+    //- anonymous functions to even avoid function variable name
+    //- conflicts. For example: 
+    //-   | (function() {
+    //-   |  var target = $('#runxacrossy');
+    //-   |   var context = {emulators: Math.floor((Math.random() * 20) + 1), nodes: "12"};
+    //-   |   var html = templates.runxacrossy(context);
+    //-   |   target.html(html);
+    //-   | })();
+    block scriptOnReady
+    | });
+    | </script>
+

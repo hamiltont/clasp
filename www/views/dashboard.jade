@@ -1,9 +1,8 @@
 extends layout
-
-//- Add tab-specific scoping
-append scriptOnReady
-  | clasp.dash = {};
-  | clasp.dash.summary = {};
+  
+append externalScripts
+  script(src='/scripts/noVNC/util.js')
+  script(src='/scripts/vnc.js')
 
 //- Enables fully-hidden table rows
 style(type='text/css')
@@ -68,22 +67,7 @@ block content
                 th.col-md-2 Last Update
                 th.col-md-5 UUID
         div.tab-pane#nodes: p Node stuff
-        div.tab-pane#emulators
-          div.row(style="margin-top: 20px")
-            // TODO Hide side margins on small screens
-            div.col-sm-5(style="background: blue; margin-left: 10px; margin-right: 10px")
-              canvas#noVNC_canvas(style="width:600px; height:800px")
-            div.col-sm-1: div.btn-group-vertical
-              button.btn.btn-default: span.glyphicon.glyphicon-home
-              button.btn.btn-default: span.glyphicon.glyphicon-circle-arrow-left
-              button.btn.btn-default: span.glyphicon.glyphicon-volume-down
-              button.btn.btn-default: span.glyphicon.glyphicon-volume-up
-              button.btn.btn-default: span.glyphicon.glyphicon-off
-              button.btn.btn-default: span.glyphicon.glyphicon-zoom-out
-              button.btn.btn-default: span.glyphicon.glyphicon-zoom-in
-          div.row(style="margin-top: 20px")
-            div.col-sm-12.pre-scrollable.well
-              | This is where the emulator logs can be output  
+        div.tab-pane#emulators: p Emulator stuff
         div.tab-pane#settings: p settings stuff
         div.tab-pane#metrics: p metrics stuff
         //- Control panes added here by t-devicetabpane
@@ -251,8 +235,8 @@ append templates
       p Welcome to device {{ uuid }}
       div.row(style="margin-top: 20px")
         // TODO Hide side margins on small screens
-        div.col-sm-5(style="background: blue; margin-left: 10px; margin-right: 10px")
-          canvas#noVNC_canvas(style="width:600px; height:800px")
+        div.col-sm-5(style="margin-left: 10px; margin-right: 10px")
+          canvas#noVNC_canvas1
         div.col-sm-1: div.btn-group-vertical
           button.btn.btn-default: span.glyphicon.glyphicon-home
           button.btn.btn-default: span.glyphicon.glyphicon-circle-arrow-left
