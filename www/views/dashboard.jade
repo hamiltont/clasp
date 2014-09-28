@@ -1,9 +1,29 @@
 extends layout
 
-block activePageBlock
-  -var activePage = 'dashboard'
 
 block content
+
+append modals
+  div#controlModal.modal.hide.fade(tabindex='-1')
+    div(class="modal-header")
+      butten(type="button",class="close",data-dismiss="modal",
+        aria-hidden="true") &times
+      h3 Run Clasp.
+    div(class="modal-body",style='height: 300px')
+    div(class="modal-footer")
+      button(class="btn",data-dismiss="modal") Close
+  div#shutdownModal.modal.fade(tabindex='-1')
+    div.modal-dialog: div.modal-content
+      div.modal-header
+        button.close(type="button",data-dismiss="modal") &times
+        h4.modal-title Are You Sure?
+      div.modal-body
+        p.text-danger This will shut down all devices, all worker nodes, and this website
+      div.modal-footer
+        button.btn.btn-success(data-dismiss="modal") Get Me Out of Here!
+        button.btn.btn-danger(data-dismiss="modal",onclick="shutdown()") Shutdown
+
+append templates
   script(id='server-item',type='text/x-handlebars-template')
     tr(id='worker-{{ ip }}')
       td: {{ ip }}
@@ -42,42 +62,11 @@ block content
         li: a(onclick='stageAntimalware("{{ server }}"); return false;',href='#').
           Antimalware
     {{/if}}
-  script(type='text/javascript')
-    | var serverTmpl = Handlebars.compile($('#server-item').html())
-    | var modalTmpl = Handlebars.compile($('#modal-body').html())
-    | var emulatorTmpl = Handlebars.compile($('#emulator-item').html())
-  div.container
-    h1 Clasp Dashboard
-    ul
-      li
-        a(href="#shutdownModal",onclick='shutdown(); return false;',data-keyboard="true",data-toggle="modal") Shutdown
-        |  | 
-        a(onclick='refreshEmulatorList(); return false;',href='#') Refresh Emulator List
-    div(id='server-table')
-    div(id='emulator-table')
-  script(type='text/javascript').
-    Handlebars.registerHelper('ifOn', function(v1, options) {
-      if (v1 === 'Yes') {
-        return options.fn(this);
-      } else {
-        return options.inverse(this);
-      }
-    });
-  div(id="controlModal",class="modal hide fade",tabindex='-1')
-    div(class="modal-header")
-      butten(type="button",class="close",data-dismiss="modal",
-        aria-hidden="true") &times
-      h3 Run Clasp.
-    div(class="modal-body",style='height: 300px')
-    div(class="modal-footer")
-      button(class="btn",data-dismiss="modal") Close
-  div(id="shutdownModal",class="modal hide fade",tabindex='-1')
-    div(class="modal-header")
-      butten(type="button",class="close",data-dismiss="modal",
-        aria-hidden="true") &times
-      h3 Shutdown Warning
-    div(class="modal-body")
-      p.red This website will stop working shortly. It typically takes 10-15 seconds for the system to finish shutting down
-    div(class="modal-footer")
-      button(class="btn",data-dismiss="modal") Close
 
+append compileTemplates
+  | templates.serverTmpl = Handlebars.compile($('#server-item').html());
+  | templates.modalTmpl = Handlebars.compile($('#modal-body').html());
+  | templates.emulatorTmpl = Handlebars.compile($('#emulator-item').html());
+
+block activePageBlock
+  -var activePage = 'dashboard'
