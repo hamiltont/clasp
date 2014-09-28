@@ -18,7 +18,7 @@ block content
       span.small.pull-right#runxacrossy: // Will be filled in by t-runxacrossy
     div.panel-body
       // Embedded tabbed interface
-      ul.nav.nav-tabs(role="tablist")
+      ul.nav.nav-tabs(role="tablist")#navtabs
         li.active: a(href="#summary",role="tab",data-toggle="tab") Summary
         li: a(href="#nodes",role="tab",data-toggle="tab") Nodes
         li: a(href="#emulators",role="tab",data-toggle="tab") Emulators
@@ -30,21 +30,14 @@ block content
             li: a(href="#settings",role="tab",data-toggle="tab") Settings
             li: a(href="#refresh",role="tab",data-toggle="tab") Force Refresh
             li: a(href="#shutdownModal",data-toggle="modal",data-keyboard="true") Shutdown
-        // Open Device Control Panels
-        li: a.btn.btn-primary(href="#phone1",role="tab",data-toggle="tab")
-          span.glyphicon.glyphicon-phone 
-        li: a.btn.btn-primary(href="#phone2",role="tab",data-toggle="tab")
-          span.glyphicon.glyphicon-phone 
-        li: a.btn.btn-primary(href="#phone3",role="tab",data-toggle="tab")
-          span.glyphicon.glyphicon-phone 
-        // Open Node Control Panels
-        li: a.btn.btn-info(href="#node1",role="tab",data-toggle="tab")
-          span.glyphicon.glyphicon-cloud
-        li: a.btn.btn-info(href="#node2",role="tab",data-toggle="tab")
-          span.glyphicon.glyphicon-cloud 
+        //- This empty tab is important - otherwise the last li inside #navtabs is 
+        //- the one buried inside the dropdown, and device panels will be appended inside
+        //- the dropdown
+        li.disabled 
+        //- Control panels added here by t-devicetab
 
       // Tab Panes
-      div.tab-content
+      div.tab-content#navcontent
         div.tab-pane.active#summary
           // Emulator Summary Next
           //- Panel helps to visually separate node summary and emulator summary
@@ -75,10 +68,31 @@ block content
                 th.col-md-2 Last Update
                 th.col-md-5 UUID
         div.tab-pane#nodes: p Node stuff
-        div.tab-pane#emulators: p device stuff
+        div.tab-pane#emulators
+          div.row(style="margin-top: 20px")
+            // TODO Hide side margins on small screens
+            div.col-sm-5(style="background: blue; margin-left: 10px; margin-right: 10px")
+              canvas#noVNC_canvas(style="width:600px; height:800px")
+            div.col-sm-1: div.btn-group-vertical
+              button.btn.btn-default: span.glyphicon.glyphicon-home
+              button.btn.btn-default: span.glyphicon.glyphicon-circle-arrow-left
+              button.btn.btn-default: span.glyphicon.glyphicon-volume-down
+              button.btn.btn-default: span.glyphicon.glyphicon-volume-up
+              button.btn.btn-default: span.glyphicon.glyphicon-off
+              button.btn.btn-default: span.glyphicon.glyphicon-zoom-out
+              button.btn.btn-default: span.glyphicon.glyphicon-zoom-in
+          div.row(style="margin-top: 20px")
+            div.col-sm-12.pre-scrollable.well
+              | This is where the emulator logs can be output  
         div.tab-pane#settings: p settings stuff
         div.tab-pane#metrics: p metrics stuff
+        //- Control panes added here by t-devicetabpane
 
+//- -------------------------------------------------------
+//- 
+//-      Modals for dashboard
+//- 
+//- -------------------------------------------------------
 
 append modals
   div#shutdownModal.modal.fade(tabindex='-1')
@@ -91,6 +105,49 @@ append modals
       div.modal-footer
         button.btn.btn-success(data-dismiss="modal") Get Me Out of Here!
         button.btn.btn-danger(data-dismiss="modal",onclick="shutdown()") Shutdown
+
+//- -------------------------------------------------------
+//- 
+//-      Useful javascript for dashboard
+//- 
+//- -------------------------------------------------------
+
+append scriptOnReady
+  | clasp.dash.change_tab = function(tabid) {
+  |   // A bit pointless at the moment, but we may eventually 
+  |   // want to modify the open websocket connections based on
+  |   // the users current tab
+  |   $('#navtabs a[href="' + tabid + '"]').tab('show');
+  | };
+  | 
+  | // Track meta key to support cmd+click
+  | clasp.metaPressed = false;
+  | clasp._metaKeyCode = -1;
+  | $(document).keydown(function(e) {
+  |   if (e.metaKey || e.ctrlKey) {
+  |     clasp.metaPressed = true;
+  |     clasp._metaKeyCode = e.keyCode;
+  |   }
+  | });
+  | $(document).keyup(function(e) {
+  |   if (clasp.metaPressed && e.keyCode == clasp._metaKeyCode) {
+  |     clasp.metaPressed = false;
+  |   }
+  | });
+  | 
+  | // From http://stackoverflow.com/a/11054415/119592
+  | // Extend jquery with flashing for elements
+  | $.fn.flash = function(duration, iterations) {
+  |     console.log('Flashing');
+  |     duration = duration || 1000; 
+  |     iterations = iterations || 1; 
+  |     var iterationDuration = Math.floor(duration / iterations);
+  | 
+  |     for (var i = 0; i < iterations; i++) {
+  |         this.fadeOut(iterationDuration).fadeIn(iterationDuration);
+  |     }
+  |     return this;
+  | }
 
 
 //- -------------------------------------------------------
@@ -118,7 +175,8 @@ append scriptOnReady
 append templates
   script(id='t-summarynoderow',type='text/x-handlebars-template')
     tr.accordion-toggle(data-toggle="collapse",data-target="#ndetails-{{ uuid }}")
-      td: button.btn.btn-xs.btn-info: span.glyphicon.glyphicon-cloud
+      td: button.btn.btn-xs.btn-info(onclick='clasp.dash.add_node_tab("{{ uuid }}")')
+        span.glyphicon.glyphicon-cloud
       td {{ ip }}
       td(class="{{ update }}") {{ update }}
       td {{ updateTime }}
@@ -148,13 +206,13 @@ append scriptOnReady
   | clasp.dash.summary.add_node(nsummary3);
   | clasp.dash.summary.add_node(nsummary4);
   
-  
-  
+
 //- Summary device row
 append templates
   script(id='t-summarydevicerow',type='text/x-handlebars-template')
     tr.accordion-toggle(data-toggle="collapse",data-target="#dev-details-{{ uuid }}")
-      td: button.btn.btn-xs.btn-primary: span.glyphicon.glyphicon-phone
+      td: button.btn.btn-xs.btn-primary(onclick='clasp.dash.add_device_tab("{{ uuid }}")')
+        span.glyphicon.glyphicon-phone
       td {{ ip }}
       td {{ update }}
       td {{ updateTime }}
@@ -182,6 +240,88 @@ append scriptOnReady
   | clasp.dash.summary.add_device(dsummary2);
   | clasp.dash.summary.add_device(dsummary3);
   | clasp.dash.summary.add_device(dsummary4);
+
+//- Adds new device tab button and page
+append templates
+  script(id='t-devicetab',type='text/x-handlebars-template')
+    li: a.btn.btn-primary(href="#devicetab-{{ uuid }}",role="tab",data-toggle="tab")
+      span.glyphicon.glyphicon-phone 
+  script(id='t-devicetabpane',type='text/x-handlebars-template')
+    div.tab-pane(id="devicetab-{{ uuid }}")
+      p Welcome to device {{ uuid }}
+      div.row(style="margin-top: 20px")
+        // TODO Hide side margins on small screens
+        div.col-sm-5(style="background: blue; margin-left: 10px; margin-right: 10px")
+          canvas#noVNC_canvas(style="width:600px; height:800px")
+        div.col-sm-1: div.btn-group-vertical
+          button.btn.btn-default: span.glyphicon.glyphicon-home
+          button.btn.btn-default: span.glyphicon.glyphicon-circle-arrow-left
+          button.btn.btn-default: span.glyphicon.glyphicon-volume-down
+          button.btn.btn-default: span.glyphicon.glyphicon-volume-up
+          button.btn.btn-default: span.glyphicon.glyphicon-off
+          button.btn.btn-default: span.glyphicon.glyphicon-zoom-out
+          button.btn.btn-default: span.glyphicon.glyphicon-zoom-in
+      div.row(style="margin-top: 20px")
+        div.col-sm-12.pre-scrollable.well
+          | This is where the emulator logs can be output  
+append compileTemplates
+  | templates.devicetab = Handlebars.compile($('#t-devicetab').html());
+  | templates.devicetabpane = Handlebars.compile($('#t-devicetabpane').html());
+append scriptOnReady
+  | clasp.dash.add_device_tab = function(dev_uuid) {
+  |   // Ensure we don't add twice
+  |   if ($('#devicetab-'+dev_uuid).length != 0) {
+  |     console.log('Refusing to create second tab for device ' + dev_uuid);
+  |     $('#navtabs a[href="#devicetab-' + dev_uuid + '"]').flash(120,2)
+  |     return;
+  |   }
+  | 
+  |   // Add new tab button
+  |   var lastTab = $('#navtabs li:last');
+  |   lastTab.after(templates.devicetab({uuid: dev_uuid}));
+  |   
+  |   // Add new tab content
+  |   var target = $('#navcontent div.tab-pane:last');
+  |   var html = templates.devicetabpane({uuid: dev_uuid});
+  |   target.after(html);
+  |   
+  |   if (!clasp.metaPressed)
+  |     clasp.dash.change_tab('#devicetab-'+dev_uuid);
+  | };
+
+
+//- Adds new node tab button and page
+append templates
+  script(id='t-nodetab',type='text/x-handlebars-template')
+    li: a.btn.btn-info(href="#nodetab-{{ uuid }}",role="tab",data-toggle="tab")
+      span.glyphicon.glyphicon-cloud 
+  script(id='t-nodetabpane',type='text/x-handlebars-template')
+    div.tab-pane(id="nodetab-{{ uuid }}")
+      p Welcome to node {{ uuid }}
+append compileTemplates
+  | templates.nodetab = Handlebars.compile($('#t-nodetab').html());
+  | templates.nodetabpane = Handlebars.compile($('#t-nodetabpane').html());
+append scriptOnReady
+  | clasp.dash.add_node_tab = function(node_uuid) {
+  |   // Ensure we don't add twice
+  |   if ($('#nodetab-'+node_uuid).length != 0) {
+  |     console.log('Refusing to create second tab for node ' + node_uuid);
+  |     $('#navtabs a[href="#nodetab-' + node_uuid + '"]').flash(120,2)
+  |     return;
+  |   }
+  | 
+  |   // Add new tab button
+  |   var lastTab = $('#navtabs li:last');
+  |   lastTab.after(templates.nodetab({uuid: node_uuid}));
+  |   
+  |   // Add new tab content
+  |   var target = $('#navcontent div.tab-pane:last');
+  |   var html = templates.nodetabpane({uuid: node_uuid});
+  |   target.after(html);
+  |   
+  |   if (!clasp.metaPressed)
+  |     clasp.dash.change_tab('#nodetab-'+node_uuid);
+  | };
 
 //- Used in header.jade to mark current page active
 block activePageBlock
