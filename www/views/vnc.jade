@@ -1,7 +1,15 @@
 extends layout
 
 block activePageBlock
-  -var activePage = 'home'
+  -var activePage = 'vnc'
+
+append templates
+  script(type='text/x-handlebars-template', id='salesTax-template')
+    h1 Sales Tax
+    p: {{test}}
+
+append compileTemplates
+  | templates.salesTemplate = Handlebars.compile($("#salesTax-template").html());
 
 block content
   div.container
