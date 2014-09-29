@@ -240,17 +240,23 @@ append templates
     div.tab-pane(id="devicetab-{{ uuid }}")
       p Welcome to device {{ uuid }}
       div.row(style="margin-top: 20px")
+        style
+          | div.toolbar button:first-child, div.toolbar button:last-child {
+          |   border-radius: 0;
+          | }
+        div.col-sm-1(style="padding-right: 0 !important;"): div.btn-group.toolbar
+          button.btn.btn-default.pull-right: span.glyphicon.glyphicon-home
+          button.btn.btn-default.pull-right: span.glyphicon.glyphicon-circle-arrow-left
+          button.btn.btn-default.pull-right: span.glyphicon.glyphicon-volume-down
+          button.btn.btn-default.pull-right: span.glyphicon.glyphicon-volume-up
+          button.btn.btn-default.pull-right: span.glyphicon.glyphicon-camera 
+          button.btn.btn-default.pull-right: span.glyphicon.glyphicon-off
+          button.btn.btn-default.pull-right: span.glyphicon.glyphicon-retweet
+          button.btn.btn-default.pull-right: span.glyphicon.glyphicon-zoom-out
+          button.btn.btn-default.pull-right: span.glyphicon.glyphicon-zoom-in
         // TODO Hide side margins on small screens
         div.col-sm-5(style="margin-left: 10px; margin-right: 10px")
           canvas(id="devicecanvas-{{ uuid }}")
-        div.col-sm-1: div.btn-group
-          button.btn.btn-default: span.glyphicon.glyphicon-home
-          button.btn.btn-default: span.glyphicon.glyphicon-circle-arrow-left
-          button.btn.btn-default: span.glyphicon.glyphicon-volume-down
-          button.btn.btn-default: span.glyphicon.glyphicon-volume-up
-          button.btn.btn-default: span.glyphicon.glyphicon-off
-          button.btn.btn-default: span.glyphicon.glyphicon-zoom-out
-          button.btn.btn-default: span.glyphicon.glyphicon-zoom-in
       div.row(style="margin-top: 20px")
         div.col-sm-12.pre-scrollable.well
           | This is where the emulator logs can be output  
@@ -279,6 +285,15 @@ append scriptOnReady
   |   var target = $('#navcontent div.tab-pane:last');
   |   var html = templates.devicetabpane({uuid: uuid});
   |   target.after(html);
+  | 
+  |   // Wire Buttons
+  |   var buttonFunctions = ["rfbPressHome", "rfbPressEsc", "rfbPressVolumeDown", "rfbPressVolumeUp",
+  |                          "rfbPressCamera", "rfbPressPower", "rfbPressOrientation", "rfbScaleDown",
+  |                          "rfbScaleUp"];
+  |   toolbar.each(function(i) {
+  |     var f = buttonFunctions[i] + '(clasp.dash.vnc["' + uuid + '"]);';
+  |     $(this).attr("onclick",f);
+  |   });
   | 
   |   // Create RFB for new tab
   |   var rfb = clasp.dash.vnc.setup(context.host, context.port, 'devicecanvas-' + uuid);

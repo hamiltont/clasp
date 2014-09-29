@@ -20,6 +20,15 @@ clasp.dash.vnc.setup = function (host, port, target) {
   var password = '', path='websockify';
   rfb.connect(host, port, password, path);
   
+  var target = rfb.get_target();
+  
+  // Scale a bit better than noVNC does naturally by relying on CSS
+  
+  // rfb.get_display().set_scale(0.5);
+  rfb.get_mouse().set_scale(0.5);
+  $(target).css( "transform", 'scale(0.5)'); // Remove translate option
+  $(target).css( "transform-origin", 'top left' );
+          
   return rfb;
 };
 
@@ -27,51 +36,52 @@ clasp.dash.vnc.setup = function (host, port, target) {
 // These are probably dependant on my mac keyboard, not sure how to 
 // map to others at the moment
 // See http://developer.android.com/tools/help/emulator.html
-function rfbPressEsc() {
-  rfbPressKey(27);
+function rfbPressEsc(rfb) {
+  rfb.sendKey(27);
 }
-function rfbPressHome() {
-  rfbPressKey(65360);
+function rfbPressHome(rfb) {
+  rfb.sendKey(65360);
 }
-function rfbPressMenu() {
-  rfbPressKey(65471);
+function rfbPressMenu(rfb) {
+  rfb.sendKey(65471);
 }
-function rfbPressPower() {
-  rfbPressKey(65476);
+function rfbPressPower(rfb) {
+  rfb.sendKey(65476);
 }
-function rfbPressKey(key) {
-  rfb.sendKey(key);
-}
-
-
-function rfbPressCamera() {
+function rfbPressCamera(rfb) {
   // control + Keypad 5
   rfb._handleKeyPress( 0xFFE3 , true);
   rfb._handleKeyPress( 65461  , true);
   rfb._handleKeyPress( 65461  , false);
   rfb._handleKeyPress( 0xFFE3 , false);
 }
-function rfbPressVolumeUp() {
+function rfbPressOrientation(rfb) {
+  rfb._handleKeyPress( 0xFFE3 , true);
+  rfb._handleKeyPress( 65481  , true);
+  rfb._handleKeyPress( 65481  , false);
+  rfb._handleKeyPress( 0xFFE3 , false);
+}
+function rfbPressVolumeUp(rfb) {
   // control + F5
   rfb._handleKeyPress( 0xFFE3 , true);
   rfb._handleKeyPress( 65474  , true);
   rfb._handleKeyPress( 65474  , false);
   rfb._handleKeyPress( 0xFFE3 , false);
 }
-function rfbPressOrientation() {
-  rfb._handleKeyPress( 0xFFE3 , true);
-  rfb._handleKeyPress( 65481  , true);
-  rfb._handleKeyPress( 65481  , false);
-  rfb._handleKeyPress( 0xFFE3 , false);
-}
-function rfbPressVolumeDown() {
+function rfbPressVolumeDown(rfb) {
   // control + F6
   rfb._handleKeyPress( 0xFFE3 , true);
   rfb._handleKeyPress( 65475  , true);
   rfb._handleKeyPress( 65475  , false);
   rfb._handleKeyPress( 0xFFE3 , false);
 }
-function vncUpdateScale(amount) {
+function rfbScaleDown(rfb) {
+  vncUpdateScale(rfb, -0.05);
+}
+function rfbScaleUp(rfb) {
+  vncUpdateScale(rfb, 0.05);
+}
+function vncUpdateScale(rfb, amount) {
   var origscale = rfb.get_display()._scale;
   var origx = rfb.get_display().absX(0);
   var origy = rfb.get_display().absY(0);
