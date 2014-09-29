@@ -195,7 +195,7 @@ append scriptOnReady
 append templates
   script(id='t-summarydevicerow',type='text/x-handlebars-template')
     tr.accordion-toggle(data-toggle="collapse",data-target="#dev-details-{{ uuid }}")
-      td: button.btn.btn-xs.btn-primary(onclick='clasp.dash.add_device_tab("{{ uuid }}")')
+      td: button.btn.btn-xs.btn-primary(onclick='clasp.dash.add_device_tab({uuid: "{{ uuid }}"})')
         span.glyphicon.glyphicon-phone
       td {{ ip }}
       td {{ update }}
@@ -238,8 +238,8 @@ append templates
       div.row(style="margin-top: 20px")
         // TODO Hide side margins on small screens
         div.col-sm-5(style="margin-left: 10px; margin-right: 10px")
-          canvas#noVNC_canvas1
-        div.col-sm-1: div.btn-group-vertical
+          canvas(id="devicecanvas-{{ uuid }}")
+        div.col-sm-1: div.btn-group
           button.btn.btn-default: span.glyphicon.glyphicon-home
           button.btn.btn-default: span.glyphicon.glyphicon-circle-arrow-left
           button.btn.btn-default: span.glyphicon.glyphicon-volume-down
@@ -254,27 +254,35 @@ append compileTemplates
   | templates.devicetab = Handlebars.compile($('#t-devicetab').html());
   | templates.devicetabpane = Handlebars.compile($('#t-devicetabpane').html());
 append scriptOnReady
-  | clasp.dash.add_device_tab = function(dev_uuid) {
+  | clasp.dash.add_device_tab = function(context) {
+  |   if (context.uuid === undefined) context.uuid = 'none'; var uuid = context.uuid;
+  |   if (context.host === undefined) context.host = 'localhost';
+  |   if (context.port === undefined) context.port = '6080';
+  |   console.log('Built context ' + context);
+  | 
   |   // Ensure we don't add twice
-  |   if ($('#devicetab-'+dev_uuid).length != 0) {
-  |     console.log('Refusing to create second tab for device ' + dev_uuid);
-  |     $('#navtabs a[href="#devicetab-' + dev_uuid + '"]').flash(120,2)
+  |   if ($('#devicetab-' + uuid).length != 0) {
+  |     console.log('Refusing to create second tab for device ' + uuid);
+  |     $('#navtabs a[href="#devicetab-' + uuid + '"]').flash(120,2)
   |     return;
   |   }
   | 
   |   // Add new tab button
   |   var lastTab = $('#navtabs li:last');
-  |   lastTab.after(templates.devicetab({uuid: dev_uuid}));
+  |   lastTab.after(templates.devicetab({uuid: uuid}));
   |   
   |   // Add new tab content
   |   var target = $('#navcontent div.tab-pane:last');
-  |   var html = templates.devicetabpane({uuid: dev_uuid});
+  |   var html = templates.devicetabpane({uuid: uuid});
   |   target.after(html);
+  | 
+  |   // Create RFB for new tab
+  |   var rfb = clasp.dash.vnc.setup(context.host, context.port, 'devicecanvas-' + uuid);
+  |   clasp.dash.vnc[uuid] = rfb;
   |   
   |   if (!clasp.metaPressed)
-  |     clasp.dash.change_tab('#devicetab-'+dev_uuid);
+  |     clasp.dash.change_tab('#devicetab-'+uuid);
   | };
-
 
 //- Adds new node tab button and page
 append templates
