@@ -3,14 +3,14 @@ extends layout
 append externalScripts
   script(src='/scripts/noVNC/util.js')
   script(src='/scripts/vnc.js')
-
-//- Enables fully-hidden table rows
-style(type='text/css')
-  | .accordianRow {
-  |     padding: 0 !important;
-  | }
-
+  
 block content
+  //- Enables fully-hidden table rows
+  style(type='text/css')
+    | .accordianRow {
+    |     padding: 0 !important;
+    | }
+
   // Full width panel is the main container for the dashboard
   div.container-fluid: div.panel.panel-default
     div.panel-heading: h3.panel-title Clasp Dashboard   
