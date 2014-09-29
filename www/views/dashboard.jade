@@ -147,12 +147,13 @@ append templates
 append compileTemplates
   | templates.runxacrossy = Handlebars.compile($('#t-runxacrossy').html());
 append scriptOnReady
-  | setInterval(function() {
-  |   var target = $('#runxacrossy');
-  |   var context = {emulators: Math.floor((Math.random() * 20) + 1), nodes: "12"};
-  |   var html = templates.runxacrossy(context);
-  |   target.html(html);
-  | }, 2000);
+  if mode == "dev"
+    | setInterval(function() {
+    |   var target = $('#runxacrossy');
+    |   var context = {emulators: Math.floor((Math.random() * 20) + 1), nodes: "12"};
+    |   var html = templates.runxacrossy(context);
+    |   target.html(html);
+    | }, 2000);
 
 
 //- Summary node row
@@ -176,20 +177,19 @@ append scriptOnReady
   |   var html = templates.summarynoderow(context);
   |   target.after(html);
   | };
-  | 
-  | var nsummary1 = {ip: "10.0.0.2", update: "Booting", 
-  |                  updateTime: "10 seconds ago", uuid: "eec0d2cd-ef51-430f-bfc6-fec7e61e8bf6"};
-  | var nsummary2 = {ip: "10.0.20.3", update: "Failed", 
-  |                  updateTime: "1 minute ago", uuid: "77a3bc41-0d02-40a4-b68d-339d6b9a0124"};
-  | var nsummary3 = {ip: "127.0.0.1", update: "Online", 
-  |                  updateTime: "3 seconds ago", uuid: "62577119-8421-405f-9741-3f8e795ecc83"};
-  | var nsummary4 = {ip: "10.0.20.7", update: "Offline", 
-  |                  updateTime: "23 seconds ago", uuid: "7e0c0daf-b4c9-4330-9335-71ed38311155"};
-  | clasp.dash.summary.add_node(nsummary1);
-  | clasp.dash.summary.add_node(nsummary2);
-  | clasp.dash.summary.add_node(nsummary3);
-  | clasp.dash.summary.add_node(nsummary4);
-  
+  if mode == "dev"
+    | var nsummary1 = {ip: "10.0.0.2", update: "Booting", 
+    |                  updateTime: "10 seconds ago", uuid: "eec0d2cd-ef51-430f-bfc6-fec7e61e8bf6"};
+    | var nsummary2 = {ip: "10.0.20.3", update: "Failed", 
+    |                  updateTime: "1 minute ago", uuid: "77a3bc41-0d02-40a4-b68d-339d6b9a0124"};
+    | var nsummary3 = {ip: "127.0.0.1", update: "Online", 
+    |                  updateTime: "3 seconds ago", uuid: "62577119-8421-405f-9741-3f8e795ecc83"};
+    | var nsummary4 = {ip: "10.0.20.7", update: "Offline", 
+    |                  updateTime: "23 seconds ago", uuid: "7e0c0daf-b4c9-4330-9335-71ed38311155"};
+    | clasp.dash.summary.add_node(nsummary1);
+    | clasp.dash.summary.add_node(nsummary2);
+    | clasp.dash.summary.add_node(nsummary3);
+    | clasp.dash.summary.add_node(nsummary4);
 
 //- Summary device row
 append templates
@@ -212,18 +212,20 @@ append scriptOnReady
   |   var html = templates.summarydevicerow(context);
   |   target.after(html);
   | };
-  | var dsummary1 = {ip: "10.0.0.2", update: "Crashed", 
-  |                  updateTime: "10 seconds ago", uuid: "39513296-ef79-4311-8e92-3e6fcf13597c"};
-  | var dsummary2 = {ip: "10.0.20.3", update: "Task Failed", 
-  |                  updateTime: "1 minute ago", uuid: "591aeb1c-fd43-439e-aafa-0756d0cfb593"};
-  | var dsummary3 = {ip: "127.0.0.1", update: "Task Success", 
-  |                  updateTime: "22 seconds ago", uuid: "51459573-c743-4a82-a9a3-86eec3e9783e"};
-  | var dsummary4 = {ip: "10.0.20.7", update: "Waiting For Task", 
-  |                  updateTime: "23 seconds ago", uuid: "82ae6ee8-196e-4b50-af8b-92cb3355a1e2"};
-  | clasp.dash.summary.add_device(dsummary1);
-  | clasp.dash.summary.add_device(dsummary2);
-  | clasp.dash.summary.add_device(dsummary3);
-  | clasp.dash.summary.add_device(dsummary4);
+  if mode == "dev"
+    | var dsummary1 = {ip: "10.0.0.2", update: "Crashed", 
+    |                  updateTime: "10 seconds ago", uuid: "39513296-ef79-4311-8e92-3e6fcf13597c"};
+    | var dsummary2 = {ip: "10.0.20.3", update: "Task Failed", 
+    |                  updateTime: "1 minute ago", uuid: "591aeb1c-fd43-439e-aafa-0756d0cfb593"};
+    | var dsummary3 = {ip: "127.0.0.1", update: "Task Success", 
+    |                  updateTime: "22 seconds ago", uuid: "51459573-c743-4a82-a9a3-86eec3e9783e"};
+    | var dsummary4 = {ip: "10.0.20.7", update: "Waiting For Task", 
+    |                  updateTime: "23 seconds ago", uuid: "82ae6ee8-196e-4b50-af8b-92cb3355a1e2"};
+    | clasp.dash.summary.add_device(dsummary1);
+    | clasp.dash.summary.add_device(dsummary2);
+    | clasp.dash.summary.add_device(dsummary3);
+    | clasp.dash.summary.add_device(dsummary4);
+    
 
 //- Adds new device tab button and page
 append templates
