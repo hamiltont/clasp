@@ -255,19 +255,22 @@ append templates
           button.btn.btn-default.pull-right: span.glyphicon.glyphicon-zoom-out
           button.btn.btn-default.pull-right: span.glyphicon.glyphicon-zoom-in
         // TODO Hide side margins on small screens
-        div.col-sm-5(style="margin-left: 10px; margin-right: 10px")
-          canvas(id="devicecanvas-{{ uuid }}")
+        //- For proper bootstrap integration we need to set the width on this
+        //- div to be equal to the desired canvas width and optionally set the 
+        //- class to something reasonable given the width
+        div.col-sm-5(style="margin-left: 0 auto;")
+          canvas(id="devicecanvas-{{ uuid }}").text-right
       div.row(style="margin-top: 20px")
-        div.col-sm-12.pre-scrollable.well
-          | This is where the emulator logs can be output  
+        div.col-sm-12.pre-scrollable.well(id="devicelog-{{ uuid }}")
+          | Emulator logs will show up here <br />
 append compileTemplates
   | templates.devicetab = Handlebars.compile($('#t-devicetab').html());
   | templates.devicetabpane = Handlebars.compile($('#t-devicetabpane').html());
 append scriptOnReady
   | clasp.dash.add_device_tab = function(context) {
   |   if (context.uuid === undefined) context.uuid = 'none'; var uuid = context.uuid;
-  |   if (context.host === undefined) context.host = 'localhost';
-  |   if (context.port === undefined) context.port = '6080';
+  |   if (context.host === undefined) context.host = '10.0.0.2';
+  |   if (context.port === undefined) context.port = '6082';
   |   console.log('Built context ' + context);
   | 
   |   // Ensure we don't add twice
@@ -277,14 +280,19 @@ append scriptOnReady
   |     return;
   |   }
   | 
-  |   // Add new tab button
+  |   // Add tab for new tab
   |   var lastTab = $('#navtabs li:last');
-  |   lastTab.after(templates.devicetab({uuid: uuid}));
+  |   lastTab.after(templates.devicetab(context));
   |   
-  |   // Add new tab content
+  |   // ====================================
+  |   // Add content for new tab 
+  |   // ====================================
   |   var target = $('#navcontent div.tab-pane:last');
-  |   var html = templates.devicetabpane({uuid: uuid});
-  |   target.after(html);
+  |   var html = $(templates.devicetabpane(context));
+  | 
+  |   // Find divs and elements we want to use
+  |   var logID = html.find('.well').attr('id');
+  |   var toolbar = html.find('.toolbar button');
   | 
   |   // Wire Buttons
   |   var buttonFunctions = ["rfbPressHome", "rfbPressEsc", "rfbPressVolumeDown", "rfbPressVolumeUp",
@@ -293,6 +301,16 @@ append scriptOnReady
   |   toolbar.each(function(i) {
   |     var f = buttonFunctions[i] + '(clasp.dash.vnc["' + uuid + '"]);';
   |     $(this).attr("onclick",f);
+  |   });
+  | 
+  |   // Append the HTML to the page
+  |   target.after(html.prop('outerHTML'));
+  | 
+  |   // Wire log panel (must do this once it's in the DOM)
+  |   var elogs = clasp.pubsub.channel('/emulator/' + uuid + '/log');
+  |   elogs.addEventListener('message', function(dataObject) {
+  |     console.log('elogs got data ' + dataObject.data);
+  |     $('#' + logID).append(dataObject.data + '<br />');
   |   });
   | 
   |   // Create RFB for new tab
