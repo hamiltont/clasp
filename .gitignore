@@ -25,3 +25,4 @@ tools/resources.pickle
 www/node_modules
 
 .vagrant
+logs
