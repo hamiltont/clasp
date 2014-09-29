@@ -432,7 +432,7 @@ object EmulatorLogger {
   case class StdOut(line: String)
   case class StdErr(line: String)
 }
-class EmulatorLogger(val serialID: String, val node: Node)
+class EmulatorLogger(val serialID: String, val node: Node, val emulator: EmulatorActor)
   extends Actor
   with ActorLogging
   with ChannelServer
@@ -442,7 +442,7 @@ class EmulatorLogger(val serialID: String, val node: Node)
   // channelIdentifyMaster(node.masterip)
   context.actorSelection(s"akka.tcp://clasp@${node.masterip}:2552/user/channelManager") ! Identify(channelManagerId)
   var channelManager: Option[ActorRef] = None
-  val channelName = "/emulatorlogs"
+  val channelName = "/emulator/" + emulator.uuid + "/log"
 
   def wrappedReceive = {
     case StdOut(line) => {
