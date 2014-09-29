@@ -1,8 +1,12 @@
 extends layout
   
 append externalScripts
+  script(src='/scripts/handlebars.min.js')
   script(src='/scripts/noVNC/util.js')
   script(src='/scripts/vnc.js')
+  script(src='/scripts/websocket-multiplex-0.1.js')
+  script(src='/scripts/dashboard.js')
+  
   
 block content
   //- Enables fully-hidden table rows
