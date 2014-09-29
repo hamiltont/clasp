@@ -9,12 +9,11 @@ block content
     div(id='toc')
     hr
     div(id='contents')
-      :markdown
-      include doc/getting-started.md
-      include doc/cluster-setup.md
-      include doc/sbt.md
-      include doc/webapp-config.md
-      include doc/logging.md
+      include:md doc/getting-started.md
+      include:md doc/cluster-setup.md
+      include:md doc/sbt.md
+      include:md doc/webapp-config.md
+      include:md doc/logging.md
 
     // http://stackoverflow.com/questions/16152641   
     script(type='text/javascript').
