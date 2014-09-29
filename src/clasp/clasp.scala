@@ -21,7 +21,7 @@ import akka.actor.Props
 import akka.actor.actorRef2Scala
 import akka.io.IO
 import clasp.core.Node
-import clasp.core.WebSocketServer
+import clasp.core.remoting.WebSocketServer
 import core.EmulatorManager
 import core.NodeManager
 import core.sdktools.sdk

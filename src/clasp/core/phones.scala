@@ -37,13 +37,14 @@ import akka.actor.ActorLogging
 import EmulatorLogger._
 import akka.actor.Props
 import akka.actor.Identify
-import clasp.core.WebSocketChannelManager._
+import clasp.core.remoting.WebSocketChannelManager._
 import clasp.utils.Slf4jLoggingStack
 import clasp.utils.ActorStack
 import clasp.utils.ActorStack
 import clasp.utils.Slf4jLoggingStack
 import clasp.utils.Slf4jLoggingStack
 import akka.actor.ActorIdentity
+import clasp.core.remoting.ChannelServer
 
 object EmulatorManager {
   case class EmulatorReady(emu: EmulatorDescription)

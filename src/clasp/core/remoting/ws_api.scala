@@ -1,5 +1,10 @@
-package clasp.core
+package clasp.core.remoting
 
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import scala.collection._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -7,17 +12,19 @@ import scala.util.Failure
 import scala.util.Success
 import WebSocketChannelManager._
 import akka.actor.Actor
+import akka.actor.ActorContext
 import akka.actor.ActorIdentity
 import akka.actor.ActorLogging
 import akka.actor.ActorRef
 import akka.actor.ActorRefFactory
-import akka.actor.ActorSelection
+import akka.actor.Identify
 import akka.actor.Props
 import akka.actor.Terminated
 import akka.actor.actorRef2Scala
-import akka.dispatch.OnComplete
 import akka.io.Tcp
 import akka.pattern.ask
+import clasp.utils.ActorStack
+import clasp.utils.Slf4jLoggingStack
 import spray.can.Http
 import spray.can.websocket.UpgradedToWebSocket
 import spray.can.websocket.WebSocketServerWorker
@@ -31,10 +38,18 @@ import spray.http.HttpResponse
 import spray.http.HttpResponse
 import spray.http.StatusCodes
 import spray.routing.HttpServiceActor
-import akka.actor.ActorContext
-import akka.actor.Identify
-import clasp.utils.ActorStack
-import clasp.utils.Slf4jLoggingStack
+import akka.actor.ActorSelection.toScala
+import akka.util.Timeout.durationToTimeout
+import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
+import spray.routing.Directive.pimpApply
+import spray.routing.directives.OnCompleteFutureMagnet.apply
+import spray.json.RootJsonFormat
+import spray.json.RootJsonWriter
+import spray.json.JsonPrinter
+import spray.json.PrettyPrinter
+import spray.json.CompactPrinter
+import java.io.BufferedReader
+import java.io.FileReader
 
 /**
  * First line of defense in handling HTTP connections. Creates separate
@@ -44,8 +59,8 @@ import clasp.utils.Slf4jLoggingStack
  * then by {@link HttpApi} (for REST Api connections), and finally by the nodeJS
  * process that acts as a server for the web interface
  */
-class WebSocketServer(val nodemanager: ActorRef, val emulatormanager: ActorRef) 
-  extends Actor 
+class WebSocketServer(val nodemanager: ActorRef, val emulatormanager: ActorRef)
+  extends Actor
   with ActorLogging {
   var httpApi = context.system.actorOf(Props(new HttpApi(nodemanager, emulatormanager)), name = "httpApi")
   var chanManager = context.system.actorOf(Props(new WebSocketChannelManager(nodemanager)), name = "channelManager")
@@ -132,13 +147,40 @@ class WebSocketWorker(val serverConnection: ActorRef, val httpApi: ActorRef, val
 
 /**
  * Creates broadcast channels to enable easy interaction between
- * actors and lists of websocket clients. Actors define the
- * available channels and websocket clients register to them.
+ * actors and lists of WebSocket clients. Actors define the
+ * available channels and WebSocket clients register to them.
+ * A common pattern is for servers to use spray-json to convert their
+ * response objects to JSON. This makes writing clients
+ * simpler, as each message can be easily parsed back into a full JSON
+ * object native to that client's language (e.g. a JSON object in
+ * JavaScript). If servers use <code>import ClaspJson._</code> to do this,
+ * the WebSocket interface will use the exact same JSON marshaling
+ * as the REST interface. It's important to do this marshaling at
+ * the sender to help distribute the compute workload across the nodes
+ * instead of concentrating it within this Actor, which runs on the
+ * master. If servers use the <code>trait ChannelServer</code> they
+ * can rely on the method <code>createMessageString</code> to check
+ * that a <code>RootJsonFormat</code> exists for their message object.
  *
- * Messages are never queued - if the client/owner is not available then
- * they are discarded
+ *
+ * For each system run, this saves all messages going server->client
+ * in a logfile underneath logs/. Each channel gets it's own file,
+ * and each file is given the suffix .json in anticipation that the
+ * outgoing messages will be JSON strings. When a new client connects
+ * to a channel, this log file is replayed line by line to the new
+ * client so they are up-to-date. This is a small hack to avoid having
+ * clients need to poll our REST service and await a response before
+ * they can subscribe to updates via the websocket channel. It works
+ * for now because we don't usually have thousands of emulators
+ * toggling offline/online status, so the stream of updates is normally
+ * not much larger than the current status
+ *
+ * Messages from client to server are never buffered or logged - if the
+ * server is not available then the messages are discarded
  */
 object WebSocketChannelManager {
+  val channelManagerId = "websocketchannelmanager"
+
   sealed abstract class Channel(val cname: String)
 
   // Internal Use classes
@@ -177,6 +219,27 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
   def deadChannels = channels.collect { case x: DeadChannel => x }
   def getChannel(name: String, from: Iterable[Channel] = channels) = from.find(c => c.cname == name)
   def getRealChannel(name: String) = realChannels.find(c => c.name == name)
+
+  val x = new SimpleDateFormat("mm")
+
+  var logFiles = Map[String, (BufferedWriter, File)]()
+  val logFolder = s"logs/${new SimpleDateFormat("yyyy_MM_dd-HH_mm-z").format(Calendar.getInstance().getTime())}"
+  def getChannelLogMap(name: String): (BufferedWriter, File) =
+    logFiles.find(x => x._1 == name) match {
+      case Some(writerMap) => writerMap._2
+      case None => {
+        val file = new File(s"$logFolder/${name.replaceAll("/", "_")}.json")
+        file.getParentFile.mkdirs
+        logFiles += (name -> (new BufferedWriter(new FileWriter(file, true)), file))
+        getChannelLogMap(name)
+      }
+    }
+
+  def getChannelLogWriter(name: String): BufferedWriter = getChannelLogMap(name)._1
+  def getChannelLog(name: String): File = getChannelLogMap(name)._2
+  def getChannelLogReader(name: String): BufferedReader = new BufferedReader(new FileReader(getChannelLog(name)))
+
+  override def postStop = logFiles.foreach { map => map._2._1.close() }
 
   def subscriptionsFor(forClient: Client): Map[Channel, Vector[Client]] =
     subscriptions.filter { sub => sub._2.contains(forClient) }
@@ -229,10 +292,29 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
     }
     case RegisterClient(chanName, clientRef) => {
       context.watch(clientRef)
+      // Add to channel
       getChannel(chanName) match {
         case Some(chan) => subscriptions += (chan -> (subscriptions(chan) :+ Client(clientRef)))
         case None => subscriptions += (DeadChannel(chanName) -> Vector(Client(clientRef)))
       }
+
+      // Send all the pre-existing log files
+      log.debug(s"Writing existing logs for $chanName to client")
+      getChannelLogWriter(chanName).flush // Ensure it's all there
+      var line = ""
+      val r = getChannelLogReader(chanName)
+      val source = scala.io.Source.fromFile(getChannelLog(chanName))
+      source.getLines.foreach { line =>
+        {
+          log.debug(s"Sending line $line")
+          val frame = TextFrame(wsmultiplex.Message(chanName, line).write)
+          clientRef ! frame
+          Thread.sleep(4*1000)
+        }
+      }
+
+      log.debug(s"Done writing existing logs")
+      Thread.sleep(60 * 1000)
     }
     case UnRegisterClient(chanName, clientRef) => {
       context.unwatch(clientRef)
@@ -251,6 +333,9 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
           }
         }
         case Some(server: Server) => { // Send to all clients
+          // Access log file for this channel and store the message
+          getChannelLogWriter(channel).write(data + "\n")
+
           getChannel(channel) match {
             case Some(real: RealChannel) => {
               val frame = TextFrame(wsmultiplex.Message(channel, data).write)
@@ -273,6 +358,30 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
   }
 
 }
+
+trait ChannelServer {
+  import WebSocketChannelManager._
+
+  val channelManagerId = WebSocketChannelManager.channelManagerId
+
+  /**
+   *  Tells the Channel master to identify itself to you
+   *
+   *  @param masterIP host for the master node e.g. 10.0.0.23
+   */
+  def channelIdentifyMaster(masterIP: String, correlationId: Any = channelManagerId)(implicit context: ActorContext) = {
+    context.actorSelection(s"akka.tcp://clasp@${masterIP}:2552/user/channelManager") ! Identify(correlationId)
+  }
+
+  /** Ensures that the passed value can be converted into a root JSON object */
+  def createMessageString[T](value: T)(implicit format: RootJsonFormat[T], printer: JsonPrinter = CompactPrinter): String = {
+    val jsvalue = format.write(value)
+    jsonBuilder.setLength(0)
+    printer.print(jsvalue, jsonBuilder)
+    jsonBuilder.toString
+  }
+  val jsonBuilder = new java.lang.StringBuilder()
+
 }
 
 /**

@@ -3,17 +3,16 @@ package clasp.core
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.TraversableOnce.flattenTraversableOnce
-import scala.collection.mutable.ArrayStack
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.MutableList
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.future
 import scala.language.postfixOps
 import scala.sys.process.Process
 import scala.sys.process.ProcessLogger
 import scala.sys.process.stringToProcess
-import scala.util.Random
 import org.slf4j.LoggerFactory
 import com.typesafe.config.ConfigFactory
 import akka.actor.Actor
@@ -31,19 +30,17 @@ import akka.actor.SupervisorStrategy.Stop
 import akka.actor.Terminated
 import akka.actor.actorRef2Scala
 import clasp.ClaspConf
+import clasp.core.remoting.ClaspJson
+import clasp.core.remoting.WebSocketChannelManager._
+import clasp.core.remoting.WebSocketChannelManager
 import clasp.core.sdktools.EmulatorOptions
 import clasp.core.sdktools.sdk
 import clasp.utils.ActorLifecycleLogging
-import scala.concurrent.duration.Duration
-import scala.concurrent.duration.FiniteDuration
-import clasp.core.WebSocketChannelManager._
 import clasp.utils.ActorStack
 import clasp.utils.Slf4jLoggingStack
-import clasp.utils.ActorStack
-import clasp.utils.Slf4jLoggingStack
-import clasp.utils.ActorStack
-import clasp.utils.Slf4jLoggingStack
-import clasp.utils.Slf4jLoggingStack
+import spray.json._
+import clasp.core.remoting.ChannelServer
+
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
@@ -65,7 +62,8 @@ class NodeManager(val conf: ClaspConf)
   extends Actor
   with ActorLifecycleLogging 
   with ActorStack
-  with Slf4jLoggingStack {
+  with Slf4jLoggingStack 
+  with ChannelServer {
 
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
@@ -116,6 +114,7 @@ class NodeManager(val conf: ClaspConf)
   // For dynamic websocket-based messaging to web clients
   var channelManager: Option[ActorRef] = None
 
+  import ClaspJson._
   def monitoring: Receive = {
     case ActorIdentity(WebSocketChannelManager, Some(manager)) =>
       {

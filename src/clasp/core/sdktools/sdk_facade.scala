@@ -20,6 +20,7 @@ import java.nio.file.Paths
 import clasp.utils.FancyFuture._
 import scala.util.Failure
 import scala.util.Success
+import clasp.core.sdktools._
 
 /**
  * The entire SDK tool facade!
