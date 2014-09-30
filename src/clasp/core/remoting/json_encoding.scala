@@ -1,24 +1,20 @@
 package clasp.core.remoting
 
-import spray.json.DefaultJsonProtocol
-import spray.json.JsObject
-import spray.json.RootJsonFormat
-import spray.json.JsNull
-import spray.json._
-import spray.json.JsonFormat
-import spray.json.JsString
-import spray.json.JsValue
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.TimeZone
+import java.util.UUID
+
+import org.hyperic.sigar.CpuPerc
 import org.slf4j.LoggerFactory
-import clasp.core.Node
-import scala.util.Failure
-import scala.util.Try
-import spray.json.DeserializationException
-import scala.util.Success
+
 import akka.actor.ActorRef
-import clasp.core.sdktools._
-import spray.json.JsBoolean
-import clasp.core.Node.NodeDescription
 import clasp.core.EmulatorActor.EmulatorDescription
+import clasp.core.Node
+import clasp.core.Node.NodeDescription
+import clasp.core.sdktools._
+import spray.json._
+import spray.json.DefaultJsonProtocol
 
 // If we ever want to have simpler JSON objects than domain objects, 
 // this is a neat trick
@@ -31,6 +27,12 @@ import clasp.core.EmulatorActor.EmulatorDescription
 
 /**
  * Provides clasp-specific JSON marshalling and unmarshalling
+ *
+ * <b>Warning:</b> Never create <code>RootJsonFormat</code> for the base
+ * types like String, Int, Boolean, etc. This violates the mutually exclusive
+ * property of Formatters required by spray-json, and your nice marshals like
+ * <code>{ foo: "bar_string" }</code> are likely to become ugly things like
+ * <code>{ foo: { value: "bar_string" } }</code>
  */
 object ClaspJson extends DefaultJsonProtocol {
 
@@ -56,22 +58,6 @@ object ClaspJson extends DefaultJsonProtocol {
       }
   }
 
-  //  implicit object failFormat extends RootJsonFormat[scala.util.Failure[Nothing]] {
-  //    def write(b: Failure[Nothing]) = {
-  //      JsObject(Map(
-  //        "status" -> JsString("failure"),
-  //        "reason" -> JsString(b.exception.getMessage())))
-  //    }
-  //    def read(value: JsValue) =
-  //      value.asJsObject.getFields("status", "reason") match {
-  //        case Seq(JsBoolean(value), JsString(reason)) => Failure(new Exception(reason))
-  //        case _ => deserializationError("Failure[Throwable] expected")
-  //      }
-  //  }
-
-  implicit object RootBooleanFormat extends RootJsonFormat[Boolean] {
-    def write(d: Boolean) = {
-      JsObject(Map("value" -> JsBoolean(d)))
   implicit object dateFormat extends RootJsonFormat[Date] {
     private val iso8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     iso8601Format.setTimeZone(TimeZone.getTimeZone("UTC"))
@@ -84,10 +70,6 @@ object ClaspJson extends DefaultJsonProtocol {
     }
   }
 
-    def read(value: JsValue) =
-      value.asJsObject.getFields("value") match {
-        case Seq(JsBoolean(value)) => value
-        case _ => deserializationError("Boolean expected")
   implicit object sigarCpuFormat extends RootJsonFormat[CpuPerc] {
     def write(c: CpuPerc) =
       if (c == null)
@@ -111,33 +93,7 @@ object ClaspJson extends DefaultJsonProtocol {
       }
 
   }
-  
-  implicit object RootStringFormat extends RootJsonFormat[String] {
-    def write(d: String) = {
-      JsObject(Map("value" -> JsString(d)))
-    }
 
-    def read(value: JsValue) =
-      value.asJsObject.getFields("value") match {
-        case Seq(JsString(value)) => value
-        case _ => deserializationError("String expected")
-      }
-  }  
-
-  implicit object tryFormat extends RootJsonFormat[Try[Boolean]] {
-    def write(b: Try[Boolean]) = {
-      debug(s"Asked to write a try[boolean] of $b")
-      b match {
-        case Success(value) => {
-          JsObject(Map(
-            "status" -> (if (value) JsString("success") else JsString("failure"))))
-        }
-        case Failure(reason) => {
-          JsObject(Map(
-            "status" -> JsString("failure"),
-            "reason" -> JsString(reason.getMessage())))
-        }
-      }
   implicit object uuidFormat extends RootJsonFormat[UUID] {
     def write(d: UUID) = {
       if (d == null)
@@ -149,13 +105,6 @@ object ClaspJson extends DefaultJsonProtocol {
       case JsString(uuid) => UUID.fromString(uuid)
       case _ => deserializationError("UUID expected")
     }
-
-    def read(value: JsValue) =
-      value.asJsObject.getFields("status", "reason") match {
-        case Seq(JsBoolean(value), JsNull) => Success(value)
-        case Seq(JsBoolean(value), JsString(reason)) => Failure(new Exception(reason))
-        case _ => deserializationError("Boolean expected")
-      }
   }
 
   def jsonEnum[T <: Enumeration](enu: T) = new JsonFormat[T#Value] {
@@ -181,4 +130,16 @@ object ClaspJson extends DefaultJsonProtocol {
   implicit val systemOptionsForamt = jsonFormat(SystemOptions, "cpuDelay", "gpsDevice", "noJNI", "useGPU", "radio", "timezone", "memory", "qemu")
   implicit val uiOptionsFormat = jsonFormat(UIoptions, "dpiDevice", "noBootAnim", "noWindow", "scale", "rawKeys", "noSkin", "keySet", "onion", "onionAlpha", "onionRotation", "skin", "skinDir")
   implicit val emulatorOptionsFormat = jsonFormat(EmulatorOptions, "avd", "clasp", "disk", "debug", "media", "network", "ui", "system")
+
+  /**
+   * Helper class to allow a root-level JSON object without corrupting the
+   * format of a Boolean. You should never create an Ack(false), just use
+   * sender ! Try(new Exception("your failure reason")). This is idiomatic because
+   * spray-routing natively supports Try() on all Futures (including asks), and
+   * so you can either complete with a root object (e.g. this Ack class) or with
+   * a failure. PS-I don't know what the hell I'm doing with mixing Try and scala-routing magic...
+   */
+  case class Ack(result: Boolean = true)
+  implicit val ackFormat = jsonFormat(Ack, "result")
+
 }

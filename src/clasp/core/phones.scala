@@ -45,6 +45,8 @@ import clasp.utils.Slf4jLoggingStack
 import clasp.utils.Slf4jLoggingStack
 import akka.actor.ActorIdentity
 import clasp.core.remoting.ChannelServer
+import scala.util.Try
+import clasp.core.remoting.ClaspJson.Ack
 
 object EmulatorManager {
   case class EmulatorReady(emu: EmulatorDescription)

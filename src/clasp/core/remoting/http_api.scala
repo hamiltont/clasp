@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import akka.actor.ActorRef
 import clasp.utils.LinuxProcessUtils._
 import spray.http._
-import spray.http._
+import spray.json._
 import spray.http.HttpMethods._
 import spray.http.StatusCodes.InternalServerError
 import spray.http.StatusCodes.NotFound
@@ -35,12 +35,13 @@ import akka.util.Timeout.durationToTimeout
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.routing.Directive.pimpApply
 import spray.routing.directives.OnCompleteFutureMagnet.apply
-
 import clasp.core.Node.NodeDescription
 import clasp.core.NodeManager
 import clasp.core.Node
 import clasp.core.EmulatorManager
 import clasp.core.EmulatorActor.EmulatorDescription
+import scala.util.Success
+import clasp.core.remoting.ClaspJson._
 
 /**
  * Defines HTTP REST API for Clasp. Called for HTTP messages that
@@ -77,24 +78,6 @@ class HttpApi(val nodeManager: ActorRef,
 
   val nodeCommand = s"node www/app.js"
 
-  /**
-   * Handles common HTTP response case when a HTTP request generates an
-   * ActorRef.ask
-   */
-  def askToComplete[T: ToResponseMarshaller](who: ActorRef, message: Any)(implicit tag: scala.reflect.ClassTag[T]) = {
-    onComplete(who.ask(message)(15.seconds).mapTo[T]) {
-      case Success(value) =>
-        {
-          complete(value)
-        }
-      case Failure(reason) =>
-        {
-          error("Failed to complete")
-          complete(InternalServerError, s"Error occurred: ${reason.getMessage}")
-        }
-    }
-  }
-
   // Handles 
   // ROOT/nodes
   // ROOT/nodes/all
@@ -104,10 +87,10 @@ class HttpApi(val nodeManager: ActorRef,
       complete(nodeManager.ask(NodeManager.NodeList(false))(timeout).mapTo[List[NodeDescription]])
     } ~
       path("launch") {
-        complete(nodeManager.ask(NodeManager.BootNode())(timeout).mapTo[Boolean])
+        complete(nodeManager.ask(NodeManager.BootNode())(timeout).mapTo[Ack])
       } ~
       pathEndOrSingleSlash {
-        askToComplete[List[NodeDescription]](nodeManager, NodeManager.NodeList())
+        complete(nodeManager.ask(NodeManager.NodeList())(timeout).mapTo[List[NodeDescription]])
       }
   }
 
@@ -117,13 +100,13 @@ class HttpApi(val nodeManager: ActorRef,
   // ROOT/emulators/launch
   val emulators = pathPrefix("emulators") {
     path(JavaUUID) { uuid =>
-      askToComplete[EmulatorOptions](emulatorManger, EmulatorManager.GetEmulatorOptions(uuid.toString))
+      complete(emulatorManger.ask(EmulatorManager.GetEmulatorOptions(uuid.toString))(timeout).mapTo[EmulatorOptions])
     } ~
       path("launch") {
-        askToComplete[Try[Boolean]](emulatorManger, EmulatorManager.LaunchEmulator())
+        complete(emulatorManger.ask(EmulatorManager.LaunchEmulator())(timeout).mapTo[Ack])
       } ~
       pathEndOrSingleSlash {
-        askToComplete[List[EmulatorDescription]](emulatorManger, EmulatorManager.ListEmulators())
+        complete(emulatorManger.ask(EmulatorManager.ListEmulators())(timeout).mapTo[List[EmulatorDescription]])
       }
   }
 
@@ -135,7 +118,7 @@ class HttpApi(val nodeManager: ActorRef,
       complete {
         debug(s"scheduling shutdown")
         context.system.scheduler.scheduleOnce(3.seconds)(nodeManager ! NodeManager.Shutdown())
-        true
+        "success"
       }
     }
   }

@@ -211,12 +211,12 @@ class NodeManager(val conf: ClaspConf)
     super.postStop
   }
 
-  def boot_node(): Boolean = {
+  def boot_node(): Ack = {
     info(s"Node boot requested (by ${sender.path})")
 
     if (nodesOffline.isEmpty) {
       error("Node boot request failed, no more nodes to boot")
-      false
+      throw new InstantiationException("No more nodes to launch")
     } else {
       val client = nodesOffline.head
       if (client.status == Node.Status.Failed)
@@ -276,7 +276,7 @@ class NodeManager(val conf: ClaspConf)
           self ! NodeUpdate(client.copy(status = Node.Status.Failed).stamp)
       }
 
-      true
+      Ack(true)
     }
   }
 }
