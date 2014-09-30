@@ -359,8 +359,8 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int, val uuid
       // We need to kill ourself if the manager dies
       context.watch(manager)
 
-      info(s"Node online: ${self.path}")
-      manager ! description()
+      info(s"Online at ${self.path}")
+      manager ! NodeManager.NodeUpdate(description())
       context.become(wrapReceive(active(manager)))
 
       // Launch initial emulators
