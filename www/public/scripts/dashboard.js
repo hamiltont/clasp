@@ -11,6 +11,8 @@
 clasp.root = 'localhost:8080';
 clasp._websocket = new WebSocket('ws://' + clasp.root);
 clasp.pubsub = new WebSocketMultiplex(clasp._websocket); 
+clasp.channels = {};
+clasp.charts = {};
 
 // Example pubsub usage: 
 //   var foo = clasp.pubsub.channel('foo');
