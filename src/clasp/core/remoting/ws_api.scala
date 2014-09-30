@@ -50,6 +50,7 @@ import spray.json.PrettyPrinter
 import spray.json.CompactPrinter
 import java.io.BufferedReader
 import java.io.FileReader
+import org.slf4j.LoggerFactory
 
 /**
  * First line of defense in handling HTTP connections. Creates separate
@@ -301,20 +302,13 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
       // Send all the pre-existing log files
       log.debug(s"Writing existing logs for $chanName to client")
       getChannelLogWriter(chanName).flush // Ensure it's all there
-      var line = ""
-      val r = getChannelLogReader(chanName)
-      val source = scala.io.Source.fromFile(getChannelLog(chanName))
-      source.getLines.foreach { line =>
+      scala.io.Source.fromFile(getChannelLog(chanName)).getLines.foreach { line =>
         {
-          log.debug(s"Sending line $line")
           val frame = TextFrame(wsmultiplex.Message(chanName, line).write)
           clientRef ! frame
-          Thread.sleep(4*1000)
         }
       }
-
       log.debug(s"Done writing existing logs")
-      Thread.sleep(60 * 1000)
     }
     case UnRegisterClient(chanName, clientRef) => {
       context.unwatch(clientRef)
@@ -360,6 +354,9 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
 }
 
 trait ChannelServer {
+  private[this] val log = LoggerFactory.getLogger(getClass())
+  import log.{ error, debug, info, trace }
+
   import WebSocketChannelManager._
 
   val channelManagerId = WebSocketChannelManager.channelManagerId
@@ -369,7 +366,7 @@ trait ChannelServer {
    *
    *  @param masterIP host for the master node e.g. 10.0.0.23
    */
-  def channelIdentifyMaster(masterIP: String, correlationId: Any = channelManagerId)(implicit context: ActorContext) = {
+  def identifyChannelMaster(masterIP: String, correlationId: Any = channelManagerId)(implicit context: ActorContext) = {
     context.actorSelection(s"akka.tcp://clasp@${masterIP}:2552/user/channelManager") ! Identify(correlationId)
   }
 
@@ -382,6 +379,25 @@ trait ChannelServer {
   }
   val jsonBuilder = new java.lang.StringBuilder()
 
+  /**
+   *  Convenience method for sending a message to the channel manager inside an Actor
+   *
+   *  You'll need to declare <code>implicit var channelManager: Option[ActorRef] = None</code>
+   *  and use the the <code>channelIdentifyMaster</code> to use
+   */
+  def channelSend[T](chanName: String, data: T)(implicit format: RootJsonFormat[T], self: ActorRef, channelManager: Option[ActorRef]) = {
+    if (channelManager.isDefined)
+      channelManager.get ! Message(chanName, createMessageString(data), self)
+    else 
+      log.error(s"Unable to send message to $chanName with data $data")
+  }
+
+  def channelRegister(chanName: String)(implicit self: ActorRef, channelManager: Option[ActorRef]) = {
+    if (channelManager.isDefined)
+    	channelManager.get ! RegisterChannel(chanName, self)
+    else 
+      log.error(s"Unable to register $chanName")
+  }
 }
 
 /**
