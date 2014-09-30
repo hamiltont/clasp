@@ -267,7 +267,7 @@ class NodeManager(val conf: ClaspConf)
         command.!!
 
         // Check that we've heard back
-        context.system.scheduler.scheduleOnce(30 seconds, self, NodeBootExpected(client))
+        context.system.scheduler.scheduleOnce(5.minutes, self, NodeBootExpected(client))
       }
 
       deploy_and_boot onFailure {
