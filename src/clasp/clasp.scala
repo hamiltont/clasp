@@ -1,7 +1,6 @@
 package clasp
 
 import java.io.File
-
 import scala.Array.canBuildFrom
 import scala.collection.immutable.StringOps
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -9,11 +8,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.promise
 import scala.sys.process.stringToProcess
-
 import org.slf4j.LoggerFactory
-
 import com.typesafe.config.ConfigFactory
-
 import akka.actor.Actor
 import akka.actor.ActorLogging
 import akka.actor.ActorSystem
@@ -27,7 +23,11 @@ import core.NodeManager
 import core.sdktools.sdk
 import spray.can.Http
 import spray.can.server.UHttp
-
+import java.util.UUID
+import org.hyperic.sigar.Mem
+import org.hyperic.sigar.Sigar
+import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.Cpu
 
 /* Used to launch Clasp from the command line */
 object ClaspRunner extends App {
@@ -138,9 +138,19 @@ class ClaspClient(val conf: ClaspConf) {
   }
 
   val masterip = conf.mip().stripLineEnd
+  val uuid = try {
+    UUID.fromString(conf.uuid())
+  } catch {
+    case _: IllegalArgumentException => {
+      error(s"Unable to turn ${conf.uuid()} into a UUID, using random UUID")
+      UUID.randomUUID
+    }
+  }
+  
   var n = system.actorOf(Props(new Node(ip, masterip,
-    conf.numEmulators.apply)), name = s"node-$ip")
+    conf.numEmulators.apply, uuid)), name = s"node-$ip")
   info(s"Created Node for $ip")
+  debug(s"Using UUID $uuid")
 
   // If the JVM indicates it's shutting down (via Ctrl-C or a SIGTERM), 
   // then try to cleanup our ActorSystem
@@ -181,7 +191,7 @@ class ClaspClient(val conf: ClaspConf) {
       debug(s"Sending message to akka.tcp://clasp@$masterip:2552/user/nodemanager")
       val manager = temp.actorFor(s"akka.tcp://clasp@$masterip:2552/user/nodemanager")
 
-      manager ! NodeManager.NodeUpdate(Node.NodeDescription(ip, None, Node.Status.Failed))
+      manager ! NodeManager.NodeUpdate(Node.NodeDescription(ip, None, Node.Status.Failed, uuid = uuid))
 
       debug("Waiting 10 seconds for the message to be delivered")
       Thread.sleep(10000)
@@ -210,13 +220,11 @@ class ClaspMaster(val conf: ClaspConf) {
   val serverConf = ConfigFactory
     .parseString(s"""akka.remote.netty.tcp.hostname="$ip" """)
     .withFallback(ConfigFactory.load("master"))
-
+ 
   implicit var system: ActorSystem = null
   try {
     debug(s"About to create Master ActorSystem clasp");
     system = ActorSystem("clasp", serverConf)
-
-    debug("Master's ActorSystem created")
   } catch {
     case inuse: org.jboss.netty.channel.ChannelException => {
       error(s"Another person is using $ip as a master node!")

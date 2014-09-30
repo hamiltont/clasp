@@ -72,7 +72,17 @@ object ClaspJson extends DefaultJsonProtocol {
   implicit object RootBooleanFormat extends RootJsonFormat[Boolean] {
     def write(d: Boolean) = {
       JsObject(Map("value" -> JsBoolean(d)))
+  implicit object dateFormat extends RootJsonFormat[Date] {
+    private val iso8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    iso8601Format.setTimeZone(TimeZone.getTimeZone("UTC"))
+
+    override def write(date: Date) = JsString(iso8601Format.format(date))
+
+    override def read(json: JsValue): Date = json match {
+      case JsString(date) => iso8601Format.parse(date)
+      case _ => deserializationError("ISO8601 date expected")
     }
+  }
 
     def read(value: JsValue) =
       value.asJsObject.getFields("value") match {
@@ -128,6 +138,16 @@ object ClaspJson extends DefaultJsonProtocol {
             "reason" -> JsString(reason.getMessage())))
         }
       }
+  implicit object uuidFormat extends RootJsonFormat[UUID] {
+    def write(d: UUID) = {
+      if (d == null)
+        JsNull
+      else
+        JsString(d.toString)
+    }
+    def read(value: JsValue) = value match {
+      case JsString(uuid) => UUID.fromString(uuid)
+      case _ => deserializationError("UUID expected")
     }
 
     def read(value: JsValue) =
@@ -149,7 +169,7 @@ object ClaspJson extends DefaultJsonProtocol {
 
   implicit val nodeStatusFormat = jsonEnum(Node.Status)
 
-  implicit val nodeFormat = jsonFormat(NodeDescription, "ip", "name", "status", "emulators", "asOf")
+  implicit val nodeFormat = jsonFormat(NodeDescription, "ip", "name", "status", "emulators", "uuid", "asOf")
 
   implicit val emulatorDescriptionFormat = jsonFormat(EmulatorDescription, "publicip", "consolePort", "vncPort", "wsVncPort", "actorPath", "uuid")
 

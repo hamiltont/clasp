@@ -194,7 +194,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   val base_wsDisplay_port = 6080
   val ws_display_port = base_wsDisplay_port + display_number
   
-  val logger = context.actorOf(Props(new EmulatorLogger(serialID, node)), s"logger")
+  val logger = context.actorOf(Props(new EmulatorLogger(serialID, node, this)), s"logger")
   // Emulator manager reference
   val emanager = context.system.actorFor(s"akka.tcp://clasp@${node.masterip}:2552/user/emulatormanager")
 

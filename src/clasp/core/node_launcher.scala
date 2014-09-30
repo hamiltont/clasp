@@ -13,6 +13,7 @@ import scala.language.postfixOps
 import scala.sys.process.Process
 import scala.sys.process.ProcessLogger
 import scala.sys.process.stringToProcess
+import scala.util.Try
 import org.slf4j.LoggerFactory
 import com.typesafe.config.ConfigFactory
 import akka.actor.Actor
@@ -30,7 +31,9 @@ import akka.actor.SupervisorStrategy.Stop
 import akka.actor.Terminated
 import akka.actor.actorRef2Scala
 import clasp.ClaspConf
+import clasp.core.remoting.ChannelServer
 import clasp.core.remoting.ClaspJson
+import clasp.core.remoting.ClaspJson._
 import clasp.core.remoting.WebSocketChannelManager._
 import clasp.core.remoting.WebSocketChannelManager
 import clasp.core.sdktools.EmulatorOptions
@@ -39,8 +42,12 @@ import clasp.utils.ActorLifecycleLogging
 import clasp.utils.ActorStack
 import clasp.utils.Slf4jLoggingStack
 import spray.json._
-import clasp.core.remoting.ChannelServer
-
+import java.util.UUID
+import java.util.Calendar
+import java.util.Date
+import akka.actor.ActorLogging
+import akka.actor.ActorIdentity
+import org.hyperic.sigar.Sigar
 
 // Main actor for managing the entire system
 // Starts, tracks, and stops nodes
@@ -60,9 +67,9 @@ object NodeManager {
 }
 class NodeManager(val conf: ClaspConf)
   extends Actor
-  with ActorLifecycleLogging 
+  with ActorLifecycleLogging
   with ActorStack
-  with Slf4jLoggingStack 
+  with Slf4jLoggingStack
   with ChannelServer {
 
   lazy val log = LoggerFactory.getLogger(getClass())
@@ -72,10 +79,10 @@ class NodeManager(val conf: ClaspConf)
   // Build pool of potential worker nodes
   val nodes: ListBuffer[Node.NodeDescription] = conf.pool.get match {
     case Some(mpool) =>
-      mpool.split(',').map(ip => Node.NodeDescription(ip)).to[ListBuffer]
+      mpool.split(',').map(ip => Node.NodeDescription(ip, uuid = UUID.randomUUID)).to[ListBuffer]
     case None =>
       ConfigFactory.load("master").getStringList(conf.poolKey()).asScala
-        .map(ip => Node.NodeDescription(ip)).to[ListBuffer]
+        .map(ip => Node.NodeDescription(ip, uuid = UUID.randomUUID)).to[ListBuffer]
   }
   nodes.foreach(_ => self ! BootNode())
   def nodesOffline = nodes.filter(n => (n.status == Node.Status.Offline || n.status == Node.Status.Failed))
@@ -92,35 +99,42 @@ class NodeManager(val conf: ClaspConf)
   def nodeUpdate(update: Node.NodeDescription) =
     nodeByIp(update.ip) match {
       case Some(old) => {
-        if (old.asOf < update.asOf) {
+        if (old.asOf.before(update.asOf)) {
           debug(s"Node updating to $update from $old")
           nodes -= old
           nodes += update
+          channelSend(channelNodeUpdates, update)
         } else error(s"Rejecting $update because $old is newer")
       }
       case None => {
         debug(s"Node update to $update")
         nodes += update
+        channelSend(channelNodeUpdates, update)
       }
     }
 
+  // Channels that we manager
+  val channelNodeUpdates = "/nodemanager/nodeupdates"
+  val channelResourceUsage = "/nodemanager/resources"
+
   // Shut ourselves down if no Nodes start within 10 minutes
   // Deploy+compile can take some time
-  context.system.scheduler.scheduleOnce(10.minutes, self, Shutdown(true))
+  // context.system.scheduler.scheduleOnce(10.minutes, self, Shutdown(true))
 
   // Start in monitor mode
   def wrappedReceive = monitoring
 
   // For dynamic websocket-based messaging to web clients
-  var channelManager: Option[ActorRef] = None
+  implicit var channelManager: Option[ActorRef] = None
 
-  import ClaspJson._
   def monitoring: Receive = {
     case ActorIdentity(WebSocketChannelManager, Some(manager)) =>
       {
         channelManager = Some(manager)
-        channelManager.foreach { x => x ! RegisterChannel("/nodemanager", self) }
-        context.system.scheduler.schedule(2.second, 4.second){channelManager.foreach(x => x ! Message("/nodemanager", "testing", self))}
+        channelManager.foreach { x =>
+          x ! RegisterChannel(channelNodeUpdates, self)
+          x ! RegisterChannel(channelResourceUsage, self)
+        }
       }
     case NodeUpdate(update) => nodeUpdate(update)
     case NodeBootExpected(node) => (nodesOnline.filter(n => n.ip == node.ip).isEmpty) match {
@@ -227,14 +241,18 @@ class NodeManager(val conf: ClaspConf)
         val copyProc = Process(copy).run(copyLogger)
         copyProc.exitValue
 
-        // val build = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $workspaceDir && sbt -Dsbt.log.noformat=true clean && sbt -Dsbt.log.noformat=true stage'"
-        val build = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $workspaceDir && sbt -Dsbt.log.noformat=true stage'"
+        val cleanBuild = true
+        val cleanBuildCmd = if (cleanBuild) "sbt -Dsbt.log.noformat=true clean && " else ""
+        val build = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'cd $workspaceDir && $cleanBuildCmd sbt -Dsbt.log.noformat=true stage'"
         info(s"Building using $build")
         val shouldLogBuild = true
         val buildLogger = ProcessLogger(line => if (shouldLogBuild) info(s"build:${client_ip}:out: $line"),
           line => error(s"build:${client_ip}:err: $line"))
         val buildProc = Process(build).run(buildLogger)
-        buildProc.exitValue
+        val buildExit = buildProc.exitValue
+        info(s"Build exit: $buildExit")
+        if (buildExit != 0)
+          throw new IllegalStateException("Build failed, cannot continue boot sequence")
 
         // TODO use ssh port forwarding to punch connections in any NAT and 
         // ensure connectivity between master and client. PS - nastyyyyy
@@ -276,16 +294,17 @@ object Node {
     val actor: Option[ActorRef] = None,
     val status: Status = Offline,
     val onlineEmulators: Int = 0,
-    val asOf: Long = System.currentTimeMillis) {
+    val uuid: UUID,
+    val asOf: Date = Calendar.getInstance.getTime) {
 
-    def stamp = copy(asOf = System.currentTimeMillis)
+    def stamp = copy(asOf = Calendar.getInstance.getTime)
   }
 }
 // TODO push updated NodeDescriptions to NodeManager whenever our internal state changes
 // TODO combine NodeDescription and NodeDetails
-class Node(val ip: String, val masterip: String, val numEmulators: Int)
-  extends Actor 
-  with ActorLifecycleLogging 
+class Node(val ip: String, val masterip: String, val numEmulators: Int, val uuid: UUID)
+  extends Actor
+  with ActorLifecycleLogging
   with ActorStack
   with Slf4jLoggingStack 
   with ChannelServer {
@@ -300,7 +319,7 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int)
 
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
   var current_emulator_ID = 0
-  def description(status: Node.Status.Status = Node.Status.Online) = Node.NodeDescription(ip, Some(self), status, current_emulator_ID)
+  def description(status: Node.Status.Status = Node.Status.Online) = Node.NodeDescription(ip, Some(self), status, current_emulator_ID, uuid)
 
   // Restart ADB with the node
   sdk.kill_adb
@@ -319,7 +338,7 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int)
     }
 
   override def postStop() = {
-    info(s"NodeActor has stopped ($self)");
+    info(s"I have stopped ($self)");
     info("Stopping ActorSystem on this node");
 
     info(s"Requesting system shutdown at ${System.currentTimeMillis}")
@@ -335,7 +354,7 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int)
   // Wait until we are connected to the nodemanager with an ActorRef
   def wrappedReceive = {
     case ActorIdentity(`managerId`, Some(manager)) =>
-      debug(s"Found ActorRefFor NodeManger of ${manager}")
+      debug(s"Found NodeManger - ${manager}")
 
       // We need to kill ourself if the manager dies
       context.watch(manager)

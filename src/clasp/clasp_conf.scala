@@ -2,6 +2,7 @@ package clasp
 
 import java.net.Inet4Address
 import java.net.Inet6Address
+import java.util.UUID
 
 import scala.sys.process.stringToProcess
 
@@ -35,6 +36,9 @@ class ClaspConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   var ip = opt[String](descr = "Informs Clasp of the IP address it should bind to. " +
     "This should be reachable by the master and by all other clients in the system.",
     default = Some(getBestIP))
+    
+  var uuid = opt[String](descr = "Set UUID for this Node. Only used by clients.",
+    default = Some(UUID.randomUUID.toString))
 
   // TODO figure out how to make scallop enforce this requirement for us
   val mip = opt[String](descr = "The master ip address. Only used with --client, " +
