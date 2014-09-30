@@ -79,6 +79,14 @@ In the scala community, version numbers are huge! We use SBT 0.13, Scala 2.10.4,
 2. Run `sbt eclipse` to create `.project` and `.classpath` files
 3. In eclipse, use import existing project
 
+You may need to modify the build path to remove `src/main` and `src/test` as some eclipse versions 
+can't handle nested source folders. These are empty anyway. 
+
+Also, for changes to `application.conf` and other configuration files
+you should run `sbt clean` instead of relying on eclipse's clean or trying to just
+rebuild. Eclipse doesn't seem to detect those as source files and will not copy
+them to target if they already exist, even if you've made modifications. 
+
 ### Directory structure
  * `android-config` - Android project we build+install on each emulator
  * `attic` - Old but interesting files

@@ -6,7 +6,7 @@ append externalScripts
   script(src='/scripts/vnc.js')
   script(src='/scripts/websocket-multiplex-0.1.js')
   script(src='/scripts/dashboard.js')
-  
+  script(src='/scripts/jquery.timeago-1.4.1.js')
   
 block content
   //- Enables fully-hidden table rows
@@ -167,8 +167,9 @@ append templates
       td: button.btn.btn-xs.btn-info(onclick='clasp.dash.add_node_tab("{{ uuid }}")')
         span.glyphicon.glyphicon-cloud
       td {{ ip }}
-      td(class="{{ update }}") {{ update }}
-      td {{ updateTime }}
+      td(class="{{ status }}") {{ status }}
+      //- Put it into the title for jQuery timeago plugin
+      td.timeago(title="{{ asOf }}") {{ asOf }}
       td {{ uuid }}
     tr
       td.accordianRow(colspan="5")
@@ -180,7 +181,12 @@ append scriptOnReady
   |   var target = $('#nodesummary tr:last');
   |   var html = templates.summarynoderow(context);
   |   target.after(html);
+  |   $('#nodesummary .timeago').each(function(x) { 
+  |     var me = $(this);
+  |     me.timeago(); me.removeClass('timeago');
+  |   });
   | };
+  | 
   if mode == "dev"
     | var nsummary1 = {ip: "10.0.0.2", update: "Booting", 
     |                  updateTime: "10 seconds ago", uuid: "eec0d2cd-ef51-430f-bfc6-fec7e61e8bf6"};
