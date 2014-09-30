@@ -287,12 +287,16 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int)
   extends Actor 
   with ActorLifecycleLogging 
   with ActorStack
-  with Slf4jLoggingStack {
+  with Slf4jLoggingStack 
+  with ChannelServer {
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
   val managerId = "manager"
   context.actorSelection(s"akka.tcp://clasp@$masterip:2552/user/nodemanager") ! Identify(managerId)
+  
+  implicit var channelManager: Option[ActorRef] = None
+  val baseChannel = s"/node/$uuid"
 
   val devices: MutableList[ActorRef] = MutableList[ActorRef]()
   var current_emulator_ID = 0
@@ -342,6 +346,12 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int)
 
       // Launch initial emulators
       self ! Node.LaunchEmulator(numEmulators)
+      
+      // Find channel server
+      // identifyChannelMaster(masterip)
+        context.actorSelection(s"akka.tcp://clasp@${masterip}:2552/user/channelManager") ! Identify(channelManagerId)
+      debug(s"Requested channel manager identity from $masterip")
+      
     case ActorIdentity(`managerId`, None) => {
       debug(s"No Identity Received For NodeManger, terminating")
       context.system.shutdown
@@ -360,7 +370,12 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int)
       for (_ <- 1 to count)
         devices += bootEmulator()
     }
-    case unknown => info(s"Received unknown message from ${sender.path}: $unknown")
+    case ActorIdentity(`channelManagerId`, Some(manager)) => {
+      debug(s"Channel manager arrived! $manager")
+      channelManager = Some(manager)
+      channelRegister(baseChannel)
+      context.actorOf(Props(new NodeResourceLogger(this, channelManager)), s"logger")
+    }
   }
 
   def reaper(): Actor.Receive = {
@@ -397,5 +412,29 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int)
     else { return "unknown" }
   }
 }
+
+
+class NodeResourceLogger(val node: Node, 
+    implicit val channelManager: Option[ActorRef]) 
+	extends Actor 
+	with ActorLogging
+	with ActorLifecycleLogging 
+	with ActorStack 
+	with ChannelServer
+	with Slf4jLoggingStack {
+  
+  val channelName = s"${node.baseChannel}/metrics"
+  channelRegister(channelName)
+  val sigar = new Sigar
+  
+  case class CheckCpu()
+  context.system.scheduler.schedule(0.second, 15.second){ self ! CheckCpu() }
+  
+  def wrappedReceive = {
+    case CheckCpu() => channelSend(channelName, sigar.getCpuPerc)
+  }
+  
+}
+
 
 

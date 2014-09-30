@@ -36,7 +36,8 @@ object ClaspBuild extends sbt.Build {
         Libraries.sprayWebsocket))
     .settings(
       unmanagedJars in Compile ++= Seq(
-        file("lib/commons-net-3.2/commons-net-3.2.jar") // For proxy_telnet
+        file("lib/commons-net-3.2/commons-net-3.2.jar"), // For proxy_telnet
+        file("lib/hyperic-sigar-1.6.4/sigar-bin/lib/sigar.jar") 
         ))
     .settings(
       unmanagedJars in Test ++= Seq(

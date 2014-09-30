@@ -78,7 +78,28 @@ object ClaspJson extends DefaultJsonProtocol {
       value.asJsObject.getFields("value") match {
         case Seq(JsBoolean(value)) => value
         case _ => deserializationError("Boolean expected")
+  implicit object sigarCpuFormat extends RootJsonFormat[CpuPerc] {
+    def write(c: CpuPerc) =
+      if (c == null)
+        JsNull
+      else
+        JsObject("idle" -> JsNumber(c.getIdle),
+          "irq" -> JsNumber(c.getIrq),
+          "nice" -> JsNumber(c.getNice),
+          "softirq" -> JsNumber(c.getSoftIrq),
+          "stolen" -> JsNumber(c.getStolen),
+          "sys" -> JsNumber(c.getSys),
+          "user" -> JsNumber(c.getUser),
+          "wait" -> JsNumber(c.getWait))
+
+    def read(value: JsValue): CpuPerc =
+      value.asJsObject.getFields("idle", "irq", "nice", "softirq", "stolen", "sys", "user", "wait") match {
+        case Seq(JsNumber(idle), JsNumber(irq), JsNumber(nice), JsNumber(softirq), JsNumber(stolen), JsNumber(sys), JsNumber(user), JsNumber(wait)) =>
+          // TODO....something? 
+          null
+        case _ => deserializationError("ActorRef expected")
       }
+
   }
   
   implicit object RootStringFormat extends RootJsonFormat[String] {
