@@ -335,6 +335,9 @@ append scriptOnReady
   |   // Create RFB for new tab
   |   var rfb = clasp.dash.vnc.setup(context.host, context.port, 'devicecanvas-' + uuid);
   |   clasp.dash.vnc[uuid] = rfb;
+  | 
+  |   // TODO get RFB width and *then* apply it to div containing the canvas
+  |   // Add click listeners for this pane
   |   
   |   if (!clasp.metaPressed)
   |     clasp.dash.change_tab('#devicetab-'+uuid);
@@ -349,6 +352,8 @@ append templates
     div.tab-pane(id="nodetab-{{ uuid }}")
       p Welcome to node {{ uuid }}
       div(id="{{ chartid_cpu }}",style="width:300px")
+      div(id="{{ chartid_mem }}",style="width:300px")
+      div(id="{{ chartid_swap }}",style="width:300px")
 append compileTemplates
   | templates.nodetab = Handlebars.compile($('#t-nodetab').html());
   | templates.nodetabpane = Handlebars.compile($('#t-nodetabpane').html());
@@ -367,8 +372,13 @@ append scriptOnReady
   |   
   |   // Add new tab content
   |   var cpuchartid = 'chart-nodecpu-' + node_uuid;
+  |   var memchartid = 'chart-nodemem-' + node_uuid;
+  |   var swapchartid = 'chart-nodeswap-' + node_uuid;
   |   var target = $('#navcontent div.tab-pane:last');
-  |   var html = templates.nodetabpane({uuid: node_uuid, chartid_cpu: cpuchartid});
+  |   var html = templates.nodetabpane({uuid: node_uuid, 
+  |                        chartid_cpu: cpuchartid,
+  |                        chartid_mem: memchartid,
+  |                        chartid_swap: swapchartid});
   |   target.after(html);
   |   
   |   // Setup CPU charting
@@ -387,15 +397,57 @@ append scriptOnReady
   |   c.data.addColumn('number', 'Idle');
   |   c.chart = new google.visualization.LineChart($('#' + cpuchartid)[0]); 
   |   c.chart.draw(c.data, c.options);
+  |   
+  |   // Setup Memory charting
+  |   clasp.charts[memchartid] = {};
+  |   var m = clasp.charts[memchartid];
+  |   m.options = {
+  |     title: 'Node Memory',
+  |     curveType: 'function',
+  |     legend: { position: 'bottom' }
+  |   };
+  |   m.data = new google.visualization.DataTable();
+  |   m.data.addColumn('datetime', 'Time');
+  |   m.data.addColumn('number', 'Free');
+  |   m.data.addColumn('number', 'Used');
+  |   m.chart = new google.visualization.LineChart($('#' + memchartid)[0]); 
+  |   m.chart.draw(m.data, m.options);
+  |   
+  |   // Setup Swap charting
+  |   clasp.charts[swapchartid] = {};
+  |   var s = clasp.charts[swapchartid];
+  |   s.options = {
+  |     title: 'Node Swap',
+  |     curveType: 'function',
+  |     legend: { position: 'bottom' }
+  |   };
+  |   s.data = new google.visualization.DataTable();
+  |   s.data.addColumn('datetime', 'Time');
+  |   s.data.addColumn('number', 'Used');
+  |   s.data.addColumn('number', 'Total');
+  |   s.chart = new google.visualization.LineChart($('#' + swapchartid)[0]); 
+  |   s.chart.draw(s.data, s.options);
+  |  
+  |   // Setup active rendering for all node charts
   |   var metricsChannelName = '/node/' + node_uuid + '/metrics';
   |   var metricsChannel = clasp.pubsub.channel(metricsChannelName);
   |   metricsChannel.addEventListener('message', function(dataObject) {
   |     console.log('Got node metrics update');
   |     console.log(dataObject);
   |     var update = $.parseJSON(dataObject.data);
-  |     
-  |     c.data.addRow([new Date(), update.sys, update.user, update.stolen, update.idle]);
-  |     c.chart.draw(c.data, c.options);
+  |     if (!(update.pageOut === undefined)) {
+  |       // This is a swap update
+  |       s.data.addRow([new Date(), update.free, update.total]);
+  |       s.chart.draw(s.data, s.options);
+  |     } else if (!(update.ram === undefined)) {
+  |       // This is a memory update
+  |       m.data.addRow([new Date(), update.freePercent, update.usedPercent]);
+  |       m.chart.draw(m.data, m.options);
+  |     } else {
+  |       // This is a CPU update
+  |       c.data.addRow([new Date(), update.sys, update.user, update.stolen, update.idle]);
+  |       c.chart.draw(c.data, c.options);
+  |     }
   |   });
   |    
   |   if (!clasp.metaPressed)
