@@ -68,11 +68,17 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
   extends Actor
   with ActorLifecycleLogging
   with ActorStack
-  with Slf4jLoggingStack {
+  with Slf4jLoggingStack 
+  with ChannelServer
+   {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
   val emulators = ListBuffer[EmulatorDescription]()
+  
+  val chanName = "/emulatormanager"
+  val channelManager = Some(context.actorFor(s"akka.tcp://clasp@${conf.ip()}:2552/user/channelManager"))
+  channelRegister(chanName)(self, channelManager)
 
   // Tasks that have been delivered but not fulfilled
   val outstandingTasks: scala.collection.mutable.Map[String, Promise[Map[String, Serializable]]] = scala.collection.mutable.Map()
@@ -97,11 +103,16 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
   }
 
   def wrappedReceive = {
-    case EmulatorReady(emulator) => {
+    case EmulatorReady(emulator, time) => {
+      // Create a record of emulator boot time
+      val o = JsObject("emulators" -> JsNumber(emulators.length), "boottime" -> JsNumber(time))
+      channelManager.get ! Message(chanName, createMessageString(o), self)
+
       emulators += emulator
       info(s"Emulator ready: ${emulator}")
       info(s"${emulators.length} emulators awake")
-      sendTask(emulator)
+      // sendTask(emulator)
+      
     }
     case GetEmulatorOptions(uuid) => {
       val matched = emulators.filter(description => description.uuid.equals(uuid))
