@@ -47,7 +47,8 @@ import clasp.utils.Slf4jLoggingStack
 import clasp.utils.Slf4jLoggingStack
 import clasp.utils.Slf4jLoggingStack
 import spray.json._
-import clasp.core.remoting.ClaspJson._ 
+import clasp.core.remoting.ClaspJson._
+import clasp.core.remoting.WebSocketChannelManager
 
 object EmulatorManager {
   case class EmulatorReady(emu: EmulatorDescription, bootTime: Long)
@@ -68,17 +69,17 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
   extends Actor
   with ActorLifecycleLogging
   with ActorStack
-  with Slf4jLoggingStack 
-  with ChannelServer
-   {
+  with Slf4jLoggingStack
+  with ChannelServer {
+  
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
   val emulators = ListBuffer[EmulatorDescription]()
-  
+
   val chanName = "/emulatormanager"
-  val channelManager = Some(context.actorFor(s"akka.tcp://clasp@${conf.ip()}:2552/user/channelManager"))
-  channelRegister(chanName)(self, channelManager)
+  implicit var channelManager: Option[ActorRef] = None
+  // implicit var channelManager = Some(context.actorFor(s"akka.tcp://clasp@${conf.ip()}:2552/user/channelManager"))
 
   // Tasks that have been delivered but not fulfilled
   val outstandingTasks: scala.collection.mutable.Map[String, Promise[Map[String, Serializable]]] = scala.collection.mutable.Map()
@@ -103,16 +104,23 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
   }
 
   def wrappedReceive = {
+    case ActorIdentity(WebSocketChannelManager, Some(manager)) =>
+      {
+        channelManager = Some(manager)
+        debug(s"Channel manager arrived, registering")
+        channelRegister(chanName)
+      }
     case EmulatorReady(emulator, time) => {
       // Create a record of emulator boot time
       val o = JsObject("emulators" -> JsNumber(emulators.length), "boottime" -> JsNumber(time))
-      channelManager.get ! Message(chanName, createMessageString(o), self)
+      channelSend(chanName, o)
+      info(s"Sent emulator ready message to channel manager")
 
       emulators += emulator
       info(s"Emulator ready: ${emulator}")
       info(s"${emulators.length} emulators awake")
       // sendTask(emulator)
-      
+
     }
     case GetEmulatorOptions(uuid) => {
       val matched = emulators.filter(description => description.uuid.equals(uuid))
@@ -174,7 +182,6 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
         }
       }
     }
-    case unknown => error(s"Received unknown message from ${sender.path}: $unknown")
   }
 }
 
@@ -213,17 +220,17 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
 
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
-  
+
   // Assign a unique ID to each emulator
   val uuid = UUID.randomUUID().toString()
   val conf = node.conf
-  
+
   // Emulator ports (each needs two)
   // WARNING: consolePort must be an even integer
   val base_emulator_port = 5556
   val consolePort = base_emulator_port + 2 * nodeId
   val adbPort = consolePort + 1
-  
+
   opts = opts.copy(network = opts.network.copy(consolePort = Some(consolePort), adbPort = Some(adbPort)))
   val serialID = s"emulator-$consolePort"
   // Display port (1 is 5901, 99 is 5999)
@@ -231,22 +238,22 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   val display_number = base_display_num + nodeId
   val base_display_port = 5900
   val display_port = base_display_port + display_number
-  
+
   val base_wsDisplay_port = 6080
   val ws_display_port = base_wsDisplay_port + display_number
-  
+
   val logger = context.actorOf(Props(new EmulatorLogger(serialID, node, this)), s"logger")
   // Emulator manager reference
   val emanager = context.system.actorFor(s"akka.tcp://clasp@${node.masterip}:2552/user/emulatormanager")
 
   // Static description of this emulator
   var description: Option[EmulatorDescription] = None
-  
+
   // Processes for display management on X11 based system
   var XvfbProcess: Option[Process] = None
   var x11vncProcess: Option[Process] = None
   var websockifyProcess: Option[Process] = None
- 
+
   var heartbeatSchedule: Cancellable = null
 
   // Build sdcard, avd, and start emulator
@@ -354,7 +361,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
       heartbeatSchedule = context.system.scheduler.schedule(0.seconds, 10.seconds, self, EmulatorHeartbeat())
 
       description = Some(EmulatorDescription(node.ip, consolePort, display_port, ws_display_port, self, uuid))
-      emanager ! EmulatorReady(description.get, bootTime-buildTime)
+      emanager ! EmulatorReady(description.get, bootTime - buildTime)
     }
     case _: BootFailure => {
       val failTime = System.currentTimeMillis
@@ -445,7 +452,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
           debug(s"Running websockify using: $webpCommand")
           val webp = webpCommand.run(webpLogger)
           websockifyProcess = Some(webp)
-          
+
           // Toss out the extra stuff and force a framebuffer 
           // that's exactly the size we want
           opts = opts.copy(ui = opts.ui.copy(skin = Some(screen)))
@@ -459,14 +466,14 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
         debug("Running emulator on non-linux platform")
         debug("Showing window, but VNC will not work")
       }
-    } 
+    }
 
     opts = opts.copy(network = opts.network.copy(consolePort = Some(consolePort)))
     opts = opts.copy(avdName = Some(avdName))
     return sdk.start_emulator(opts, Some(logger));
   }
-  
-  override def toString():String = {
+
+  override def toString(): String = {
     return s"[Emulator, id: $uuid, serialId: $serialID, nodeId: $nodeId, consolePort: $consolePort, path: ${self.path}]"
   }
 }

@@ -64,7 +64,7 @@ class WebSocketServer(val nodemanager: ActorRef, val emulatormanager: ActorRef)
   extends Actor
   with ActorLogging {
   var httpApi = context.system.actorOf(Props(new HttpApi(nodemanager, emulatormanager)), name = "httpApi")
-  var chanManager = context.system.actorOf(Props(new WebSocketChannelManager(nodemanager)), name = "channelManager")
+  var chanManager = context.system.actorOf(Props(new WebSocketChannelManager(nodemanager, emulatormanager)), name = "channelManager")
 
   /** Each incoming connection gets a dedicated Actor with a unique serverConnection pipeline */
   def receive = {
@@ -205,7 +205,7 @@ object WebSocketChannelManager {
   case class UnRegisterClient(channelName: String, client: ActorRef)
   case class Message(chan: String, data: String, from: ActorRef)
 }
-class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
+class WebSocketChannelManager(val nodeManager: ActorRef, val emulatorManager: ActorRef) extends Actor
   with ActorLogging
   with ActorStack
   with Slf4jLoggingStack {
@@ -257,6 +257,7 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
 
   // Tell nodemanager we are ready
   nodeManager ! ActorIdentity(WebSocketChannelManager, Some(self))
+  emulatorManager ! ActorIdentity(WebSocketChannelManager, Some(self))
 
   def wrappedReceive = {
     case RegisterChannel(name, owner) => {
