@@ -248,8 +248,7 @@ class NodeManager(val conf: ClaspConf)
       val deploy_and_boot = future {
         val directory: String = "pwd".!!.stripLineEnd
         val username = "whoami".!!.stripLineEnd
-        val hostname = "hostname".!!.stripLineEnd
-        val workspaceDir = s"/tmp/clasp/$username-$hostname"
+        val workspaceDir = s"/tmp/clasp/$username"
 
         val mkdir = s"ssh -oStrictHostKeyChecking=no $client_ip sh -c 'mkdir -p $workspaceDir'"
         if (mkdir.! != 0)
