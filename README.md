@@ -25,6 +25,20 @@
 * Xvfb, x11vnc on Linux workers
 
 
+## Notes on Hardware Virtualization
+
+Intel's VT-x or AMD's SVM is critical to running fast emulators on all 
+worker nodes. Use `egrep -c '(vmx|svm)' /proc/cpuinfo` to check if 
+this is supported by the CPU. Being supported does not mean it's enabled, 
+just supported. Install cpu-checker (`sudo apt-get install -y cpu-checker`)
+and run `sudo /usr/sbin/kvm-ok` to see if it's enabled. You may need to 
+load the kvm module (`sudo modprobe kvm_intel`)
+
+If this is disabled in BIOS on attack you need to use the iDRAC console 
+to enable it. If it's disabled on a cloud provider (EC2, openstack, etc) 
+then you're stuck using the non-accelerated mode. 
+
+
 ## Build and Run Methods
 
 ### SBT Run
