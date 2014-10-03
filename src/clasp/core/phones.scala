@@ -55,6 +55,7 @@ object EmulatorManager {
 
   // Used to send commands to manager
   case class ListEmulators()
+  case class LaunchEmulator()
   case class GetEmulatorOptions(uuid: String)
 
   // TODO move to task manager
@@ -102,7 +103,11 @@ class EmulatorManager(val nodeManager: ActorRef)
       sendTask(emulator)
     }
     case GetEmulatorOptions(uuid) => {
-      emulators.filter(description => description.uuid.equals(uuid)).head.actor ! GetOptions(sender)
+      val matched = emulators.filter(description => description.uuid.equals(uuid))
+      if (matched.isEmpty) { // TODO
+
+      } else
+        matched.head.actor ! GetOptions(sender)
     }
     case EmulatorFailedBoot(actor) => {
       info(s"Emulator failed to boot: $actor")
@@ -135,6 +140,27 @@ class EmulatorManager(val nodeManager: ActorRef)
       promise_option.get failure reason
       sendTask(emulator)
     }
+    case _: LaunchEmulator => {
+      info(s"Received launch emulator request from $sender - asking for nodes")
+
+      val originalSender = sender
+      val response = nodeManager.ask(NodeManager.FindNodesForLaunch(1))(15.seconds).mapTo[Map[Node.NodeDescription, Int]]
+      response onComplete {
+        case Success(result) => {
+          val availableNodes = result.find(nodeMap => nodeMap._2 > 0)
+          if (availableNodes.isEmpty) {
+            debug(s"Unable to launch emulator, no available nodes")
+            originalSender ! Try(new InstantiationException("No nodes available to run on"))
+          } else {
+            originalSender ! Ack()
+            availableNodes.head._1.actor.get ! Node.LaunchEmulator(1)
+          }
+        }
+        case Failure(reason) => {
+          debug(s"Unable to launch emulator")
+          originalSender ! Failure(reason)
+        }
+      }
     }
     case unknown => error(s"Received unknown message from ${sender.path}: $unknown")
   }

@@ -169,6 +169,27 @@ class NodeManager(val conf: ClaspConf)
       } else
         error(s"Unexpected state reached with $ifempty and $nodes")
     }
+    case FindNodesForLaunch(count) => {
+      debug(s"Looking for nodes to boot $count emulators")
+      if (nodesOnline.isEmpty) {
+        debug(s"No nodes available")
+        sender ! Map()
+      } else {
+        // TODO deal with multiple people requesting nodes before
+        // they have had time to boot emulators and then update their 
+        // descriptions with the master
+        var result = collection.mutable.Map[Node.NodeDescription, Int]()
+        nodes.foreach(n => result += (n -> n.onlineEmulators))
+        val roundRobin = Iterator.continually(nodes).flatten
+        var remaining = count
+        def spaceLeft = result.exists(nodeMapping => nodeMapping._2 < 5)
+        while (remaining > 0 && spaceLeft) {
+          val next = roundRobin.next
+          result(next) = result(next) + 1
+          remaining -= 1
+        }
+        debug(s"Found nodes $result")
+        sender ! result.toMap
       }
     }
     case unknown => error(s"Received unknown message from ${sender.path}: $unknown")
@@ -357,6 +378,7 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int, val uuid
       debug(s"Found NodeManger - ${manager}")
 
       // We need to kill ourself if the manager dies
+      // TODO test that this is working as expected?
       context.watch(manager)
 
       info(s"Online at ${self.path}")
