@@ -328,7 +328,7 @@ class Node(val ip: String, val masterip: String, val conf: ClaspConf, val uuid: 
   extends Actor
   with ActorLifecycleLogging
   with ActorStack
-  with Slf4jLoggingStack 
+  with Slf4jLoggingStack
   with ChannelServer {
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
@@ -336,7 +336,7 @@ class Node(val ip: String, val masterip: String, val conf: ClaspConf, val uuid: 
   val numEmulators = conf.numEmulators.get.getOrElse(0)
   val managerId = "manager"
   context.actorSelection(s"akka.tcp://clasp@$masterip:2552/user/nodemanager") ! Identify(managerId)
-  
+
   implicit var channelManager: Option[ActorRef] = None
   val baseChannel = s"/node/$uuid"
 
@@ -389,12 +389,12 @@ class Node(val ip: String, val masterip: String, val conf: ClaspConf, val uuid: 
 
       // Launch initial emulators
       self ! Node.LaunchEmulator(numEmulators)
-      
+
       // Find channel server
       // identifyChannelMaster(masterip)
-        context.actorSelection(s"akka.tcp://clasp@${masterip}:2552/user/channelManager") ! Identify(channelManagerId)
+      context.actorSelection(s"akka.tcp://clasp@${masterip}:2552/user/channelManager") ! Identify(channelManagerId)
       debug(s"Requested channel manager identity from $masterip")
-      
+
     case ActorIdentity(`managerId`, None) => {
       debug(s"No Identity Received For NodeManger, terminating")
       context.system.shutdown
@@ -409,9 +409,10 @@ class Node(val ip: String, val masterip: String, val conf: ClaspConf, val uuid: 
       self ! Node.Shutdown
     }
     case Node.LaunchEmulator(count) => {
-      info(s"Emulator launch requested by $sender")
-      for (_ <- 1 to count)
+      for (_ <- 1 to count) {
+        info(s"Emulator launch requested by $sender")
         devices += bootEmulator()
+      }
     }
     case ActorIdentity(`channelManagerId`, Some(manager)) => {
       debug(s"Channel manager arrived! $manager")
@@ -456,27 +457,34 @@ class Node(val ip: String, val masterip: String, val conf: ClaspConf, val uuid: 
   }
 }
 
+class NodeResourceLogger(val node: Node,
+  implicit val channelManager: Option[ActorRef])
+  extends Actor
+  with ActorLogging
+  with ActorLifecycleLogging
+  with ActorStack
+  with ChannelServer
+  with Slf4jLoggingStack {
 
-class NodeResourceLogger(val node: Node, 
-    implicit val channelManager: Option[ActorRef]) 
-	extends Actor 
-	with ActorLogging
-	with ActorLifecycleLogging 
-	with ActorStack 
-	with ChannelServer
-	with Slf4jLoggingStack {
-  
   val channelName = s"${node.baseChannel}/metrics"
   channelRegister(channelName)
   val sigar = new Sigar
-  
+
   case class CheckCpu()
-  context.system.scheduler.schedule(0.second, 15.second){ self ! CheckCpu() }
-  
+  case class CheckMem()
+  case class CheckSwap()
+  // TODO add network statistics (open TCP connections, bytes Tx and Rx)
+  // See http://stackoverflow.com/questions/11034753/sigar-network-speed for info on how
+  context.system.scheduler.schedule(0.second, 5.second) { self ! CheckCpu() }
+  context.system.scheduler.schedule(0.second, 5.second) { self ! CheckMem() }
+  context.system.scheduler.schedule(0.second, 5.second) { self ! CheckSwap() }
+
   def wrappedReceive = {
     case CheckCpu() => channelSend(channelName, sigar.getCpuPerc)
+    case CheckMem() => channelSend(channelName, sigar.getMem)
+    case CheckSwap() => channelSend(channelName, sigar.getSwap)
   }
-  
+
 }
 
 
