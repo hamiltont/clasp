@@ -148,15 +148,15 @@ class HttpApi(val nodeManager: ActorRef,
   val corsHeaders = List(HttpHeaders.`Access-Control-Allow-Origin`(AllOrigins),
     HttpHeaders.`Access-Control-Allow-Methods`(GET, POST, OPTIONS, DELETE),
     HttpHeaders.`Access-Control-Allow-Headers`("Origin, X-Requested-With, Content-Type, Accept, Accept-Encoding, Accept-Language, Host, Referer, User-Agent"))
-    
+
   def receive = runRoute {
     // logRequestResponse("api", akka.event.Logging.InfoLevel) {
-      respondWithHeaders(corsHeaders) {
-        nodes ~
-          emulators ~
-          system ~
-          static
-      }
+    respondWithHeaders(corsHeaders) {
+      nodes ~
+        emulators ~
+        system ~
+        static
+    }
     // }
   }
 
