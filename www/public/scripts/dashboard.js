@@ -14,6 +14,10 @@ clasp.pubsub = new WebSocketMultiplex(clasp._websocket);
 clasp.channels = {};
 clasp.charts = {};
 
+// Subscribe to all channels we definitely want
+// clasp.channels.nodeupdates = clasp.pubsub.channel('/nodemanager/nodeupdates');
+// WebSocket: Server Message: msg,/nodemanager/nodeupdates,{"ip":"127.0.0.1","status":"Failed","emulators":0,"asOf":1412042188840} dashboard.js:72
+
 // Example pubsub usage: 
 //   var foo = clasp.pubsub.channel('foo');
 //   foo.send('barf');
@@ -30,6 +34,7 @@ clasp.charts = {};
 //  $('#emulatorlogs').append(dataObject.data + '<br />');
 //});
 
+/* 
 $.ajax('http://' + root + '/nodes/all')
   .done(function( data ) {
     console.log( "Server data received: " + data );
@@ -43,6 +48,7 @@ $.ajax('http://' + root + '/nodes/all')
   }).fail(function( jqXHR, textStatus, errorThrown ) {
     console.log( "Server request failed: " + data );
   });
+*/
 
 // TODO only refresh's emulators currently
 clasp.refresh = function () {
@@ -77,4 +83,3 @@ clasp.shutdown = function() {
 }
 
 
-*/
