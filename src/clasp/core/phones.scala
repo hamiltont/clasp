@@ -308,7 +308,9 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
     implicit val system = context.system
     val boot = future {
       info(s"Waiting for emulator $this to come online")
-      if (sdk.wait_for_emulator(serialID, 200.second))
+      // Safety factor of ~3 (~173 seconds is normal for hardware-accelerated 
+      // emulator)
+      if (sdk.wait_for_emulator(serialID, 500.second))
         self ! BootSuccess()
       else
         self ! BootFailure()
