@@ -59,6 +59,9 @@ class ClaspConf(arguments: Seq[String]) extends ScallopConf(arguments) {
     
   var poolKey = opt[String](descr = "The key used to find the workerpool in master.conf", 
       default = Some("clasp.workerpool"))
+      
+  var noClean = opt[Boolean](descr = "Do not remove created files, like AVD directories",
+      default = Some(false))
 
   val numEmulators = opt[Int](default = Option(1),
     descr = "The number of emulators to start on each node.")

@@ -146,9 +146,8 @@ class ClaspClient(val conf: ClaspConf) {
       UUID.randomUUID
     }
   }
-  
-  var n = system.actorOf(Props(new Node(ip, masterip,
-    conf.numEmulators.apply, uuid)), name = s"node-$ip")
+
+  var n = system.actorOf(Props(new Node(ip, masterip, conf, uuid)), name = s"node-$ip")
   info(s"Created Node for $ip")
   debug(s"Using UUID $uuid")
 
@@ -220,7 +219,7 @@ class ClaspMaster(val conf: ClaspConf) {
   val serverConf = ConfigFactory
     .parseString(s"""akka.remote.netty.tcp.hostname="$ip" """)
     .withFallback(ConfigFactory.load("master"))
- 
+
   implicit var system: ActorSystem = null
   try {
     debug(s"About to create Master ActorSystem clasp");
@@ -279,7 +278,7 @@ class ClaspMaster(val conf: ClaspConf) {
   val manager = system.actorOf(Props(new NodeManager(conf)), name = "nodemanager")
   info("Created NodeManager")
 
-  val emanager = system.actorOf(Props(new EmulatorManager(manager)), name = "emulatormanager")
+  val emanager = system.actorOf(Props(new EmulatorManager(manager, conf)), name = "emulatormanager")
   info("Created EmulatorManager")
 
   val server = system.actorOf(Props(new WebSocketServer(manager, emanager)), "websocket")

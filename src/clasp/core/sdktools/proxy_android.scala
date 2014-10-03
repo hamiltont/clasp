@@ -51,7 +51,7 @@ trait AndroidProxy {
 
     val result = for (regex(target) <- regex findAllIn output) yield target
     val res = result.toVector
-    debug(s"get_targets: ${res.mkString(" ")}")
+    // debug(s"get_targets: ${res.mkString(" ")}")
     res
   }
 
@@ -132,7 +132,8 @@ trait AndroidProxy {
           break
         }
       }
-      error(s"Error: ABIname '$abiName' does not exist for specified target.")
+      error(s"Error: ABI '$abiName' does not exist for target '$target'")
+      error(s"Error: ABIs for '$target': $abis")
       return false
     }
 
