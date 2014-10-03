@@ -475,10 +475,11 @@ class NodeResourceLogger(val node: Node,
   case class CheckSwap()
   // TODO add network statistics (open TCP connections, bytes Tx and Rx)
   // See http://stackoverflow.com/questions/11034753/sigar-network-speed for info on how
-  context.system.scheduler.schedule(0.second, 5.second) { self ! CheckCpu() }
-  context.system.scheduler.schedule(0.second, 5.second) { self ! CheckMem() }
-  context.system.scheduler.schedule(0.second, 5.second) { self ! CheckSwap() }
-
+  context.system.scheduler.schedule(0.second, 5.second) {
+    self ! CheckCpu()
+    self ! CheckMem()
+    self ! CheckSwap()
+  }
   def wrappedReceive = {
     case CheckCpu() => channelSend(channelName, sigar.getCpuPerc)
     case CheckMem() => channelSend(channelName, sigar.getMem)
