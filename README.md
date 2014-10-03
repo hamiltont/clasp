@@ -7,22 +7,32 @@
 * Ubuntu 14.04
     * For EC2, I used ami-864d84ee
     * Other OS'es should work fine, but this was the target
-* Java, Scala
-    * `apt-get install -y openjdk-7-jdk scala`
+* Java 7, Scala
+    * `sudo apt-get install -y openjdk-7-jdk scala`
+    * If you already had java6 installed, you need to use `sudo update-alternatives --config java` to set the version to 7
 * sbt
     * `wget http://repo.scala-sbt.org/scalasbt/sbt-native-packages/org/scala-sbt/sbt/0.13.0/sbt.deb --no-verbose`
     * `dpkg -i sbt.deb`
+    * **NOTE:** sbt seems to be able to download and install the scala version it needs for our project, which is slick. Rely on this, and use *sbt console* or *sbt consoleQuick* if you need to run scala console directly
+    * The time on master and workers needs to be (roughly e.g. within a second) sychronized. The easiest method is to manually run NTP once a day: `sudo ntpdate ntp.ubuntu.com` (if you're using a VT network, you have to use their NTP servers e.g. `sudo ntpdate ntp-1.vt.edu`)
 
 **Master**
 * Passwordless SSH from the launch machine to all other machines
     * If you only have one machine, then your `localhost` will double as master and worker, and `ssh localhost` needs to work
     * `ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa`
     * `cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys`
+* node package manager, to install and run web site
+    * `sudo apt-get install -y npm`
 
 **Workers**
 * Android SDK on worker machines
-    * Note that you may need to link libGL into the Android SDK as shown [here](http://stackoverflow.com/a/24978664/119592)
-* Xvfb, x11vnc on Linux workers
+    * Basically, this involves running `wget http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz` then `tar xvzf android-sdk_r23.0.2-linux.tgz` then finding the `android` binary and running 
+    `android update sdk --all --no-ui` (you may want to use `yes | <...>` if you don't want to stick around)
+    * You need to `sudo apt-get install -y ia32-libs` on and 64-bit machines
+    * You may need to link libGL into the Android SDK as shown [here](http://stackoverflow.com/a/24978664/119592)
+    * Xvfb, x11vnc on Linux workers if you want to use remote VNC
+    * Just use `sudo apt-get install -y xvfb x11vnc`
+    * If your worker is on the ataack cloud, these by default run ubuntu 12.04 with a local apt mirror. Our local mirror is limited, so you'll need to replace `/etc/apt/sources.list` with the default `sources.list` before you can install ia32-libs. Use `http://repogen.simplylinux.ch/generate.php` to get the default easily, or just copy it from b17
 
 
 ## Build and Run Methods
