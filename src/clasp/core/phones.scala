@@ -17,39 +17,40 @@ import scala.sys.process.ProcessLogger
 import scala.sys.process.stringToProcess
 import scala.util.Failure
 import scala.util.Success
+import scala.util.Try
 import org.slf4j.LoggerFactory
+import EmulatorActor._
+import EmulatorLogger._
+import EmulatorManager._
 import akka.actor.Actor
+import akka.actor.ActorIdentity
+import akka.actor.ActorLogging
 import akka.actor.ActorRef
 import akka.actor.Cancellable
-import akka.actor.PoisonPill
+import akka.actor.Identify
+import akka.actor.Props
 import akka.actor.actorRef2Scala
+import akka.pattern.ask
+import clasp.ClaspConf
 import clasp.Emulator
+import clasp.core.remoting.ChannelServer
+import clasp.core.remoting.ClaspJson.Ack
+import clasp.core.remoting.WebSocketChannelManager._
 import clasp.core.sdktools.EmulatorOptions
 import clasp.core.sdktools.avd
 import clasp.core.sdktools.sdk
-import clasp.modules.Personas
 import clasp.utils.ActorLifecycleLogging
-import EmulatorManager._
-import EmulatorActor._
 import clasp.utils.ActorLifecycleLogging
-import akka.pattern.ask
-import akka.actor.ActorLogging
-import EmulatorLogger._
-import akka.actor.Props
-import akka.actor.Identify
-import clasp.core.remoting.WebSocketChannelManager._
-import clasp.utils.Slf4jLoggingStack
 import clasp.utils.ActorStack
 import clasp.utils.ActorStack
 import clasp.utils.Slf4jLoggingStack
 import clasp.utils.Slf4jLoggingStack
-import akka.actor.ActorIdentity
-import clasp.core.remoting.ChannelServer
-import scala.util.Try
-import clasp.core.remoting.ClaspJson.Ack
+import clasp.utils.Slf4jLoggingStack
+import spray.json._
+import clasp.core.remoting.ClaspJson._ 
 
 object EmulatorManager {
-  case class EmulatorReady(emu: EmulatorDescription)
+  case class EmulatorReady(emu: EmulatorDescription, bootTime: Long)
   case class EmulatorFailedBoot(actor: ActorRef)
   case class EmulatorCrashed(emu: EmulatorDescription)
 
@@ -63,7 +64,7 @@ object EmulatorManager {
   case class TaskSuccess(taskId: String, data: Map[String, Serializable], emulator: EmulatorDescription)
   case class TaskFailure(taskId: String, reason: Throwable, emulator: EmulatorDescription)
 }
-class EmulatorManager(val nodeManager: ActorRef)
+class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
   extends Actor
   with ActorLifecycleLogging
   with ActorStack
@@ -204,6 +205,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
   
   // Assign a unique ID to each emulator
   val uuid = UUID.randomUUID().toString()
+  val conf = node.conf
   
   // Emulator ports (each needs two)
   // WARNING: consolePort must be an even integer
@@ -269,8 +271,12 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
       info("Halted Xvfb")
     }
 
-    info(s"Removing AVD")
-    avd.delete
+    if (conf.noClean.apply)
+      info("Intentionally not cleaning up AVD")
+    else {
+      info(s"Removing AVD")
+      avd.delete
+    }
 
     if (heartbeatSchedule != null)
       heartbeatSchedule.cancel
@@ -331,13 +337,13 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
       info(s"Emulator $consolePort is awake at $bootTime, took ${bootTime - buildTime}")
 
       // Apply all personas
-      Personas.applyAll(serialID, opts)
+      // Personas.applyAll(serialID, opts)
 
       // Start the heartbeats
       heartbeatSchedule = context.system.scheduler.schedule(0.seconds, 10.seconds, self, EmulatorHeartbeat())
 
       description = Some(EmulatorDescription(node.ip, consolePort, display_port, ws_display_port, self, uuid))
-      emanager ! EmulatorReady(description.get)
+      emanager ! EmulatorReady(description.get, bootTime-buildTime)
     }
     case _: BootFailure => {
       val failTime = System.currentTimeMillis

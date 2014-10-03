@@ -279,9 +279,10 @@ class NodeManager(val conf: ClaspConf)
         // ensure connectivity between master and client. PS - nastyyyyy
 
         val localFlag = if (conf.local()) "--local" else ""
+        val cleanFlag = if (conf.noClean()) "--no-clean" else ""
         val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip " +
           s"sh -c 'cd $workspaceDir; " +
-          s"nohup target/start --client $localFlag --ip $client_ip --mip ${conf.ip()} " +
+          s"nohup target/start --client $localFlag $cleanFlag --ip $client_ip --mip ${conf.ip()} " +
           s"--num-emulators ${conf.numEmulators()} " +
           s"> /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
         info(s"Starting $client_ip using $command")
@@ -323,7 +324,7 @@ object Node {
 }
 // TODO push updated NodeDescriptions to NodeManager whenever our internal state changes
 // TODO combine NodeDescription and NodeDetails
-class Node(val ip: String, val masterip: String, val numEmulators: Int, val uuid: UUID)
+class Node(val ip: String, val masterip: String, val conf: ClaspConf, val uuid: UUID)
   extends Actor
   with ActorLifecycleLogging
   with ActorStack
@@ -332,6 +333,7 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int, val uuid
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
+  val numEmulators = conf.numEmulators.get.getOrElse(0)
   val managerId = "manager"
   context.actorSelection(s"akka.tcp://clasp@$masterip:2552/user/nodemanager") ! Identify(managerId)
   
