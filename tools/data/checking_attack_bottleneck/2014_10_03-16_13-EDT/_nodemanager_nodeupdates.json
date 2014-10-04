@@ -1,0 +1,2 @@
+{"ip":"10.0.2.18","status":"Booting","emulators":0,"uuid":"b8ae82c7-e338-44a8-ab50-eaa554476356","asOf":"2014-10-03T20:13:53Z"}
+{"ip":"10.0.2.18","name":"Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18#1910332699]","status":"Online","emulators":0,"uuid":"8c1d9b5b-a89b-43d9-ae2b-21daa31bf942","asOf":"2014-10-03T20:15:00Z"}

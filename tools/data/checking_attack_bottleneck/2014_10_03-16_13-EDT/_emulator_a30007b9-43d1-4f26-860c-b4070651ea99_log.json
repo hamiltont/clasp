@@ -1,0 +1,124 @@
+emulator: found SDK root at /tftpboot/android
+emulator: Android virtual device file at: /home/hamiltont/.android/avd/18-5574.ini
+emulator: virtual device content at /home/hamiltont/.android/avd/18-5574.avd
+emulator: virtual device config file: /home/hamiltont/.android/avd/18-5574.avd/config.ini
+emulator: using core hw config path: /home/hamiltont/.android/avd/18-5574.avd/hardware-qemu.ini
+emulator: Found AVD target API level: 18
+emulator: Read property file at /tftpboot/android/system-images/android-18/default/x86//build.prop
+emulator: No boot.prop property file found.
+emulator: found skin 'WVGA800' in directory: /tftpboot/android/platforms/android-18/skins
+emulator: autoconfig: -skindir /tftpboot/android/platforms/android-18/skins
+emulator: keyset loaded from: /home/hamiltont/.android/default.keyset
+emulator: there is no '480x800' skin in '/tftpboot/android/platforms/android-18/skins'
+emulator: found magic skin width=480 height=800 bpp=16
+
+emulator: autoconfig: -kernel /tftpboot/android/system-images/android-18/default/x86//kernel-qemu
+emulator: autoconfig: -ramdisk /tftpboot/android/system-images/android-18/default/x86//ramdisk.img
+emulator: Using initial system image: /tftpboot/android/system-images/android-18/default/x86//system.img
+emulator: autoconfig: -initdata /home/hamiltont/.android/avd/18-5574.avd/userdata.img
+emulator: autoconfig: -cache /home/hamiltont/.android/avd/18-5574.avd/cache.img
+emulator: Physical RAM size: 512MB
+
+Content of hardware configuration file:
+  hw.cpu.arch = x86
+  hw.ramSize = 512
+  hw.screen = touch
+  hw.mainKeys = yes
+  hw.trackBall = yes
+  hw.keyboard = yes
+  hw.keyboard.lid = no
+  hw.keyboard.charmap = qwerty2
+  hw.dPad = yes
+  hw.gsmModem = yes
+  hw.gps = yes
+  hw.battery = yes
+  hw.accelerometer = yes
+  hw.audioInput = yes
+  hw.audioOutput = yes
+  hw.sdCard = yes
+  hw.sdCard.path = /tmp/clasp/hamiltont/sdcards/sdcard-18-5574.img
+  disk.cachePartition = yes
+  disk.cachePartition.path = /home/hamiltont/.android/avd/18-5574.avd/cache.img
+  disk.cachePartition.size = 66m
+  hw.lcd.width = 480
+  hw.lcd.height = 800
+  hw.lcd.depth = 16
+  hw.lcd.density = 240
+  hw.lcd.backlight = yes
+  hw.gpu.enabled = no
+  hw.camera.back = emulated
+  hw.camera.front = none
+  vm.heapSize = 48
+  hw.sensors.proximity = yes
+  hw.sensors.magnetic_field = yes
+  hw.sensors.orientation = yes
+  hw.sensors.temperature = yes
+  hw.useext4 = yes
+  kernel.path = /tftpboot/android/system-images/android-18/default/x86//kernel-qemu
+  kernel.parameters =  androidboot.hardware=goldfish clocksource=pit android.checkjni=1
+  disk.ramdisk.path = /tftpboot/android/system-images/android-18/default/x86//ramdisk.img
+  disk.systemPartition.initPath = /tftpboot/android/system-images/android-18/default/x86//system.img
+  disk.systemPartition.size = 296m
+  disk.dataPartition.path = /home/hamiltont/.android/avd/18-5574.avd/userdata-qemu.img
+  disk.dataPartition.initPath = /home/hamiltont/.android/avd/18-5574.avd/userdata.img
+  disk.dataPartition.size = 200m
+  avd.name = 18-5574
+.
+QEMU options list:
+emulator: argv[00] = "/tftpboot/android/tools/emulator64-x86"
+emulator: argv[01] = "-netfast"
+emulator: argv[02] = "-audio"
+emulator: argv[03] = "none"
+emulator: argv[04] = "-dns-server"
+emulator: argv[05] = "8.8.8.8"
+emulator: argv[06] = "-android-ports"
+emulator: argv[07] = "5574,5575"
+emulator: argv[08] = "-android-hw"
+emulator: argv[09] = "/home/hamiltont/.android/avd/18-5574.avd/hardware-qemu.ini"
+Concatenated QEMU options:
+ /tftpboot/android/tools/emulator64-x86 -netfast -audio none -dns-server 8.8.8.8 -android-ports 5574,5575 -android-hw /home/hamiltont/.android/avd/18-5574.avd/hardware-qemu.ini
+emulator: registered 'boot-properties' qemud service
+emulator: System partition format: yaffs2
+emulator: nand_add_dev: system,size=0x12800000,initfile=/tftpboot/android/system-images/android-18/default/x86//system.img
+emulator: mapping 'system' NAND image to /tmp/android-hamiltont/emulator-Buu9CJ
+emulator: rounding devsize up to a full eraseunit, now 12819000
+
+emulator: Data partition format: yaffs2
+DNS server name '8.8.8.8' resolved to 8.8.8.8:55
+emulator: nand_add_dev: userdata,size=0xc800000,file=/home/hamiltont/.android/avd/18-5574.avd/userdata-qemu.img,initfile=/home/hamiltont/.android/avd/18-5574.avd/userdata.img
+emulator: rounding devsize up to a full eraseunit, now c810000
+
+emulator: registered 'boot-properties' qemud service
+emulator: Adding boot property: 'dalvik.vm.heapsize' = '48m'
+emulator: Adding boot property: 'ro.config.low_ram' = 'true'
+emulator: Adding boot property: 'qemu.sf.lcd_density' = '240'
+emulator: Adding boot property: 'qemu.hw.mainkeys' = '1'
+emulator: Adding boot property: 'qemu.sf.fake_camera' = 'back'
+emulator: Cache partition format: yaffs2
+emulator: nand_add_dev: cache,size=0x4200000,file=/home/hamiltont/.android/avd/18-5574.avd/cache.img
+emulator: Initializing hardware OpenGLES emulation support
+Failed to load libGL.so
+error libGL.so: cannot open shared object file: No such file or directory
+Failed to load libGL.so
+error libGL.so: cannot open shared object file: No such file or directory
+emulator: KVM device file is not readable for this user.
+emulator: Kernel parameters: qemu.gles=0 qemu=1 console=ttyS0 android.qemud=ttyS1 androidboot.hardware=goldfish clocksource=pit android.checkjni=1 ndns=1
+emulator:     trying to find: /tftpboot/android/tools/bios.bin
+
+emulator:     trying to find: /tftpboot/android/tools/lib/pc-bios/bios.bin
+
+emulator:     trying to find: /tftpboot/android/tools/vgabios-cirrus.bin
+
+emulator:     trying to find: /tftpboot/android/tools/lib/pc-bios/vgabios-cirrus.bin
+
+emulator: sent '0012host:emulator:5575' to ADB server
+emulator: ping program: /tftpboot/android/tools/ddms
+emulator: ping command: /tftpboot/android/tools/ddms ping emulator 22.6.4.0 "VMware, Inc." "Gallium 0.4 on llvmpipe (LLVM 0x300)" "2.1 Mesa 8.0.4"
+goldfish_fb_get_pixel_format:169: display surface,pixel format:
+  bits/pixel:  16
+  bytes/pixel: 2
+  depth:       16
+  red:         bits=5 mask=0xf800 shift=11 max=0x1f
+  green:       bits=6 mask=0x7e0 shift=5 max=0x3f
+  blue:        bits=5 mask=0x1f shift=0 max=0x1f
+  alpha:       bits=0 mask=0x0 shift=0 max=0x0
