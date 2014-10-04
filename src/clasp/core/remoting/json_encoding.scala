@@ -59,7 +59,7 @@ object ClaspJson extends DefaultJsonProtocol {
       }
   }
 
-  implicit object dateFormat extends RootJsonFormat[Date] {
+  implicit object dateFormat extends JsonFormat[Date] {
     private val iso8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     iso8601Format.setTimeZone(TimeZone.getTimeZone("UTC"))
 
@@ -83,15 +83,12 @@ object ClaspJson extends DefaultJsonProtocol {
           "stolen" -> JsNumber(c.getStolen),
           "sys" -> JsNumber(c.getSys),
           "user" -> JsNumber(c.getUser),
-          "wait" -> JsNumber(c.getWait))
+          "wait" -> JsNumber(c.getWait),
+          "asOf" -> dateFormat.write(new Date)) 
+          // TODO date stamping should really be done when the measurement is taken 
+          // but that would require a wrapper for each type (e.g. DateCpuPerc, etc)
 
-    def read(value: JsValue): CpuPerc =
-      value.asJsObject.getFields("idle", "irq", "nice", "softirq", "stolen", "sys", "user", "wait") match {
-        case Seq(JsNumber(idle), JsNumber(irq), JsNumber(nice), JsNumber(softirq), JsNumber(stolen), JsNumber(sys), JsNumber(user), JsNumber(wait)) =>
-          // TODO....something? 
-          null
-        case _ => deserializationError("ActorRef expected")
-      }
+    def read(value: JsValue): CpuPerc = null
   }
 
   implicit object sigarMemFormat extends RootJsonFormat[Mem] {
@@ -106,7 +103,8 @@ object ClaspJson extends DefaultJsonProtocol {
           "ram" -> JsNumber(m.getRam),
           "total" -> JsNumber(m.getTotal),
           "used" -> JsNumber(m.getUsed),
-          "usedPercent" -> JsNumber(m.getUsedPercent))
+          "usedPercent" -> JsNumber(m.getUsedPercent),
+          "asOf" -> dateFormat.write(new Date))
 
     def read(value: JsValue): Mem = null
   }
@@ -120,7 +118,8 @@ object ClaspJson extends DefaultJsonProtocol {
           "pageIn" -> JsNumber(s.getPageIn),
           "pageOut" -> JsNumber(s.getPageOut),
           "total" -> JsNumber(s.getTotal),
-          "used" -> JsNumber(s.getUsed))
+          "used" -> JsNumber(s.getUsed),
+          "asOf" -> dateFormat.write(new Date))
 
     def read(value: JsValue): Swap = null
   }

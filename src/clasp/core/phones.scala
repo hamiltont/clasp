@@ -49,6 +49,7 @@ import clasp.utils.Slf4jLoggingStack
 import spray.json._
 import clasp.core.remoting.ClaspJson._
 import clasp.core.remoting.WebSocketChannelManager
+import java.util.Date
 
 object EmulatorManager {
   case class EmulatorReady(emu: EmulatorDescription, bootTime: Long)
@@ -112,7 +113,10 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       }
     case EmulatorReady(emulator, time) => {
       // Create a record of emulator boot time
-      val o = JsObject("emulators" -> JsNumber(emulators.length), "boottime" -> JsNumber(time))
+      
+      val o = JsObject("emulators" -> JsNumber(emulators.length), 
+          "boottime" -> JsNumber(time), 
+          "asOf" -> dateFormat.write(new Date))
       channelSend(chanName, o)
       info(s"Sent emulator ready message to channel manager")
 
@@ -370,9 +374,6 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
       info(s"Emulator $this failed to boot. Reported failure at $failTime");
       emanager ! EmulatorFailedBoot(self)
       context.stop(self)
-    }
-    case unknown => {
-      info(s"EmulatorActor ${self.path} received unknown message from ${sender.path}: $unknown")
     }
   }
 
