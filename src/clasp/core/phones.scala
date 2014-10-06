@@ -130,13 +130,13 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       emulators += emulator
       info(s"Emulator ready: ${emulator}")
       info(s"${emulators.length} emulators awake")
-      // sendTask(emulator)
+      sendTask(emulator)
 
-      info(s"Will trigger stress test in 30 seconds")
-      context.system.scheduler.scheduleOnce(30.second){
-        info("It's been 30 seconds, triggering a stress test")  
-        self ! SerialStressTest(emulator)
-      }
+      // info(s"Will trigger stress test in 30 seconds")
+      // context.system.scheduler.scheduleOnce(30.second){
+      //  info("It's been 30 seconds, triggering a stress test")  
+      //  self ! SerialStressTest(emulator)
+      // }
     }
     case GetEmulatorOptions(uuid) => {
       val matched = emulators.filter(description => description.uuid.equals(uuid))
@@ -149,8 +149,8 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       info(s"Emulator failed to boot: $actor")
     }
     case SerialStressTest(emulator) => {
-      info(s"Stress test requested for $emulator")
-      val task = (emu: Emulator) => {
+      info(s"Stress test requested for $emulator (ignoring)")
+      /*val task = (emu: Emulator) => {
         info("About to install APK")
         sdk.install_package(emu.serialID, "examples/antimalware/Profiler.apk")
         info("Installed APK, now uninstalling")
@@ -179,6 +179,7 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       info(s"Queued all tasks for stress test, scheduling task check in 10sec")
       val stressEmulator = emulator
       context.system.scheduler.scheduleOnce(10.second)(self ! CheckForTasks(stressEmulator))
+      */
     }
     case CheckForTasks(emulator) => {
       info("Asked to check for tasks")
