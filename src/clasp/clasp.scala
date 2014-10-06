@@ -56,9 +56,10 @@ object ClaspRunner extends App {
   else {
     var clasp = new ClaspMaster(conf)
 
+    // Uncomment this if you want to enqueue a new task as soon as an emulator comes online
     // Any logging done inside the callback will show up in the remote host
     // nohup file Any exceptions thrown will be delivered to onFailure handler.
-    val f = clasp.register_on_new_emulator((emu: Emulator) => {
+    /*val f = clasp.register_on_new_emulator((emu: Emulator) => {
       var result = scala.collection.mutable.Map[String, Serializable]()
       info("About to install")
       // result("serialID") = emu.serialID
@@ -75,6 +76,8 @@ object ClaspRunner extends App {
     f onFailure {
       case t => error(s"Future failed due to ${t.getMessage}")
     }
+    */
+    
   } // End of clasp master logic
 }
 

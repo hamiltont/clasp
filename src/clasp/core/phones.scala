@@ -4,13 +4,16 @@
  */
 package clasp.core
 
+import java.util.Date
 import java.util.UUID
+
 import scala.collection.immutable.Map
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.future
+import scala.concurrent.promise
 import scala.language.postfixOps
 import scala.sys.process.Process
 import scala.sys.process.ProcessLogger
@@ -18,7 +21,9 @@ import scala.sys.process.stringToProcess
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
+
 import org.slf4j.LoggerFactory
+
 import EmulatorActor._
 import EmulatorLogger._
 import EmulatorManager._
@@ -34,8 +39,10 @@ import akka.pattern.ask
 import clasp.ClaspConf
 import clasp.Emulator
 import clasp.core.remoting.ChannelServer
+import clasp.core.remoting.ClaspJson._
 import clasp.core.remoting.ClaspJson.Ack
 import clasp.core.remoting.WebSocketChannelManager._
+import clasp.core.remoting.WebSocketChannelManager
 import clasp.core.sdktools.EmulatorOptions
 import clasp.core.sdktools.avd
 import clasp.core.sdktools.sdk
@@ -47,9 +54,6 @@ import clasp.utils.Slf4jLoggingStack
 import clasp.utils.Slf4jLoggingStack
 import clasp.utils.Slf4jLoggingStack
 import spray.json._
-import clasp.core.remoting.ClaspJson._
-import clasp.core.remoting.WebSocketChannelManager
-import java.util.Date
 
 object EmulatorManager {
   case class EmulatorReady(emu: EmulatorDescription, bootTime: Long)
@@ -65,6 +69,9 @@ object EmulatorManager {
   case class QueueEmulatorTask(function: Emulator => Map[String, Serializable], promise: Promise[Map[String, Serializable]])
   case class TaskSuccess(taskId: String, data: Map[String, Serializable], emulator: EmulatorDescription)
   case class TaskFailure(taskId: String, reason: Throwable, emulator: EmulatorDescription)
+  case class CheckForTasks(emulator: EmulatorDescription)
+
+  case class SerialStressTest(emulator: EmulatorDescription)
 }
 class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
   extends Actor
@@ -72,7 +79,7 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
   with ActorStack
   with Slf4jLoggingStack
   with ChannelServer {
-  
+
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
@@ -101,7 +108,7 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       // Alternatively, just copy all *.class files
       to.actor ! undeliveredTasks.dequeue
     } else
-      error("Emulator came online, but no work was available.")
+      error("Emulator is ready, but no work was available.")
   }
 
   def wrappedReceive = {
@@ -113,10 +120,10 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       }
     case EmulatorReady(emulator, time) => {
       // Create a record of emulator boot time
-      
-      val o = JsObject("emulators" -> JsNumber(emulators.length), 
-          "boottime" -> JsNumber(time), 
-          "asOf" -> dateFormat.write(new Date))
+
+      val o = JsObject("emulators" -> JsNumber(emulators.length),
+        "boottime" -> JsNumber(time),
+        "asOf" -> dateFormat.write(new Date))
       channelSend(chanName, o)
       info(s"Sent emulator ready message to channel manager")
 
@@ -125,6 +132,11 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       info(s"${emulators.length} emulators awake")
       // sendTask(emulator)
 
+      info(s"Will trigger stress test in 30 seconds")
+      context.system.scheduler.scheduleOnce(30.second){
+        info("It's been 30 seconds, triggering a stress test")  
+        self ! SerialStressTest(emulator)
+      }
     }
     case GetEmulatorOptions(uuid) => {
       val matched = emulators.filter(description => description.uuid.equals(uuid))
@@ -135,6 +147,42 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
     }
     case EmulatorFailedBoot(actor) => {
       info(s"Emulator failed to boot: $actor")
+    }
+    case SerialStressTest(emulator) => {
+      info(s"Stress test requested for $emulator")
+      val task = (emu: Emulator) => {
+        info("About to install APK")
+        sdk.install_package(emu.serialID, "examples/antimalware/Profiler.apk")
+        info("Installed APK, now uninstalling")
+        sdk.uninstall_package(emu.serialID, "examples/antimalware/Profiler.apk")
+        info("Uninstalled APK")
+        Map[String, Serializable]()
+      }
+      for (a <- 1 to 9) {
+        val result = promise[Map[String, Serializable]]
+        self ! EmulatorManager.QueueEmulatorTask(task, result)
+      }
+      info(s"Queued basic stress tasks")
+      val lastResult = promise[Map[String, Serializable]]
+      self ! EmulatorManager.QueueEmulatorTask(task, lastResult)
+      info(s"Queued final stress task")
+      val finalResult = lastResult.future
+      finalResult onComplete {
+        case Success(value) => {
+          info("Final task completed successfully")
+        }
+        case _ : Failure[_] => {
+          info("Final task failed")
+        }
+      }
+
+      info(s"Queued all tasks for stress test, scheduling task check in 10sec")
+      val stressEmulator = emulator
+      context.system.scheduler.scheduleOnce(10.second)(self ! CheckForTasks(stressEmulator))
+    }
+    case CheckForTasks(emulator) => {
+      info("Asked to check for tasks")
+      sendTask(emulator)
     }
     case EmulatorCrashed(emulator) => {
       info(s"Emulator crashed: $emulator")
