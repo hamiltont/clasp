@@ -6,6 +6,7 @@ package clasp.core
 
 import java.util.Date
 import java.util.UUID
+import java.io.Serializable
 
 import scala.collection.immutable.Map
 import scala.collection.mutable.ListBuffer

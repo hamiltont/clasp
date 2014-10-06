@@ -23,11 +23,15 @@ import core.NodeManager
 import core.sdktools.sdk
 import spray.can.Http
 import spray.can.server.UHttp
+import java.io.Serializable
 import java.util.UUID
 import org.hyperic.sigar.Mem
 import org.hyperic.sigar.Sigar
-import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.SigarException
 import org.hyperic.sigar.Cpu
+import java.io.BufferedWriter
+import java.io.FileWriter
+import scala.math.Numeric
 
 /* Used to launch Clasp from the command line */
 object ClaspRunner extends App {
@@ -56,13 +60,20 @@ object ClaspRunner extends App {
   else {
     var clasp = new ClaspMaster(conf)
 
-    // Uncomment this if you want to enqueue a new task as soon as an emulator comes online
     // Any logging done inside the callback will show up in the remote host
     // nohup file Any exceptions thrown will be delivered to onFailure handler.
     
+    val filename = s"stressTest.${"hostname".!!.stripLineEnd}.json"
+    val file = new File(s"logs/${filename}")
+    val writer = (new BufferedWriter(new FileWriter(file, true)), file)
+        
     val task = (emu: Emulator) => {
-      var result = scala.collection.mutable.Map[String, Serializable]()
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
       info("About to install")
+      val time: java.lang.Long = System.currentTimeMillis
+      val stime = java.lang.Long.toString(time)
+      result("start") = stime
+      
       // result("serialID") = emu.serialID
       // result("node") = "hostname".!!.stripLineEnd
 
@@ -70,15 +81,23 @@ object ClaspRunner extends App {
       info("Installed, now uninstalling")
       sdk.uninstall_package(emu.serialID, "examples/antimalware/Profiler.apk")
       info("Uninstalled")
+      
       result.toMap
     }
     
-    for (i <- 1 to 9)
+    for (i <- 1 to 2)
       clasp.register_on_new_emulator(task)
     
     val f = clasp.register_on_new_emulator(task)
     f onSuccess {
-      case data => info(s"Emulator Tasks completed successfully") // Node ${data("node")}, emulator ${data("serialID")}""")
+      case data => {
+        
+        val start = java.lang.Long.parseLong(data("start").toString)
+        val end = System.currentTimeMillis()
+        
+        info(s"Emulator Tasks completed successfully") // Node ${data("node")}, emulator ${data("serialID")}""")
+        info(s"Took ${end - start}")
+      }
     }
     f onFailure {
       case t => error(s"Future failed")
