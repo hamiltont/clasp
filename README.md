@@ -28,7 +28,7 @@
 * Android SDK on worker machines
     * Basically, this involves running `wget http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz` then `tar xvzf android-sdk_r23.0.2-linux.tgz` then finding the `android` binary and running 
     `android update sdk --all --no-ui` (you may want to use `yes | <...>` if you don't want to stick around)
-    * You need to `sudo apt-get install -y ia32-libs` on and 64-bit machines
+    * You need to `sudo apt-get install -y ia32-libs` on any 64-bit machines to get things like adb to run. Yes, it's annoying
     * You may need to link libGL into the Android SDK as shown [here](http://stackoverflow.com/a/24978664/119592)
     * Xvfb, x11vnc on Linux workers if you want to use remote VNC
     * Just use `sudo apt-get install -y xvfb x11vnc`
