@@ -67,14 +67,18 @@ object ClaspRunner extends App {
       // result("node") = "hostname".!!.stripLineEnd
 
       sdk.install_package(emu.serialID, "examples/antimalware/Profiler.apk")
-      info("Installed")
-
+      info("Installed, now uninstalling")
+      sdk.uninstall_package(emu.serialID, "examples/antimalware/Profiler.apk")
+      info("Uninstalled")
       result.toMap
     }
     
+    for (i <- 1 to 9)
+      clasp.register_on_new_emulator(task)
+    
     val f = clasp.register_on_new_emulator(task)
     f onSuccess {
-      case data => info(s"Emulator Task completed successfully") // Node ${data("node")}, emulator ${data("serialID")}""")
+      case data => info(s"Emulator Tasks completed successfully") // Node ${data("node")}, emulator ${data("serialID")}""")
     }
     f onFailure {
       case t => error(s"Future failed")
