@@ -191,6 +191,7 @@ object WebSocketChannelManager {
   sealed abstract class Role
   case class Client(actor: ActorRef) extends Role
   case class Server(actor: ActorRef) extends Role
+  case class FlushLogFiles()
 
   /**
    * A channel that has clients, but does not have any owner available. Used
@@ -235,6 +236,7 @@ class WebSocketChannelManager(val nodeManager: ActorRef, val emulatorManager: Ac
         getChannelLogMap(name)
       }
     }
+  // context.system.scheduler.schedule(3.minutes, 3.minutes)(self ! FlushLogFiles())
 
   def getChannelLogWriter(name: String): BufferedWriter = getChannelLogMap(name)._1
   def getChannelLog(name: String): File = getChannelLogMap(name)._2
@@ -330,6 +332,7 @@ class WebSocketChannelManager(val nodeManager: ActorRef, val emulatorManager: Ac
         case Some(server: Server) => { // Send to all clients
           // Access log file for this channel and store the message
           getChannelLogWriter(channel).write(data + "\n")
+          getChannelLogWriter(channel).flush
 
           getChannel(channel) match {
             case Some(real: RealChannel) => {
@@ -343,6 +346,7 @@ class WebSocketChannelManager(val nodeManager: ActorRef, val emulatorManager: Ac
         case None => log.error(s"Discarded Message - unknown sender")
       }
     }
+    case FlushLogFiles() => logFiles.foreach { map => map._2._1.flush }
   }
 
   override def postReceive = {
