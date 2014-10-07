@@ -113,16 +113,28 @@ object ClaspRunner extends App {
     val getSensorsTask = (emu: Emulator) => {
       var result = scala.collection.mutable.Map[String, java.io.Serializable]()
       result("type") = "sensorlist"
-      info("About to list packages")
+      info("About to get sensors")
       val stime: java.lang.Long = System.currentTimeMillis
-      val packages = sdk.get_installed_packages(emu.serialID)
       val sensors = sdk.get_sensor_status(emu.telnetPort)
       result("duration") = System.currentTimeMillis - stime
       info(s"Found sensors ${sensors}")
       result.toMap
     }
     
-    for (i <- 1 to 10) {
+    val sendGpsTask = (emu: Emulator) => {
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "sendgps"
+      info("About to send GPS")
+      val stime: java.lang.Long = System.currentTimeMillis
+      val sensors = sdk.get_sensor_status(emu.telnetPort)
+      sdk.send_geo_fix(emu.telnetPort, "-89.296875", "37.675125", "", "")
+      result("duration") = System.currentTimeMillis - stime
+      info(s"sent gps")
+      result.toMap
+    }
+    
+    for (i <- 1 to 1000) {
+      clasp.register_on_new_emulator(keyTask)
       clasp.register_on_new_emulator(installTask)
       clasp.register_on_new_emulator(keyTask)
       clasp.register_on_new_emulator(listPackagesTask)
