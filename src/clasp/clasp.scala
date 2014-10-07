@@ -86,10 +86,47 @@ object ClaspRunner extends App {
       result("duration") = System.currentTimeMillis - stime
       info("Uninstalled")
       result.toMap
-    } 
+    }
+    
+    val keyTask = (emu: Emulator) => {
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "keypress"
+      info("About to press key")
+      val stime: java.lang.Long = System.currentTimeMillis
+      sdk.remote_shell(emu.serialID, "input keyevent 122")
+      result("duration") = System.currentTimeMillis - stime
+      info("Pressed")
+      result.toMap
+    }
+
+    val listPackagesTask = (emu: Emulator) => {
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "packagelist"
+      info("About to list packages")
+      val stime: java.lang.Long = System.currentTimeMillis
+      val packages = sdk.get_installed_packages(emu.serialID)
+      result("duration") = System.currentTimeMillis - stime
+      info(s"Found packages ${packages}")
+      result.toMap
+    }
+    
+    val getSensorsTask = (emu: Emulator) => {
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "sensorlist"
+      info("About to list packages")
+      val stime: java.lang.Long = System.currentTimeMillis
+      val packages = sdk.get_installed_packages(emu.serialID)
+      val sensors = sdk.get_sensor_status(emu.telnetPort)
+      result("duration") = System.currentTimeMillis - stime
+      info(s"Found sensors ${sensors}")
+      result.toMap
+    }
     
     for (i <- 1 to 10) {
       clasp.register_on_new_emulator(installTask)
+      clasp.register_on_new_emulator(keyTask)
+      clasp.register_on_new_emulator(listPackagesTask)
+      clasp.register_on_new_emulator(getSensorsTask)
       clasp.register_on_new_emulator(uninstallTask)
     }
     
