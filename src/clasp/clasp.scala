@@ -126,7 +126,6 @@ object ClaspRunner extends App {
       result("type") = "sendgps"
       info("About to send GPS")
       val stime: java.lang.Long = System.currentTimeMillis
-      val sensors = sdk.get_sensor_status(emu.telnetPort)
       sdk.send_geo_fix(emu.telnetPort, "-89.296875", "37.675125", "", "")
       result("duration") = System.currentTimeMillis - stime
       info(s"sent gps")
