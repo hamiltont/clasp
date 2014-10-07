@@ -23,6 +23,7 @@ object Command {
       } else {
         command ! logger
       }
+    debug(s"Output: ${out.toString}")
     debug(s"Finished executing'$command'")
     if (ret != 0) {
       return None
