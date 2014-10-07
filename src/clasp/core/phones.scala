@@ -402,7 +402,7 @@ class EmulatorActor(val nodeId: Int, var opts: EmulatorOptions,
     }
     case EmulatorTask(id, callback) => {
       info(s"Performing task $id")
-      val emu = new Emulator(serialID)
+      val emu = new Emulator(serialID, consolePort)
 
       val data = future { callback(emu) }
       data.mapTo[Map[String, Serializable]] onComplete {
