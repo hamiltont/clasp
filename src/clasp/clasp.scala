@@ -82,7 +82,7 @@ object ClaspRunner extends App {
       result("type") = "uninstall"
       info("About to uninstall")
       val stime: java.lang.Long = System.currentTimeMillis
-      sdk.uninstall_package(emu.serialID, "examples/app-tester/apps/pokemon/com.MitchK.PokemonJokes.apk")
+      sdk.uninstall_package(emu.serialID, "com.MitchK.PokemonJokes")
       result("duration") = System.currentTimeMillis - stime
       info("Uninstalled")
       result.toMap
