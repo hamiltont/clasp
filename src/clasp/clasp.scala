@@ -72,7 +72,7 @@ object ClaspRunner extends App {
       result("type") = "install"
       info("About to install")
       val stime: java.lang.Long = System.currentTimeMillis
-      sdk.install_package(emu.serialID, "examples/antimalware/Profiler.apk")
+      sdk.install_package(emu.serialID, "examples/app-tester/apps/pokemon/com.MitchK.PokemonJokes.apk")
       result("duration") = System.currentTimeMillis - stime
       info("Installed")
       result.toMap
@@ -80,9 +80,9 @@ object ClaspRunner extends App {
     val uninstallTask = (emu: Emulator) => {
       var result = scala.collection.mutable.Map[String, java.io.Serializable]()
       result("type") = "uninstall"
-      info("About to install")
+      info("About to uninstall")
       val stime: java.lang.Long = System.currentTimeMillis
-      sdk.uninstall_package(emu.serialID, "examples/antimalware/Profiler.apk")
+      sdk.uninstall_package(emu.serialID, "examples/app-tester/apps/pokemon/com.MitchK.PokemonJokes.apk")
       result("duration") = System.currentTimeMillis - stime
       info("Uninstalled")
       result.toMap
