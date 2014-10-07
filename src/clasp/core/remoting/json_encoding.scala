@@ -8,6 +8,7 @@ import org.hyperic.sigar.CpuPerc
 import org.slf4j.LoggerFactory
 import akka.actor.ActorRef
 import clasp.core.EmulatorActor.EmulatorDescription
+import clasp.core.EmulatorManager.StructuredTaskResult
 import clasp.core.Node
 import clasp.core.Node.NodeDescription
 import clasp.core.sdktools._
@@ -149,6 +150,8 @@ object ClaspJson extends DefaultJsonProtocol {
   implicit val nodeStatusFormat = jsonEnum(Node.Status)
 
   implicit val nodeFormat = jsonFormat(NodeDescription, "ip", "name", "status", "emulators", "uuid", "asOf")
+  
+  implicit val sTaskFormat = jsonFormat(StructuredTaskResult, "task", "duration")
 
   implicit val emulatorDescriptionFormat = jsonFormat(EmulatorDescription, "publicip", "consolePort", "vncPort", "wsVncPort", "actorPath", "uuid")
 

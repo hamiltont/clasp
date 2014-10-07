@@ -72,6 +72,8 @@ object EmulatorManager {
   case class TaskFailure(taskId: String, reason: Throwable, emulator: EmulatorDescription)
   case class CheckForTasks(emulator: EmulatorDescription)
 
+  case class StructuredTaskResult(taskType: String, duration: Long)
+  
   case class SerialStressTest(emulator: EmulatorDescription)
 }
 class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
@@ -87,6 +89,7 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
   val emulators = ListBuffer[EmulatorDescription]()
 
   val chanName = "/emulatormanager"
+  val taskChanName = "/tasks"
   implicit var channelManager: Option[ActorRef] = None
   // implicit var channelManager = Some(context.actorFor(s"akka.tcp://clasp@${conf.ip()}:2552/user/channelManager"))
 
@@ -118,6 +121,7 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
         channelManager = Some(manager)
         debug(s"Channel manager arrived, registering")
         channelRegister(chanName)
+        channelRegister(taskChanName)
       }
     case EmulatorReady(emulator, time) => {
       // Create a record of emulator boot time
@@ -204,6 +208,10 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
     }
     case TaskSuccess(id, data, emulator) => {
       info(s"Task $id has completed")
+      
+      val result = StructuredTaskResult(data("type").toString, java.lang.Long.parseLong(data("duration").toString))
+      channelSend(taskChanName, result)
+      
       val promise_option = outstandingTasks remove id
       promise_option.get success data
       sendTask(emulator)

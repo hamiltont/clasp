@@ -67,28 +67,33 @@ object ClaspRunner extends App {
     val file = new File(s"logs/${filename}")
     val writer = (new BufferedWriter(new FileWriter(file, true)), file)
         
-    val task = (emu: Emulator) => {
+    val installTask = (emu: Emulator) => {
       var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "install"
       info("About to install")
-      val time: java.lang.Long = System.currentTimeMillis
-      val stime = java.lang.Long.toString(time)
-      result("start") = stime
-      
-      // result("serialID") = emu.serialID
-      // result("node") = "hostname".!!.stripLineEnd
-
+      val stime: java.lang.Long = System.currentTimeMillis
       sdk.install_package(emu.serialID, "examples/antimalware/Profiler.apk")
-      info("Installed, now uninstalling")
-      sdk.uninstall_package(emu.serialID, "examples/antimalware/Profiler.apk")
-      info("Uninstalled")
-      
+      result("duration") = System.currentTimeMillis - stime
+      info("Installed")
       result.toMap
     }
+    val uninstallTask = (emu: Emulator) => {
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "uninstall"
+      info("About to install")
+      val stime: java.lang.Long = System.currentTimeMillis
+      sdk.uninstall_package(emu.serialID, "examples/antimalware/Profiler.apk")
+      result("duration") = System.currentTimeMillis - stime
+      info("Uninstalled")
+      result.toMap
+    } 
     
-    for (i <- 1 to 2)
-      clasp.register_on_new_emulator(task)
+    for (i <- 1 to 10) {
+      clasp.register_on_new_emulator(installTask)
+      clasp.register_on_new_emulator(uninstallTask)
+    }
     
-    val f = clasp.register_on_new_emulator(task)
+    /*val f = clasp.register_on_new_emulator(task)
     f onSuccess {
       case data => {
         
@@ -101,7 +106,7 @@ object ClaspRunner extends App {
     }
     f onFailure {
       case t => error(s"Future failed")
-    }
+    }*/
     
   } // End of clasp master logic
 }
