@@ -19,13 +19,19 @@ trial = 0
 result = data.frame()
 for (file in Sys.glob("*/_emulatormanager.json")) {
   x = readLines(file)
+  if (length(x) == 0) {
+    cat("File", file, "is empty, skipping\n")
+    next
+  }
   innerresult = fromJSON(paste('[', paste(x, collapse=','), ']'))
   innerresult$trial = trial
   trial = trial + 1
   if (length(result) == 0)
     result = innerresult
-  else 
+  else {
+    cat("read", file, "\n")
     result = rbind(result, innerresult)
+  }
 }
 result$trial = as.factor(result$trial)
 emulators = result
@@ -35,8 +41,8 @@ emulators$asOf = as.POSIXct(emulators$asOf,format="%Y-%m-%dT%H:%M:%OS")
 emulators$exp_seconds = emulators$asOf - min(emulators$asOf)
 
 # Simple plot
-plot(emulators$emulators, emulators$boottime/1000, type='l',
-     ylab="Boot Time (sec)", xlab="Active Emulators When Booting")
+# plot(emulators$emulators, emulators$boottime/1000, type='l',
+#     ylab="Boot Time (sec)", xlab="Active Emulators When Booting")
 
 # Get lm string to print on graph
 # From http://stackoverflow.com/a/13451587/119592
@@ -76,6 +82,23 @@ ggplot(combined_emulators, aes(x=e_count, y=boot_mean)) +
   xlab("Emulators Launched") + 
   geom_smooth(method="lm", formula=y ~ x) + 
   scale_x_discrete(breaks=seq(0,70,5)) +
+  annotate("text", x=25, y=250, label = lm_eqn(lm(y~x,emulators)), size = 6, parse=TRUE)
+
+# After manually reading in emulator twice (once from vt-x, once
+# not) and combining them using rbind (and adding a column type)
+# to each, I used this to generate a combined plot
+cpu_cols <- c("lightblue","blue")
+ggplot(combined_all, aes(x=e_count, y=boot_mean, color=type, fill=type)) + 
+  scale_color_manual(name="Acceleration", values=cpu_cols) + 
+  scale_fill_manual(name="Acceleration", values=cpu_cols) + 
+  geom_errorbar(aes(ymax = boot_mean + boot_se, ymin=boot_mean - boot_se), size=1) + 
+  ylab("Boot Time (seconds)") + 
+  xlab("Active Emulators") + 
+  geom_smooth(method="lm", formula=y ~ x, alpha=0.3) + 
+  theme(panel.background = element_rect(fill = "white")) + 
+  theme(panel.grid.major = element_line(colour = "gray",size=0.2)) + 
+  scale_x_discrete(breaks=seq(0,70,5)) +
+  theme(legend.justification=c(1, 0), legend.position=c(1, 0)) + 
   annotate("text", x=25, y=250, label = lm_eqn(lm(y~x,emulators)), size = 6, parse=TRUE)
 
 ###################################################
@@ -186,7 +209,8 @@ for (beat in beats) {
 grid.arrange(p_ram_scaled, p_cpu_scaled, nrow=2, ncol=1)
 
 # Cheap hack to make time start from 00 instead of 06
-swap$exp_time = swap$asOf - 60*60*6
+# swap$exp_time = swap$asOf - 60*60*6
+swap$exp_time = swap$asOf - 60*60*5
 
 p_swap = ggplot(swap, aes(x=exp_time, y=pageOut)) + 
   geom_line() + 

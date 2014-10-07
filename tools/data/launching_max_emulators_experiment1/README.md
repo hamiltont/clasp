@@ -16,7 +16,7 @@ were `.host_clasp_vtx`
 For now data is stored on dropbox because it's 85MB. See
 [here](https://dl.dropboxusercontent.com/u/6336312/Clasp/clasp_exp1.tgz)
 
-The log from each clasp master is called `7.screenlog.lot`, and each 
+The log from each clasp master is called `7.master.log`, and each 
 worker log is called `8.worker.log`. The channel server logs are 
 stored in a folder named after the launch time e.g. `2014_10_04-02_11-EDT`. 
 Due to some errors with buffer flusing to disk, the channel logs are 
@@ -38,6 +38,14 @@ Each master was manually started using
     $ screen -L -S step
     $ cd tools
     $ ./stepped-launch.sh http://10.0.2.29:8080
+
+To recover the emulator data from the master logs, I used: 
+
+    $ for i in `ls *.lot`
+    do
+    NUM=$(echo $i | grep -o -P '\d+')
+    cat $i | grep "emulatormanager" | grep "Message" | grep -o -P '{.*}' > $NUM._emulatormanager.json
+    done
 
 ## Measuring with VT-x
 
