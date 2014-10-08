@@ -4,9 +4,9 @@
  */
 package clasp.core
 
+import java.io.Serializable
 import java.util.Date
 import java.util.UUID
-import java.io.Serializable
 
 import scala.collection.immutable.Map
 import scala.collection.mutable.ListBuffer
@@ -73,8 +73,10 @@ object EmulatorManager {
   case class CheckForTasks(emulator: EmulatorDescription)
 
   case class StructuredTaskResult(taskType: String, duration: Long)
-  
+
   case class SerialStressTest(emulator: EmulatorDescription)
+
+  case class MeasureTPS(taskCount: Long = 100000)
 }
 class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
   extends Actor
@@ -122,6 +124,7 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
         debug(s"Channel manager arrived, registering")
         channelRegister(chanName)
         channelRegister(taskChanName)
+        channelRegister("/measuretps")
       }
     case EmulatorReady(emulator, time) => {
       // Create a record of emulator boot time
@@ -190,6 +193,32 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       info("Asked to check for tasks")
       sendTask(emulator)
     }
+    case MeasureTPS(taskCount) => {
+      val startTime = System.currentTimeMillis
+      val noopTask = (emu: Emulator) => { Map[String, java.io.Serializable]() }
+      for (i <- 0L to taskCount) {
+        val result = promise[Map[String, Serializable]]
+        self ! EmulatorManager.QueueEmulatorTask(noopTask, result)
+      }
+
+      val tasks = taskCount
+      val finalTask = (emu: Emulator) => { Map[String, java.io.Serializable]("start" -> startTime, "tasks" -> tasks) }
+      val finalResult = promise[Map[String, Serializable]]
+      self ! EmulatorManager.QueueEmulatorTask(finalTask, finalResult)
+      val whoAmI = self
+      finalResult.future onComplete {
+        case Success(value) => {
+          val end = System.currentTimeMillis
+          info(s"MeasureTPS has completed successfully at $end")
+          val duration = end - java.lang.Long.parseLong(value("start").toString)
+          info(s"MeasureTPS took $duration for ${value("tasks")} tasks")
+          val o = JsObject("tasks" -> JsNumber(value("tasks").toString),
+            "duration" -> JsNumber(duration))
+          channelSend("/measuretps", o)
+        }
+        case Failure(reason) => info(s"MeasureTPS has failed: $reason")
+      }
+    }
     case EmulatorCrashed(emulator) => {
       info(s"Emulator crashed: $emulator")
       emulators -= emulator
@@ -208,10 +237,12 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
     }
     case TaskSuccess(id, data, emulator) => {
       info(s"Task $id has completed")
-      
-      val result = StructuredTaskResult(data("type").toString, java.lang.Long.parseLong(data("duration").toString))
-      channelSend(taskChanName, result)
-      
+
+      if (data.contains("type") && data.contains("duration")) {
+        val result = StructuredTaskResult(data("type").toString, java.lang.Long.parseLong(data("duration").toString))
+        channelSend(taskChanName, result)
+      }
+
       val promise_option = outstandingTasks remove id
       promise_option.get success data
       sendTask(emulator)
