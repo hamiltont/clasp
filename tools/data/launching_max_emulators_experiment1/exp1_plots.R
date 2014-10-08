@@ -17,7 +17,7 @@ emulators = fromJSON(paste('[', paste(x, collapse=','), ']'))
 # Read them all into one DF
 trial = 0
 result = data.frame()
-for (file in Sys.glob("*/_emulatormanager.json")) {
+for (file in Sys.glob("*/*_emulatormanager.json")) {
   x = readLines(file)
   if (length(x) == 0) {
     cat("File", file, "is empty, skipping\n")
@@ -84,9 +84,16 @@ ggplot(combined_emulators, aes(x=e_count, y=boot_mean)) +
   scale_x_discrete(breaks=seq(0,70,5)) +
   annotate("text", x=25, y=250, label = lm_eqn(lm(y~x,emulators)), size = 6, parse=TRUE)
 
-# After manually reading in emulator twice (once from vt-x, once
-# not) and combining them using rbind (and adding a column type)
+
+
+# After manually reading in combined_emulators twice 
+# (once from vt-x, once from None) and combining them using rbind (and adding a column type)
 # to each, I used this to generate a combined plot
+> combined_emulators_vtx$type = "VT-x"
+> combined_emulators_novtx$type = "None"
+> combined_all = rbind(combined_emulators_vtx, combined_emulators_novtx)
+combined_all$type = as.factor(combined_all$type)
+
 cpu_cols <- c("lightblue","blue")
 ggplot(combined_all, aes(x=e_count, y=boot_mean, color=type, fill=type)) + 
   scale_color_manual(name="Acceleration", values=cpu_cols) + 
@@ -97,9 +104,9 @@ ggplot(combined_all, aes(x=e_count, y=boot_mean, color=type, fill=type)) +
   geom_smooth(method="lm", formula=y ~ x, alpha=0.3) + 
   theme(panel.background = element_rect(fill = "white")) + 
   theme(panel.grid.major = element_line(colour = "gray",size=0.2)) + 
-  scale_x_discrete(breaks=seq(0,70,5)) +
-  theme(legend.justification=c(1, 0), legend.position=c(1, 0)) + 
-  annotate("text", x=25, y=250, label = lm_eqn(lm(y~x,emulators)), size = 6, parse=TRUE)
+  theme(legend.justification=c(0, 1), legend.position=c(0, 1)) + 
+  annotate("text", x=34, y=165, color="#67D8FF", label = lm_eqn(lm(boot_mean~e_count,combined_emulators_novtx)), size = 6, parse=TRUE) + 
+  annotate("text", x=34, y=75, color="blue", label = lm_eqn(lm(boot_mean~e_count,combined_emulators_vtx)), size = 6, parse=TRUE)
 
 ###################################################
 #
