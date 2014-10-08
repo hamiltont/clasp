@@ -82,7 +82,7 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
   extends Actor
   with ActorLifecycleLogging
   with ActorStack
-  with Slf4jLoggingStack
+  // with Slf4jLoggingStack
   with ChannelServer {
 
   lazy val log = LoggerFactory.getLogger(getClass())
