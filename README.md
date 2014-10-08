@@ -29,25 +29,75 @@
     * Basically, this involves running `wget http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz` then `tar xvzf android-sdk_r23.0.2-linux.tgz` then finding the `android` binary and running 
     `android update sdk --all --no-ui` (you may want to use `yes | <...>` if you don't want to stick around)
     * You need to `sudo apt-get install -y ia32-libs` on any 64-bit machines to get things like adb to run. Yes, it's annoying
-    * You may need to link libGL into the Android SDK as shown [here](http://stackoverflow.com/a/24978664/119592)
     * Xvfb, x11vnc on Linux workers if you want to use remote VNC
     * Just use `sudo apt-get install -y xvfb x11vnc`
     * If your worker is on the ataack cloud, these by default run ubuntu 12.04 with a local apt mirror. Our local mirror is limited, so you'll need to replace `/etc/apt/sources.list` with the default `sources.list` before you can install ia32-libs. Use `http://repogen.simplylinux.ch/generate.php` to get the default easily, or just copy it from b17
-
+* Virtualization Support (critical). See notes below
 
 ## Notes on Hardware Virtualization
 
 Intel's VT-x or AMD's SVM is critical to running fast emulators on all 
-worker nodes. Use `egrep -c '(vmx|svm)' /proc/cpuinfo` to check if 
-this is supported by the CPU. Being supported does not mean it's enabled, 
-just supported. Install cpu-checker (`sudo apt-get install -y cpu-checker`)
-and run `sudo /usr/sbin/kvm-ok` to see if it's enabled. You may need to 
-load the kvm module (`sudo modprobe kvm_intel`)
+worker nodes. This only works with intel x86 based emulators, and the 
+process is different if the host OS is linux or not-linux. These docs
+are mostly for linux, for non-linux you need to use HAXM. The only 
+way to 100% determine if you have turned this on correctly is to start
+the emulator with the `-verbose` flag and grep for KVM (if linux) or 
+HAX (if non-linux). 
 
-If this is disabled in BIOS on attack you need to use the iDRAC console 
-to enable it. If it's disabled on a cloud provider (EC2, openstack, etc) 
-then you're stuck using the non-accelerated mode. 
+The KVM message is either a success like so: 
 
+     emulator: KVM mode auto-enabled!
+
+Or an error message like so: 
+
+     emulator: KVM device file is not readable for this user.
+
+Use `egrep -c '(vmx|svm)' /proc/cpuinfo` to check if this is supported 
+by the CPU. Being supported does not mean it's enabled, just supported. 
+It must be enabled in the BIOS, and is normally termed something like 
+Virtualization Technology (e.g. VT). If VT-x is disabled in BIOS on an 
+ATAACK node you need to use the iDRAC console to enable it. If it's 
+disabled on a cloud provider (EC2, openstack, etc) then you're stuck 
+using the non-accelerated mode. 
+
+You also need to see if it's enabled in the host OS. Install 
+cpu-checker with `sudo apt-get install -y cpu-checker` and run 
+`sudo /usr/sbin/kvm-ok` to check. 
+You may need to load the KVM kernel module with `sudo modprobe kvm_intel`. 
+Being enabled and having the kernel module loaded is *still* not a guarantee. 
+For Linux, you need to ensure that your user has proper permissions on 
+`/dev/kvm`. The fastest way to 100% ensure this is to do these steps (this
+actually does a lot more than is needed, but it works): 
+
+    $ sudo apt-get install -y qemu-kvm libvirt-bin ubuntu-vm-builder bridge-utils
+    $ sudo adduser your_user_name kvm
+    $ sudo adduser your_user_name libvirtd
+    # now log out and log back in
+
+For more info, see [this](https://software.intel.com/en-us/blogs/2012/03/12/how-to-start-intel-hardware-assisted-virtualization-hypervisor-on-linux-to-speed-up-intel-android-x86-gingerbread-emulator). Also, [this site](intel.com/software/android) 
+is a good resource. 
+
+## Notes on Host GPU
+
+The option "Use Host GPU" should probably be called "Use Host OpenGL 
+Implementation" instead. Even if you don't have a graphics card, this 
+should fallback to a host CPU-based OpenGL impl. Main challenge here is that 
+it's really hard to debug and I don't know if anything is even printed to 
+the log to indicate success/failure of attemptint to use host GPU. It's also 
+mutually exclusive with the snapshot option, you cannot use both. Note that 
+boot delay is tiny when you get KVM working properly (like 10-20 seconds) so 
+the loss of snapshots doesn't mean much for reducing boot time if you are using
+KVM. 
+
+As far as I can tell with `sudo lshw -C display`, the attack nodes have
+Matrox MGA G200eW WPCM450 graphics cards and should therefore be 
+able to support the "use host GPU" option as long as OpenGL is working 
+properly. This may mean that you need to link libGL into the Android 
+SDK as shown [here](http://stackoverflow.com/a/24978664/119592). 
+
+There is also apparently a "hardware acceleration" that is specific to 
+GPU operations. I am not yet familiar with what this is or how well it 
+works. Potentially more info [here](http://www.binarytides.com/linux-get-gpu-information/)
 
 ## Build and Run Methods
 
