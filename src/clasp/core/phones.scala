@@ -189,10 +189,7 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       context.system.scheduler.scheduleOnce(10.second)(self ! CheckForTasks(stressEmulator))
       */
     }
-    case CheckForTasks(emulator) => {
-      info("Asked to check for tasks")
-      sendTask(emulator)
-    }
+    case CheckForTasks(emulator) => sendTask(emulator)
     case MeasureTPS(taskCount) => {
 
       future {
