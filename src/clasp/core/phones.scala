@@ -194,15 +194,15 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       sendTask(emulator)
     }
     case MeasureTPS(taskCount) => {
-      val startTime = System.currentTimeMillis
 
       future {
+        val startTime = System.currentTimeMillis
         val noopTask = (emu: Emulator) => { Map[String, java.io.Serializable]() }
         for (i <- 0L to taskCount) {
           val result = promise[Map[String, Serializable]]
           self ! EmulatorManager.QueueEmulatorTask(noopTask, result)
         }
-
+       
         val tasks = taskCount
         val finalTask = (emu: Emulator) => { Map[String, java.io.Serializable]("start" -> startTime, "tasks" -> tasks) }
         val finalResult = promise[Map[String, Serializable]]
