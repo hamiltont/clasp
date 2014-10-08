@@ -114,7 +114,7 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       // Alternatively, just copy all *.class files
       to.actor ! undeliveredTasks.dequeue
     } else
-      error("Emulator is ready, but no work was available.")
+      context.system.scheduler.scheduleOnce(100.millisecond)( self ! CheckForTasks(to))
   }
 
   def wrappedReceive = {
@@ -218,6 +218,8 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
         }
         case Failure(reason) => info(s"MeasureTPS has failed: $reason")
       }
+      
+      sender ! Ack()
     }
     case EmulatorCrashed(emulator) => {
       info(s"Emulator crashed: $emulator")
@@ -230,9 +232,6 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
       val id = UUID.randomUUID().toString()
       outstandingTasks(id) = promise
       info(s"Enqueued new task: $id")
-
-      // TODO does not work if tasks arrive after emulator comes online.
-      // Currently there's little danger of that, but still....
       undeliveredTasks.enqueue(new EmulatorTask(id, task))
     }
     case TaskSuccess(id, data, emulator) => {
