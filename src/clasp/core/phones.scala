@@ -211,8 +211,13 @@ class EmulatorManager(val nodeManager: ActorRef, val conf: ClaspConf)
             info(s"MeasureTPS has completed successfully at $end")
             val duration = end - java.lang.Long.parseLong(value("start").toString)
             info(s"MeasureTPS took $duration for ${value("tasks")} tasks")
+            
+            // Assumes all emulators are started by this pint
+            val ecount = emulators.length
+
             val o = JsObject("tasks" -> JsNumber(value("tasks").toString),
-              "duration" -> JsNumber(duration))
+              "duration" -> JsNumber(duration),
+              "emulators" -> JsNumber(ecount))
             channelSend("/measuretps", o)
           }
           case Failure(reason) => info(s"MeasureTPS has failed: $reason")
