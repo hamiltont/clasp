@@ -140,8 +140,8 @@ all other nodes
                                (default = 172.30.0.153)
   -l, --local                  Indicates that you are running Clasp on only one
                                computer, instead of the (more typical) distribute
-                               system. If ip, pool, or user were not explicitely
-                               provided, this wil update them. --ip will become
+                               system. If ip, pool, or user were not explicitly
+                               provided, this will update them. --ip will become
                                127.0.0.1, user will be the current user, pool to
                                be 127.0.0.1. Currently forces emulators to run in
                                non-headless mode
@@ -157,7 +157,7 @@ all other nodes
   -u, --user  <arg>            The username that clasp should use when SSHing int
                                worker systems (default = clasp)
   -w, --workers  <arg>         The number of worker clients Clasp should start by
-                               default. This number can grow or shrink dynamicall
+                               default. This number can grow or shrink dynamically
                                as the system runs. All clients are picked from th
                                pool of IP addresses inside client.conf
                                (default = 3)
