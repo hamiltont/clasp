@@ -105,6 +105,13 @@ class HttpApi(val nodeManager: ActorRef,
       path("launch") {
         complete(emulatorManger.ask(EmulatorManager.LaunchEmulator())(timeout).mapTo[Ack])
       } ~
+      path("measuretps") {  // I'm gonna need you to take a look at these TPS reports
+        complete(emulatorManger.ask(EmulatorManager.MeasureTPS())(timeout).mapTo[Ack])
+      } ~
+      path("measuretps" / LongNumber) { taskCount => // I'm gonna need you to take a look at these TPS reports
+        info(s"Youve asked me to measure the time for $taskCount no-op tasks")
+        complete(emulatorManger.ask(EmulatorManager.MeasureTPS(taskCount))(timeout).mapTo[Ack])
+      } ~
       pathEndOrSingleSlash {
         complete(emulatorManger.ask(EmulatorManager.ListEmulators())(timeout).mapTo[List[EmulatorDescription]])
       }
@@ -148,15 +155,15 @@ class HttpApi(val nodeManager: ActorRef,
   val corsHeaders = List(HttpHeaders.`Access-Control-Allow-Origin`(AllOrigins),
     HttpHeaders.`Access-Control-Allow-Methods`(GET, POST, OPTIONS, DELETE),
     HttpHeaders.`Access-Control-Allow-Headers`("Origin, X-Requested-With, Content-Type, Accept, Accept-Encoding, Accept-Language, Host, Referer, User-Agent"))
-    
+
   def receive = runRoute {
     // logRequestResponse("api", akka.event.Logging.InfoLevel) {
-      respondWithHeaders(corsHeaders) {
-        nodes ~
-          emulators ~
-          system ~
-          static
-      }
+    respondWithHeaders(corsHeaders) {
+      nodes ~
+        emulators ~
+        system ~
+        static
+    }
     // }
   }
 

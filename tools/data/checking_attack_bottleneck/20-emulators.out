@@ -1,0 +1,141 @@
+[{
+  "publicip": "10.0.2.18",
+  "consolePort": 5558,
+  "vncPort": 5902,
+  "wsVncPort": 6082,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5556#-1139900017]",
+  "uuid": "7f7ebcdd-9dfb-47a4-9b58-a87ede75e5c3"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5560,
+  "vncPort": 5903,
+  "wsVncPort": 6083,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5558#-1849645905]",
+  "uuid": "217ea055-88cc-417e-8a0e-4798c6ebb3e1"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5562,
+  "vncPort": 5904,
+  "wsVncPort": 6084,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5560#-934395498]",
+  "uuid": "08d01afe-8cb6-47bd-92cd-deb87ecdd38f"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5564,
+  "vncPort": 5905,
+  "wsVncPort": 6085,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5562#1498065803]",
+  "uuid": "80f98a79-9fe0-4414-911e-db93da0bd5bf"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5566,
+  "vncPort": 5906,
+  "wsVncPort": 6086,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5564#75983643]",
+  "uuid": "08bda192-6672-4817-9cc1-ac999ca54cf7"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5568,
+  "vncPort": 5907,
+  "wsVncPort": 6087,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5566#1972721383]",
+  "uuid": "88c0092f-aaae-4b0f-a485-6bf8ad5b51db"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5570,
+  "vncPort": 5908,
+  "wsVncPort": 6088,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5568#-447585015]",
+  "uuid": "2bc04b05-d4d1-466a-887c-6e6a2a7f644d"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5572,
+  "vncPort": 5909,
+  "wsVncPort": 6089,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5570#-1865146841]",
+  "uuid": "d6c1af2e-39d1-4668-8e1b-c59a7e87c044"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5574,
+  "vncPort": 5910,
+  "wsVncPort": 6090,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5572#-620078064]",
+  "uuid": "a30007b9-43d1-4f26-860c-b4070651ea99"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5576,
+  "vncPort": 5911,
+  "wsVncPort": 6091,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5574#-710624098]",
+  "uuid": "193b18a7-dd4a-463a-8bb8-c32d7a95c8af"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5578,
+  "vncPort": 5912,
+  "wsVncPort": 6092,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5576#-305915588]",
+  "uuid": "9434ee60-12d5-44c2-8c47-7573609e08de"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5580,
+  "vncPort": 5913,
+  "wsVncPort": 6093,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5578#1127562895]",
+  "uuid": "21c03755-7b5b-44e1-bcc3-d710e695fd2b"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5582,
+  "vncPort": 5914,
+  "wsVncPort": 6094,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5580#-1163364382]",
+  "uuid": "649c5340-8153-453c-b9cb-47a28ffe29e5"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5584,
+  "vncPort": 5915,
+  "wsVncPort": 6095,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5582#146881370]",
+  "uuid": "b430ff1a-1582-4656-aec7-54c5fc25aaa1"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5586,
+  "vncPort": 5916,
+  "wsVncPort": 6096,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5584#1791377748]",
+  "uuid": "d46e4660-e91e-4f5b-b4bf-6c74466054a7"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5588,
+  "vncPort": 5917,
+  "wsVncPort": 6097,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5586#-83149920]",
+  "uuid": "d5f4a98f-8692-4965-9f6e-fb8e78d6f83a"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5590,
+  "vncPort": 5918,
+  "wsVncPort": 6098,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5588#1803512391]",
+  "uuid": "66904530-0834-4e32-98a5-582d8bd2fa07"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5592,
+  "vncPort": 5919,
+  "wsVncPort": 6099,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5590#1154457896]",
+  "uuid": "6c629d0a-4065-4604-b8d3-45fc0b96b986"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5594,
+  "vncPort": 5920,
+  "wsVncPort": 6100,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5592#957057250]",
+  "uuid": "558c45c5-cc7f-4fa3-b69d-f2adc1af154d"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5596,
+  "vncPort": 5921,
+  "wsVncPort": 6101,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5594#244911266]",
+  "uuid": "545e3f32-3a86-4abf-82bd-580feb396785"
+}]

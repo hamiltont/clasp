@@ -169,6 +169,27 @@ class NodeManager(val conf: ClaspConf)
       } else
         error(s"Unexpected state reached with $ifempty and $nodes")
     }
+    case FindNodesForLaunch(count) => {
+      debug(s"Looking for nodes to boot $count emulators")
+      if (nodesOnline.isEmpty) {
+        debug(s"No nodes available")
+        sender ! Map()
+      } else {
+        // TODO deal with multiple people requesting nodes before
+        // they have had time to boot emulators and then update their 
+        // descriptions with the master
+        var result = collection.mutable.Map[Node.NodeDescription, Int]()
+        nodes.foreach(n => result += (n -> n.onlineEmulators))
+        val roundRobin = Iterator.continually(nodes).flatten
+        var remaining = count
+        def spaceLeft = result.exists(nodeMapping => nodeMapping._2 < 5)
+        while (remaining > 0 && spaceLeft) {
+          val next = roundRobin.next
+          result(next) = result(next) + 1
+          remaining -= 1
+        }
+        debug(s"Found nodes $result")
+        sender ! result.toMap
       }
     }
     case unknown => error(s"Received unknown message from ${sender.path}: $unknown")
@@ -258,9 +279,10 @@ class NodeManager(val conf: ClaspConf)
         // ensure connectivity between master and client. PS - nastyyyyy
 
         val localFlag = if (conf.local()) "--local" else ""
+        val cleanFlag = if (conf.noClean()) "--no-clean" else ""
         val command: String = s"ssh -oStrictHostKeyChecking=no $client_ip " +
           s"sh -c 'cd $workspaceDir; " +
-          s"nohup target/start --client $localFlag --ip $client_ip --mip ${conf.ip()} " +
+          s"nohup target/start --client $localFlag $cleanFlag --ip $client_ip --mip ${conf.ip()} " +
           s"--num-emulators ${conf.numEmulators()} " +
           s"> /tmp/clasp/$username/nohup.$client_ip 2>&1 &' "
         info(s"Starting $client_ip using $command")
@@ -302,18 +324,19 @@ object Node {
 }
 // TODO push updated NodeDescriptions to NodeManager whenever our internal state changes
 // TODO combine NodeDescription and NodeDetails
-class Node(val ip: String, val masterip: String, val numEmulators: Int, val uuid: UUID)
+class Node(val ip: String, val masterip: String, val conf: ClaspConf, val uuid: UUID)
   extends Actor
   with ActorLifecycleLogging
   with ActorStack
-  with Slf4jLoggingStack 
+  with Slf4jLoggingStack
   with ChannelServer {
   val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 
+  val numEmulators = conf.numEmulators.get.getOrElse(0)
   val managerId = "manager"
   context.actorSelection(s"akka.tcp://clasp@$masterip:2552/user/nodemanager") ! Identify(managerId)
-  
+
   implicit var channelManager: Option[ActorRef] = None
   val baseChannel = s"/node/$uuid"
 
@@ -357,6 +380,7 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int, val uuid
       debug(s"Found NodeManger - ${manager}")
 
       // We need to kill ourself if the manager dies
+      // TODO test that this is working as expected?
       context.watch(manager)
 
       info(s"Online at ${self.path}")
@@ -365,12 +389,12 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int, val uuid
 
       // Launch initial emulators
       self ! Node.LaunchEmulator(numEmulators)
-      
+
       // Find channel server
       // identifyChannelMaster(masterip)
-        context.actorSelection(s"akka.tcp://clasp@${masterip}:2552/user/channelManager") ! Identify(channelManagerId)
+      context.actorSelection(s"akka.tcp://clasp@${masterip}:2552/user/channelManager") ! Identify(channelManagerId)
       debug(s"Requested channel manager identity from $masterip")
-      
+
     case ActorIdentity(`managerId`, None) => {
       debug(s"No Identity Received For NodeManger, terminating")
       context.system.shutdown
@@ -385,9 +409,10 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int, val uuid
       self ! Node.Shutdown
     }
     case Node.LaunchEmulator(count) => {
-      info(s"Emulator launch requested by $sender")
-      for (_ <- 1 to count)
+      for (_ <- 1 to count) {
+        info(s"Emulator launch requested by $sender")
         devices += bootEmulator()
+      }
     }
     case ActorIdentity(`channelManagerId`, Some(manager)) => {
       debug(s"Channel manager arrived! $manager")
@@ -432,27 +457,35 @@ class Node(val ip: String, val masterip: String, val numEmulators: Int, val uuid
   }
 }
 
+class NodeResourceLogger(val node: Node,
+  implicit val channelManager: Option[ActorRef])
+  extends Actor
+  with ActorLogging
+  with ActorLifecycleLogging
+  with ActorStack
+  with ChannelServer
+  with Slf4jLoggingStack {
 
-class NodeResourceLogger(val node: Node, 
-    implicit val channelManager: Option[ActorRef]) 
-	extends Actor 
-	with ActorLogging
-	with ActorLifecycleLogging 
-	with ActorStack 
-	with ChannelServer
-	with Slf4jLoggingStack {
-  
   val channelName = s"${node.baseChannel}/metrics"
   channelRegister(channelName)
   val sigar = new Sigar
-  
+
   case class CheckCpu()
-  context.system.scheduler.schedule(0.second, 15.second){ self ! CheckCpu() }
-  
+  case class CheckMem()
+  case class CheckSwap()
+  // TODO add network statistics (open TCP connections, bytes Tx and Rx)
+  // See http://stackoverflow.com/questions/11034753/sigar-network-speed for info on how
+  context.system.scheduler.schedule(0.second, 5.second) {
+    self ! CheckCpu()
+    self ! CheckMem()
+    self ! CheckSwap()
+  }
   def wrappedReceive = {
     case CheckCpu() => channelSend(channelName, sigar.getCpuPerc)
+    case CheckMem() => channelSend(channelName, sigar.getMem)
+    case CheckSwap() => channelSend(channelName, sigar.getSwap)
   }
-  
+
 }
 
 

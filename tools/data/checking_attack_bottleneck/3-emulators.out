@@ -1,0 +1,22 @@
+[{
+  "publicip": "10.0.2.18",
+  "consolePort": 5558,
+  "vncPort": 5902,
+  "wsVncPort": 6082,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5556#-1139900017]",
+  "uuid": "7f7ebcdd-9dfb-47a4-9b58-a87ede75e5c3"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5560,
+  "vncPort": 5903,
+  "wsVncPort": 6083,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5558#-1849645905]",
+  "uuid": "217ea055-88cc-417e-8a0e-4798c6ebb3e1"
+}, {
+  "publicip": "10.0.2.18",
+  "consolePort": 5562,
+  "vncPort": 5904,
+  "wsVncPort": 6084,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5560#-934395498]",
+  "uuid": "08d01afe-8cb6-47bd-92cd-deb87ecdd38f"
+}]

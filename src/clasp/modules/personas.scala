@@ -79,8 +79,15 @@ object Personas {
   }
 
   // Convenience aliases.
-  private def goHome(serialID: String) =
-    for (i <- 0 to 3) sdk.remote_shell(serialID, "input keyevent 3")
+  private def goHome(serialID: String) = {
+    val keycodes = AndroidKeys.get_keycodes(1.6)
+    
+    // sdk.send_keyevent(serialID, keycodes.KEY_HOME)
+    
+    // for (i <- 0 to 3) sdk.remote_shell(serialID, "input keyevent 3")
+    for (i <- 0 to 3) sdk.remote_shell(serialID, "input keyevent 122")
+  }
+    
 
   private def dpadCenter(serialID: String)  =
     for (i <- 0 to 3) sdk.remote_shell(serialID, "input keyevent 23")

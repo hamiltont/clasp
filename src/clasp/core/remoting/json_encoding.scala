@@ -4,17 +4,19 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
 import java.util.UUID
-
 import org.hyperic.sigar.CpuPerc
 import org.slf4j.LoggerFactory
-
 import akka.actor.ActorRef
 import clasp.core.EmulatorActor.EmulatorDescription
+import clasp.core.EmulatorManager.StructuredTaskResult
 import clasp.core.Node
 import clasp.core.Node.NodeDescription
 import clasp.core.sdktools._
 import spray.json._
 import spray.json.DefaultJsonProtocol
+import org.hyperic.sigar.Mem
+import org.hyperic.sigar.Swap
+import org.hyperic.sigar.NetStat
 
 // If we ever want to have simpler JSON objects than domain objects, 
 // this is a neat trick
@@ -58,7 +60,7 @@ object ClaspJson extends DefaultJsonProtocol {
       }
   }
 
-  implicit object dateFormat extends RootJsonFormat[Date] {
+  implicit object dateFormat extends JsonFormat[Date] {
     private val iso8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     iso8601Format.setTimeZone(TimeZone.getTimeZone("UTC"))
 
@@ -82,18 +84,47 @@ object ClaspJson extends DefaultJsonProtocol {
           "stolen" -> JsNumber(c.getStolen),
           "sys" -> JsNumber(c.getSys),
           "user" -> JsNumber(c.getUser),
-          "wait" -> JsNumber(c.getWait))
+          "wait" -> JsNumber(c.getWait),
+          "asOf" -> dateFormat.write(new Date)) 
+          // TODO date stamping should really be done when the measurement is taken 
+          // but that would require a wrapper for each type (e.g. DateCpuPerc, etc)
 
-    def read(value: JsValue): CpuPerc =
-      value.asJsObject.getFields("idle", "irq", "nice", "softirq", "stolen", "sys", "user", "wait") match {
-        case Seq(JsNumber(idle), JsNumber(irq), JsNumber(nice), JsNumber(softirq), JsNumber(stolen), JsNumber(sys), JsNumber(user), JsNumber(wait)) =>
-          // TODO....something? 
-          null
-        case _ => deserializationError("ActorRef expected")
-      }
-
+    def read(value: JsValue): CpuPerc = null
   }
 
+  implicit object sigarMemFormat extends RootJsonFormat[Mem] {
+    def write(m: Mem) =
+      if (m == null)
+        JsNull
+      else
+        JsObject("actualFree" -> JsNumber(m.getActualFree),
+          "actualUsed" -> JsNumber(m.getActualUsed),
+          "free" -> JsNumber(m.getFree),
+          "freePercent" -> JsNumber(m.getFreePercent),
+          "ram" -> JsNumber(m.getRam),
+          "total" -> JsNumber(m.getTotal),
+          "used" -> JsNumber(m.getUsed),
+          "usedPercent" -> JsNumber(m.getUsedPercent),
+          "asOf" -> dateFormat.write(new Date))
+
+    def read(value: JsValue): Mem = null
+  }
+  
+  implicit object sigarSwapFormat extends RootJsonFormat[Swap] {
+    def write(s: Swap) =
+      if (s == null)
+        JsNull
+      else
+        JsObject("free" -> JsNumber(s.getFree),
+          "pageIn" -> JsNumber(s.getPageIn),
+          "pageOut" -> JsNumber(s.getPageOut),
+          "total" -> JsNumber(s.getTotal),
+          "used" -> JsNumber(s.getUsed),
+          "asOf" -> dateFormat.write(new Date))
+
+    def read(value: JsValue): Swap = null
+  }
+  
   implicit object uuidFormat extends RootJsonFormat[UUID] {
     def write(d: UUID) = {
       if (d == null)
@@ -119,6 +150,8 @@ object ClaspJson extends DefaultJsonProtocol {
   implicit val nodeStatusFormat = jsonEnum(Node.Status)
 
   implicit val nodeFormat = jsonFormat(NodeDescription, "ip", "name", "status", "emulators", "uuid", "asOf")
+  
+  implicit val sTaskFormat = jsonFormat(StructuredTaskResult, "task", "duration")
 
   implicit val emulatorDescriptionFormat = jsonFormat(EmulatorDescription, "publicip", "consolePort", "vncPort", "wsVncPort", "actorPath", "uuid")
 

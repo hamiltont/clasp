@@ -1,0 +1,8 @@
+[{
+  "publicip": "10.0.2.18",
+  "consolePort": 5558,
+  "vncPort": 5902,
+  "wsVncPort": 6082,
+  "actorPath": "Actor[akka.tcp://clasp@10.0.2.18:2553/user/node-10.0.2.18/emulator-5556#-1139900017]",
+  "uuid": "7f7ebcdd-9dfb-47a4-9b58-a87ede75e5c3"
+}]

@@ -23,11 +23,15 @@ import core.NodeManager
 import core.sdktools.sdk
 import spray.can.Http
 import spray.can.server.UHttp
+import java.io.Serializable
 import java.util.UUID
 import org.hyperic.sigar.Mem
 import org.hyperic.sigar.Sigar
-import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.SigarException
 import org.hyperic.sigar.Cpu
+import java.io.BufferedWriter
+import java.io.FileWriter
+import scala.math.Numeric
 
 /* Used to launch Clasp from the command line */
 object ClaspRunner extends App {
@@ -58,23 +62,100 @@ object ClaspRunner extends App {
 
     // Any logging done inside the callback will show up in the remote host
     // nohup file Any exceptions thrown will be delivered to onFailure handler.
-    val f = clasp.register_on_new_emulator((emu: Emulator) => {
-      var result = scala.collection.mutable.Map[String, Serializable]()
+    
+    val filename = s"stressTest.${"hostname".!!.stripLineEnd}.json"
+    val file = new File(s"logs/${filename}")
+    val writer = (new BufferedWriter(new FileWriter(file, true)), file)
+        
+    val installTask = (emu: Emulator) => {
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "install"
       info("About to install")
-      // result("serialID") = emu.serialID
-      // result("node") = "hostname".!!.stripLineEnd
-
-      sdk.install_package(emu.serialID, "examples/antimalware/Profiler.apk")
-      info("Installed.")
-
+      val stime: java.lang.Long = System.currentTimeMillis
+      sdk.install_package(emu.serialID, "examples/app-tester/apps/pokemon/com.MitchK.PokemonJokes.apk")
+      result("duration") = System.currentTimeMillis - stime
+      info("Installed")
       result.toMap
-    })
+    }
+    val uninstallTask = (emu: Emulator) => {
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "uninstall"
+      info("About to uninstall")
+      val stime: java.lang.Long = System.currentTimeMillis
+      sdk.uninstall_package(emu.serialID, "com.MitchK.PokemonJokes")
+      result("duration") = System.currentTimeMillis - stime
+      info("Uninstalled")
+      result.toMap
+    }
+    
+    val keyTask = (emu: Emulator) => {
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "keypress"
+      info("About to press key")
+      val stime: java.lang.Long = System.currentTimeMillis
+      sdk.remote_shell(emu.serialID, "input keyevent 122")
+      result("duration") = System.currentTimeMillis - stime
+      info("Pressed")
+      result.toMap
+    }
+
+    val listPackagesTask = (emu: Emulator) => {
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "packagelist"
+      info("About to list packages")
+      val stime: java.lang.Long = System.currentTimeMillis
+      val packages = sdk.get_installed_packages(emu.serialID)
+      result("duration") = System.currentTimeMillis - stime
+      info(s"Found packages ${packages}")
+      result.toMap
+    }
+    
+    val getSensorsTask = (emu: Emulator) => {
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "sensorlist"
+      info("About to get sensors")
+      val stime: java.lang.Long = System.currentTimeMillis
+      val sensors = sdk.get_sensor_status(emu.telnetPort)
+      result("duration") = System.currentTimeMillis - stime
+      info(s"Found sensors ${sensors}")
+      result.toMap
+    }
+    
+    val sendGpsTask = (emu: Emulator) => {
+      var result = scala.collection.mutable.Map[String, java.io.Serializable]()
+      result("type") = "sendgps"
+      info("About to send GPS")
+      val stime: java.lang.Long = System.currentTimeMillis
+      sdk.send_geo_fix(emu.telnetPort, "-89.296875", "37.675125", "", "")
+      result("duration") = System.currentTimeMillis - stime
+      info(s"sent gps")
+      result.toMap
+    }
+    
+    for (i <- 1 to 1000) {
+      clasp.register_on_new_emulator(keyTask)
+      clasp.register_on_new_emulator(installTask)
+      clasp.register_on_new_emulator(keyTask)
+      clasp.register_on_new_emulator(listPackagesTask)
+      clasp.register_on_new_emulator(getSensorsTask)
+      clasp.register_on_new_emulator(uninstallTask)
+    }
+    
+    /*val f = clasp.register_on_new_emulator(task)
     f onSuccess {
-      case data => info(s"""Emulator Task completed successfully on Node ${data("node")}, emulator ${data("serialID")}""")
+      case data => {
+        
+        val start = java.lang.Long.parseLong(data("start").toString)
+        val end = System.currentTimeMillis()
+        
+        info(s"Emulator Tasks completed successfully") // Node ${data("node")}, emulator ${data("serialID")}""")
+        info(s"Took ${end - start}")
+      }
     }
     f onFailure {
-      case t => error(s"Future failed due to ${t.getMessage}")
-    }
+      case t => error(s"Future failed")
+    }*/
+    
   } // End of clasp master logic
 }
 
@@ -146,9 +227,8 @@ class ClaspClient(val conf: ClaspConf) {
       UUID.randomUUID
     }
   }
-  
-  var n = system.actorOf(Props(new Node(ip, masterip,
-    conf.numEmulators.apply, uuid)), name = s"node-$ip")
+
+  var n = system.actorOf(Props(new Node(ip, masterip, conf, uuid)), name = s"node-$ip")
   info(s"Created Node for $ip")
   debug(s"Using UUID $uuid")
 
@@ -220,7 +300,7 @@ class ClaspMaster(val conf: ClaspConf) {
   val serverConf = ConfigFactory
     .parseString(s"""akka.remote.netty.tcp.hostname="$ip" """)
     .withFallback(ConfigFactory.load("master"))
- 
+
   implicit var system: ActorSystem = null
   try {
     debug(s"About to create Master ActorSystem clasp");
@@ -279,7 +359,7 @@ class ClaspMaster(val conf: ClaspConf) {
   val manager = system.actorOf(Props(new NodeManager(conf)), name = "nodemanager")
   info("Created NodeManager")
 
-  val emanager = system.actorOf(Props(new EmulatorManager(manager)), name = "emulatormanager")
+  val emanager = system.actorOf(Props(new EmulatorManager(manager, conf)), name = "emulatormanager")
   info("Created EmulatorManager")
 
   val server = system.actorOf(Props(new WebSocketServer(manager, emanager)), "websocket")
@@ -318,7 +398,7 @@ class ClaspMaster(val conf: ClaspConf) {
  * We may want to avoid caching in the future and just have this know how
  * to ask the emulator for the right things
  */
-class Emulator(val serialID: String) extends Serializable {
+class Emulator(val serialID: String, val telnetPort: Int) extends Serializable {
   lazy val log = LoggerFactory.getLogger(getClass())
   import log.{ error, debug, info, trace }
 }

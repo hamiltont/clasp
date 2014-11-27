@@ -64,7 +64,7 @@ class WebSocketServer(val nodemanager: ActorRef, val emulatormanager: ActorRef)
   extends Actor
   with ActorLogging {
   var httpApi = context.system.actorOf(Props(new HttpApi(nodemanager, emulatormanager)), name = "httpApi")
-  var chanManager = context.system.actorOf(Props(new WebSocketChannelManager(nodemanager)), name = "channelManager")
+  var chanManager = context.system.actorOf(Props(new WebSocketChannelManager(nodemanager, emulatormanager)), name = "channelManager")
 
   /** Each incoming connection gets a dedicated Actor with a unique serverConnection pipeline */
   def receive = {
@@ -191,6 +191,7 @@ object WebSocketChannelManager {
   sealed abstract class Role
   case class Client(actor: ActorRef) extends Role
   case class Server(actor: ActorRef) extends Role
+  case class FlushLogFiles()
 
   /**
    * A channel that has clients, but does not have any owner available. Used
@@ -205,7 +206,7 @@ object WebSocketChannelManager {
   case class UnRegisterClient(channelName: String, client: ActorRef)
   case class Message(chan: String, data: String, from: ActorRef)
 }
-class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
+class WebSocketChannelManager(val nodeManager: ActorRef, val emulatorManager: ActorRef) extends Actor
   with ActorLogging
   with ActorStack
   with Slf4jLoggingStack {
@@ -235,6 +236,7 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
         getChannelLogMap(name)
       }
     }
+  // context.system.scheduler.schedule(3.minutes, 3.minutes)(self ! FlushLogFiles())
 
   def getChannelLogWriter(name: String): BufferedWriter = getChannelLogMap(name)._1
   def getChannelLog(name: String): File = getChannelLogMap(name)._2
@@ -257,6 +259,7 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
 
   // Tell nodemanager we are ready
   nodeManager ! ActorIdentity(WebSocketChannelManager, Some(self))
+  emulatorManager ! ActorIdentity(WebSocketChannelManager, Some(self))
 
   def wrappedReceive = {
     case RegisterChannel(name, owner) => {
@@ -329,6 +332,7 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
         case Some(server: Server) => { // Send to all clients
           // Access log file for this channel and store the message
           getChannelLogWriter(channel).write(data + "\n")
+          getChannelLogWriter(channel).flush
 
           getChannel(channel) match {
             case Some(real: RealChannel) => {
@@ -342,6 +346,7 @@ class WebSocketChannelManager(val nodeManager: ActorRef) extends Actor
         case None => log.error(s"Discarded Message - unknown sender")
       }
     }
+    case FlushLogFiles() => logFiles.foreach { map => map._2._1.flush }
   }
 
   override def postReceive = {
